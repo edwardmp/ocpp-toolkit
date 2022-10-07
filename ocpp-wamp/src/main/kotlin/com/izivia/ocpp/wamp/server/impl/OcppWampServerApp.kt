@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                         private val handlers: (CSOcppId)-> List<OcppWampServerHandler>,
+                        private val onWsConnectHandler: (CSOcppId)-> Unit = {},
+                        private val onWsCloseHandler: (CSOcppId)-> Unit = {},
                         private val ocppWsEndpoint: OcppWsEndpoint,
                         val timeoutInMs:Long) {
     companion object {
@@ -45,6 +47,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
             ?.let { ocppVersions.filter { v -> v.subprotocol == it.lowercase() }.firstOrNull() }
             ?:throw IllegalArgumentException("malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}")
         val handler = handlers(chargingStationOcppId)
+        onWsConnectHandler(chargingStationOcppId)
 
         if (connections[chargingStationOcppId] != null) {
             // already connected - refuse connection
@@ -63,6 +66,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
             } else {
                 logger.info("warn: do not clear ws on close - not current connection in map")
             }
+            onWsCloseHandler(chargingStationOcppId)
         }
 
         logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
