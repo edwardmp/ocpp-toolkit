@@ -50,10 +50,8 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
         onWsConnectHandler(chargingStationOcppId)
 
         if (connections[chargingStationOcppId] != null) {
-            // already connected - refuse connection
-            logger.warn("""[$chargingStationOcppId] already connected - refusing new connection """)
-            ws.close()
-            return
+            // already connected
+            logger.warn("""[$chargingStationOcppId] already connected - the new connection will replace the previous one """)
         }
 
         val chargingStationConnection = ChargingStationConnection(
