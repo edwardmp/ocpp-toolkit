@@ -32,7 +32,7 @@ interface OcppWampServer {
      *
      * @throws IllegalStateException if no such ChargingStation is currently connected to this server
      */
-    fun sendBlocking(ocppId:CSOcppId, message:WampMessage): WampMessage
+    fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage
 
     /**
      * registers a wamp server handler on this server.
@@ -55,8 +55,14 @@ interface OcppWampServer {
     fun getChargingStationOcppVersion(ocppId: CSOcppId): OcppVersion
 
     companion object {
-        fun newServer(port:Int, ocppVersions:Set<OcppVersion> = OcppVersion.values().toSet(), path: String = "ws", timeoutInMs:Long = 30_000)
-            = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs)
+        fun newServer(
+            port: Int,
+            ocppVersions: Set<OcppVersion> = OcppVersion.values().toSet(),
+            path: String = "ws",
+            timeoutInMs: Long = 30_000,
+            onWsConnectHandler: (CSOcppId) -> Unit = {},
+            onWsCloseHandler: (CSOcppId) -> Unit = {}
+        ) = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsCloseHandler)
     }
 }
 
@@ -67,6 +73,7 @@ interface OcppWampServerHandler {
      * this is used by server to accept connection for a given ocpp id.
      */
     fun accept(ocppId: CSOcppId): Boolean
+
     /**
      * a wamp action handler
      */
