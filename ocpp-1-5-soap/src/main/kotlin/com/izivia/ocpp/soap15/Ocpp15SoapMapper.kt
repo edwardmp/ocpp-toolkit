@@ -1,10 +1,12 @@
 package com.izivia.ocpp.soap15
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
 import com.izivia.ocpp.core15.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core15.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
@@ -25,6 +27,7 @@ import com.izivia.ocpp.core15.model.clearcache.ClearCacheResp
 import com.izivia.ocpp.core15.model.clearcache.enumeration.ClearCacheStatus
 import com.izivia.ocpp.core15.model.common.IdTagInfo
 import com.izivia.ocpp.core15.model.common.MeterValue
+import com.izivia.ocpp.core15.model.common.SampledValue
 import com.izivia.ocpp.core15.model.common.enumeration.*
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferResp
@@ -84,6 +87,7 @@ internal object Ocpp15SoapMapperIn : ObjectMapper(
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
+        .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
 )
 
 
@@ -124,6 +128,7 @@ internal object Ocpp15SoapMapper : ObjectMapper(
         .addMixIn(MeterValuesResp::class.java, MeterValuesRespMixin::class.java)
         .addMixIn(MeterValuesReq::class.java, MeterValuesReqMixin::class.java)
         .addMixIn(MeterValue::class.java, MeterValueMixin::class.java)
+        .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
         .addMixIn(RemoteStartTransactionResp::class.java, RemoteStartTransactionRespMixin::class.java)
         .addMixIn(RemoteStartTransactionReq::class.java, RemoteStartTransactionReqMixin::class.java)
         .addMixIn(RemoteStopTransactionResp::class.java, RemoteStopTransactionRespMixin::class.java)
@@ -364,9 +369,15 @@ private abstract class MeterValuesReqMixin(
 )
 
 private abstract class MeterValueMixin(
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "o:timestamp")
     val timestamp: Instant,
     @JacksonXmlProperty(localName = "o:value")
+    val value: List<SampledValue>
+)
+
+private abstract class SampledValueMixin(
+    @JsonProperty("text")
+    @JacksonXmlText
     val value: String,
     @JacksonXmlProperty(isAttribute = true)
     val context: ReadingContext? = ReadingContext.SamplePeriodic,
