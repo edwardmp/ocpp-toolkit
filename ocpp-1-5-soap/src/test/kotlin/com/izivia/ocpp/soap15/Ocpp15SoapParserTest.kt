@@ -9,6 +9,7 @@ import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core15.model.bootnotification.enumeration.RegistrationStatus
 import com.izivia.ocpp.core15.model.common.IdTagInfo
 import com.izivia.ocpp.core15.model.common.MeterValue
+import com.izivia.ocpp.core15.model.common.SampledValue
 import com.izivia.ocpp.core15.model.common.enumeration.*
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferResp
@@ -30,7 +31,10 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointEr
 import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointStatus
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
-import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.soap.RequestSoapMessage
+import com.izivia.ocpp.soap.ResponseSoapMessage
+import com.izivia.ocpp.soap.SoapEnvelope
+import com.izivia.ocpp.soap.parseRequestFromSoap
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -261,6 +265,11 @@ class Ocpp15SoapParserTest {
                             <cs:transactionId>15095</cs:transactionId>
                             <cs:values>
                                 <cs:timestamp>2022-05-17T15:41:19.912Z</cs:timestamp>
+                                <cs:value unit="Wh" location="Inlet" measurand="Energy.Active.Import.Register" format="Raw" context="Sample.Periodic">12563</cs:value>
+                                <cs:value unit="Wh" location="Outlet" measurand="Energy.Active.Import.Register" format="Raw" context="Sample.Periodic">12563</cs:value>
+                            </cs:values>
+                            <cs:values>
+                                <cs:timestamp>2022-05-17T15:42:19.912Z</cs:timestamp>
                                 <cs:value unit="Wh" location="Outlet" measurand="Energy.Active.Import.Register" format="Raw" context="Sample.Periodic">12563</cs:value>
                             </cs:values>
                         </cs:meterValuesRequest>
@@ -271,14 +280,36 @@ class Ocpp15SoapParserTest {
         expectThat(Ocpp15SoapParser().parseRequestFromSoap<MeterValuesReq>(message).payload).and {
             get { connectorId }.isEqualTo(1)
             get { transactionId }.isEqualTo(15095)
-            get { values }.isNotNull().hasSize(1).first().and {
-                get { timestamp }.isEqualTo(Instant.parse("2022-05-17T15:41:19.912Z"))
-                get { value }.isEqualTo("12563")
-                get { context }.isEqualTo(ReadingContext.SamplePeriodic)
-                get { format }.isEqualTo(ValueFormat.Raw)
-                get { location }.isEqualTo(Location.Outlet)
-                get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
-                get { unit }.isEqualTo(UnitOfMeasure.Wh)
+            get { values }.isNotNull().hasSize(2).and {
+                get { get(0) }.and {
+                    get { timestamp }.isEqualTo(Instant.parse("2022-05-17T15:41:19.912Z"))
+                    get { value }.hasSize(2).and {
+                        get { get(0) }.and {
+                            get { value }.isEqualTo("12563")
+                            get { context }.isEqualTo(ReadingContext.SamplePeriodic)
+                            get { location }.isEqualTo(Location.Inlet)
+                            get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
+                            get { unit }.isEqualTo(UnitOfMeasure.Wh)
+                        }
+                        get { get(1) }.and {
+                            get { value }.isEqualTo("12563")
+                            get { context }.isEqualTo(ReadingContext.SamplePeriodic)
+                            get { location }.isEqualTo(Location.Outlet)
+                            get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
+                            get { unit }.isEqualTo(UnitOfMeasure.Wh)
+                        }
+                    }
+                }
+                get { get(1) }.and {
+                    get { timestamp }.isEqualTo(Instant.parse("2022-05-17T15:42:19.912Z"))
+                    get { value }.hasSize(1).first().and {
+                        get { value }.isEqualTo("12563")
+                        get { context }.isEqualTo(ReadingContext.SamplePeriodic)
+                        get { location }.isEqualTo(Location.Outlet)
+                        get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
+                        get { unit }.isEqualTo(UnitOfMeasure.Wh)
+                    }
+                }
             }
         }
     }
@@ -1019,14 +1050,18 @@ class Ocpp15SoapParserTest {
             values = listOf(
                 MeterValue(
                     timestamp = Instant.parse("2022-05-17T15:41:19.912Z"),
-                    value = "15213716",
-                    context = ReadingContext.SamplePeriodic,
-                    location = Location.Inlet,
-                    measurand = Measurand.EnergyActiveImportRegister,
-                    unit = UnitOfMeasure.Wh
+                    value = listOf(
+                        SampledValue(
+                            value = "15213716",
+                            context = ReadingContext.SamplePeriodic,
+                            location = Location.Inlet,
+                            measurand = Measurand.EnergyActiveImportRegister,
+                            unit = UnitOfMeasure.Wh
+                        )
                     )
                 )
             )
+        )
 
         val messageSoap = Ocpp15SoapParser().mapRequestToSoap(
             RequestSoapMessage(
@@ -1040,7 +1075,7 @@ class Ocpp15SoapParserTest {
         )
 
         val expectedEnvelope =
-            """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header><a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/MeterValues</a:Action><a:chargeBoxIdentity>CS1</a:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To></s:Header><s:Body><o:meterValuesRequest><o:connectorId>1</o:connectorId><o:values timestamp="2022-05-17T15:41:19.912Z" context="Sample.Periodic" format="Raw" measurand="Energy.Active.Import.Register" location="Inlet" unit="Wh"><o:value>15213716</o:value></o:values><o:transactionId>15917</o:transactionId></o:meterValuesRequest></s:Body></s:Envelope>""".trimIndent()
+            """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header><a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/MeterValues</a:Action><a:chargeBoxIdentity>CS1</a:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To></s:Header><s:Body><o:meterValuesRequest><o:connectorId>1</o:connectorId><o:values><o:timestamp>2022-05-17T15:41:19.912Z</o:timestamp><o:value context="Sample.Periodic" format="Raw" measurand="Energy.Active.Import.Register" location="Inlet" unit="Wh">15213716</o:value></o:values><o:transactionId>15917</o:transactionId></o:meterValuesRequest></s:Body></s:Envelope>""".trimIndent()
 
         expectThat(messageSoap.inline()).isEqualTo(expectedEnvelope.inline())
         expectThat(parseToEnvelope(messageSoap)) {
@@ -1049,12 +1084,13 @@ class Ocpp15SoapParserTest {
                 get { transactionId }.isEqualTo(15917)
                 get { values }.isNotNull().hasSize(1).first().and {
                     get { timestamp }.isEqualTo(Instant.parse("2022-05-17T15:41:19.912Z"))
-                    get { value }.isEqualTo("15213716")
-                    get { context }.isEqualTo(ReadingContext.SamplePeriodic)
-                    get { location }.isEqualTo(Location.Inlet)
-                    get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
-                    get { unit }.isEqualTo(UnitOfMeasure.Wh)
-                    get { value }.isEqualTo("15213716")
+                    get { value }.hasSize(1).first().and {
+                        get { value }.isEqualTo("15213716")
+                        get { context }.isEqualTo(ReadingContext.SamplePeriodic)
+                        get { location }.isEqualTo(Location.Inlet)
+                        get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
+                        get { unit }.isEqualTo(UnitOfMeasure.Wh)
+                    }
                 }
             }
         }

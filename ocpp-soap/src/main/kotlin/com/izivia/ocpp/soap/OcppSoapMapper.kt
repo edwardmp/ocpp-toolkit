@@ -28,6 +28,7 @@ fun getNewFactory(nsAware: Boolean) : XmlFactory {
 private object CustomXmlModule : JacksonXmlModule() {
     init {
         setDefaultUseWrapper(false)
+        setXMLTextElementName("text")
     }
 }
 

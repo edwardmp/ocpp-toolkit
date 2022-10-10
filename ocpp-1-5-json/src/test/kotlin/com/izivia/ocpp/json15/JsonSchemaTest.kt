@@ -20,8 +20,8 @@ import com.izivia.ocpp.core15.model.clearcache.ClearCacheResp
 import com.izivia.ocpp.core15.model.clearcache.enumeration.ClearCacheStatus
 import com.izivia.ocpp.core15.model.common.IdTagInfo
 import com.izivia.ocpp.core15.model.common.MeterValue
-import com.izivia.ocpp.core15.model.common.enumeration.AuthorizationStatus
-import com.izivia.ocpp.core15.model.common.enumeration.RemoteStartStopStatus
+import com.izivia.ocpp.core15.model.common.SampledValue
+import com.izivia.ocpp.core15.model.common.enumeration.*
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core15.model.datatransfer.enumeration.DataTransferStatus
@@ -102,7 +102,21 @@ class JsonSchemaTest {
         var errors = JsonSchemaValidator.isValidObject(
             MeterValuesReq(
                 connectorId = 1,
-                values = listOf(MeterValue(timestamp = Instant.parse("2022-02-15T00:00:00.000Z"), value = "0"))
+                values = listOf(
+                    MeterValue(
+                        timestamp = Instant.parse("2022-02-15T00:00:00.000Z"),
+                        value = listOf(
+                            SampledValue(
+                                value = "123456789",
+                                context = ReadingContext.SamplePeriodic,
+                                format = ValueFormat.Raw,
+                                measurand = Measurand.EnergyActiveImportRegister,
+                                location = Location.Outlet,
+                                unit = UnitOfMeasure.Wh
+                            )
+                        )
+                    )
+                )
             ), "MeterValues.json"
         )
         expectThat(errors)
@@ -114,7 +128,16 @@ class JsonSchemaTest {
                 connectorId = 1,
                 values = listOf(
                     MeterValue(
-                        value = "0",
+                        value = listOf(
+                            SampledValue(
+                                value = "123456789",
+                                context = ReadingContext.SamplePeriodic,
+                                format = ValueFormat.Raw,
+                                measurand = Measurand.EnergyActiveImportRegister,
+                                location = Location.Outlet,
+                                unit = UnitOfMeasure.Wh
+                            )
+                        ),
                         timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
                     )
                 ),
@@ -175,7 +198,18 @@ class JsonSchemaTest {
                 transactionId = 12,
                 idTag = "Tag1",
                 transactionData = listOf(
-                    MeterValue(value = "0", timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
+                    MeterValue(
+                        value = listOf(
+                            SampledValue(
+                                value = "123456789",
+                                context = ReadingContext.SamplePeriodic,
+                                format = ValueFormat.Raw,
+                                measurand = Measurand.EnergyActiveImportRegister,
+                                location = Location.Outlet,
+                                unit = UnitOfMeasure.Wh
+                            )
+                        ),
+                        timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
                     )
                 )
             ),
@@ -388,9 +422,11 @@ class JsonSchemaTest {
             .and { get { this.size }.isEqualTo(0) }
 
         errors = JsonSchemaValidator.isValidObject(
-            SendLocalListReq(listVersion = 1,
+            SendLocalListReq(
+                listVersion = 1,
                 updateType = UpdateType.Differential,
-                localAuthorizationList = listOf(AuthorisationData(""))), "SendLocalList.json"
+                localAuthorizationList = listOf(AuthorisationData(""))
+            ), "SendLocalList.json"
         )
         expectThat(errors)
             .and { get { this.size }.isEqualTo(0) }
@@ -674,7 +710,10 @@ class JsonSchemaTest {
 
     @Test
     fun `firmwareStatusNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(FirmwareStatusNotificationResp(), "FirmwareStatusNotificationResponse.json")
+        val errors = JsonSchemaValidator.isValidObject(
+            FirmwareStatusNotificationResp(),
+            "FirmwareStatusNotificationResponse.json"
+        )
         expectThat(errors)
             .and { get { this.size }.isEqualTo(0) }
     }
@@ -701,8 +740,10 @@ class JsonSchemaTest {
     @Test
     fun `sendLocalList response format`() {
         val errors =
-            JsonSchemaValidator.isValidObject(SendLocalListResp(status = UpdateStatus.Accepted),
-                "SendLocalListResponse.json")
+            JsonSchemaValidator.isValidObject(
+                SendLocalListResp(status = UpdateStatus.Accepted),
+                "SendLocalListResponse.json"
+            )
         expectThat(errors)
             .and { get { this.size }.isEqualTo(0) }
     }
@@ -733,8 +774,10 @@ class JsonSchemaTest {
         expectThat(errors)
             .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(GetDiagnosticsResp("fileName"),
-            "GetDiagnosticsResponse.json")
+        errors = JsonSchemaValidator.isValidObject(
+            GetDiagnosticsResp("fileName"),
+            "GetDiagnosticsResponse.json"
+        )
         expectThat(errors)
             .and { get { this.size }.isEqualTo(0) }
     }
