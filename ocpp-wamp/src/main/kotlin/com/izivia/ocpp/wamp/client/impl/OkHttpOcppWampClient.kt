@@ -9,6 +9,8 @@ import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import okhttp3.*
 import org.http4k.core.Uri
 import org.slf4j.LoggerFactory
@@ -20,7 +22,8 @@ class OkHttpOcppWampClient(
     private val target: Uri,
     val ocppId: CSOcppId,
     val ocppVersion: OcppVersion,
-    val timeoutInMs: Long = 30_000
+    val timeoutInMs: Long = 30_000,
+    baseAutoReconnectDelayInMs: Long = 250
 ) : OcppWampClient {
     val serverUri = target.path("${target.path.removeSuffix("/")}/$ocppId")
 
@@ -31,7 +34,7 @@ class OkHttpOcppWampClient(
         .connectTimeout(timeoutInMs, TimeUnit.MILLISECONDS)
         .hostnameVerifier { _, _ -> true }
         .build()
-    private val autoReconnectHandler = AutoReconnectHandler(this)
+    private val autoReconnectHandler = AutoReconnectHandler(this, baseAutoReconnectDelayInMs)
 
     private var wampConnection: WampConnection? = null
 
@@ -251,7 +254,7 @@ class OkHttpOcppWampClient(
     private fun waitForReconnectionOrTimeout() {
         if (connectionState == ConnectionState.CONNECTED) return
 
-        autoReconnectHandler.waitForReconnectionOrTimeout()
+        autoReconnectHandler.maybeForceReconnectAttemptAndWaitForReconnection()
         if (connectionState == ConnectionState.CONNECTED) {
             logger.debug("[$ocppId] reconnection successful to $serverUri")
         } else {
@@ -282,14 +285,26 @@ class OkHttpOcppWampClient(
         fun onFailure(t: Throwable)
     }
 
-    class AutoReconnectHandler(val client: OkHttpOcppWampClient) {
+    class AutoReconnectHandler(val client: OkHttpOcppWampClient, val baseAutoReconnectDelay: Long) {
         private var reconnecting: Boolean = false
-        private var autoReconnectDelay: Long = BASE_AUTO_RECONNECT_DELAY
+        private var autoReconnectDelay: Long = baseAutoReconnectDelay
         private var autoReconnectAttemptCount = 0
         private var next: ScheduledFuture<*>? = null
         private var connectionLatch: CountDownLatch? = null
+        private var lastForcedReconnectionAttempt: Instant? = null
 
-        fun waitForReconnectionOrTimeout() {
+        fun maybeForceReconnectAttemptAndWaitForReconnection() {
+            val lastAttempt = lastForcedReconnectionAttempt
+            if (lastAttempt == null ||
+                // make sure we don't force the immediate reconnect attempt too often
+                Clock.System.now().minus(lastAttempt).inWholeMilliseconds > baseAutoReconnectDelay
+            ) {
+                logger.info("[${client.ocppId}] triggering immediate reconnect attempt to ${client.serverUri}")
+                next?.cancel(false)
+                autoReconnectDelay = baseAutoReconnectDelay
+                lastForcedReconnectionAttempt = Clock.System.now()
+                reconnectAttempt()
+            }
             logger.info(
                 "[${client.ocppId}] waiting for reconnection to ${client.serverUri}" +
                     " with connection latch $connectionLatch"
@@ -306,9 +321,9 @@ class OkHttpOcppWampClient(
                 logger.info("[${client.ocppId}] starting auto reconnect process to ${client.serverUri}")
                 reconnecting = true
                 autoReconnectAttemptCount = 0
-                autoReconnectDelay = BASE_AUTO_RECONNECT_DELAY
-                next = executor.schedule({ reconnectAttempt() }, autoReconnectDelay, TimeUnit.MILLISECONDS)
+                autoReconnectDelay = baseAutoReconnectDelay
                 setupConnectionLatch()
+                reconnectAttempt()
             }
         }
 
@@ -355,8 +370,6 @@ class OkHttpOcppWampClient(
         }
 
         companion object {
-            const val BASE_AUTO_RECONNECT_DELAY = 500L
-
             private val executor = Executors.newScheduledThreadPool(1)
         }
     }

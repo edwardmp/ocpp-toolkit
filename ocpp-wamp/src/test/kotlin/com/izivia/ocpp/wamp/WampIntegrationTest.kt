@@ -252,20 +252,58 @@ class WampIntegrationTest {
             client.connect()
             expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
 
+            // check we are resilient to connection loss after a first message has been sent
             server.stop()
             server.start()
             expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
 
+            // check we are resilient to connection loss with some delay before stop, start, and new attempt
             server.stop()
+            Thread.sleep(50)
             server.start()
-            Thread.sleep(100)
+            Thread.sleep(50)
             expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
 
+            // close the client to check manual reconnect
             client.close()
             client.connect()
+            // immediately stop without a single message sent - this usually triggers a brutal close of the connection
             server.stop()
+            // restart immediately and check we can smoothly send a message
             server.start()
             expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
+            client.close()
+        } finally {
+            server.stop()
+        }
+    }
+
+    @Test
+    fun `should client immediately force reconnect attempt on send message`() {
+        val port = 12345
+
+        val server = OcppWampServer.newServer(port, setOf(OCPP_1_6, OcppVersion.OCPP_2_0))
+        server.register(object : OcppWampServerHandler {
+            override fun accept(ocppId: CSOcppId): Boolean = "TEST1" == ocppId
+            override fun onAction(meta: WampMessageMeta, msg: WampMessage): WampMessage? = null
+        })
+        server.start()
+
+        try {
+            val client = OcppWampClient.newClient(Uri.of("ws://localhost:$port/ws"), "TEST1", OCPP_1_6)
+            client.connect()
+            expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
+
+            // check we are resilient to connection loss with some delay before stop, start, and new attempt
+            server.stop()
+            Thread.sleep(100) // wait to make sure auto reconnect doesn't immediately reconnect
+            server.start()
+            Thread.sleep(100) // wait for the server to be ready
+            val time = measureTimeMillis {
+                expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isSuccess()
+            }
+            expectThat(time).isLessThan(100) // make sure we dont wait for the 500ms of auto reconnect
+
             client.close()
         } finally {
             server.stop()
