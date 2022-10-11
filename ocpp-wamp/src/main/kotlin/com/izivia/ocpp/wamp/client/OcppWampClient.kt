@@ -10,12 +10,17 @@ import org.http4k.core.Uri
 interface OcppWampClient {
     fun connect()
     fun close()
-    fun sendBlocking(message:WampMessage):WampMessage
+    fun sendBlocking(message: WampMessage): WampMessage
     fun onAction(fn: WampOnActionHandler)
 
     companion object {
-        fun newClient(target: Uri, ocppId:CSOcppId, ocppVersion: OcppVersion, timeoutInMs:Long = 30_000)
-            = OkHttpOcppWampClient(target, ocppId, ocppVersion, timeoutInMs)
+        fun newClient(
+            target: Uri,
+            ocppId: CSOcppId,
+            ocppVersion: OcppVersion,
+            timeoutInMs: Long = 30_000,
+            baseAutoReconnectDelayInMs: Long = 250
+        ) = OkHttpOcppWampClient(target, ocppId, ocppVersion, timeoutInMs, baseAutoReconnectDelayInMs)
     }
 }
 
