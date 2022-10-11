@@ -116,6 +116,7 @@ class WebsocketTest {
             websocketClient.receiveMessageClass(AuthorizeReq::class, "authorize", authorizeFun)
 
             websocketClient.connect()
+            Thread.sleep(100) // wait for connection to be fully established, it seems to cause issues on GH action
 
             server.sendBlocking("chargePoint2", WampMessage(WampMessageType.CALL,"1","authorize","{\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"))
 
