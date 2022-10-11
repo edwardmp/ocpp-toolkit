@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="io.simatix.ev" level="debug" />
+    <logger name="com.izivia" level="debug" />
 
     <root level="warn">
         <appender-ref ref="CONSOLE"/>
