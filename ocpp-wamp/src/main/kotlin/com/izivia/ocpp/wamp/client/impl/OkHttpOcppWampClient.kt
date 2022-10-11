@@ -81,8 +81,8 @@ class OkHttpOcppWampClient(
         var error: Throwable? = TimeoutException("connection timed out to $serverUri")
         asyncConnect(object : ConnectListener {
             override fun onConnect() {
-                latch.countDown()
                 error = null
+                latch.countDown()
             }
 
             override fun onFailure(t: Throwable) {
