@@ -2,6 +2,9 @@ package com.izivia.ocpp.soap
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SoapEnvelope<T : SoapBody>(
@@ -14,21 +17,28 @@ data class SoapEnvelope<T : SoapBody>(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SoapHeader(
     @JsonProperty("MessageID")
-    val messageId: String,
+    val messageId: ValueText,
     @JsonProperty("Action")
-    val action: String,
-    val chargeBoxIdentity: String?,
+    val action: ValueText,
+    val chargeBoxIdentity: ValueText?,
     @JsonProperty("From")
     val from: SoapHeaderFrom?,
     @JsonProperty("To")
-    val to: String?,
+    val to: ValueText?,
     @JsonProperty("RelatesTo")
-    val relatesTo: String?
+    val relatesTo: ValueText?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class ValueText(
+    @JacksonXmlText
+    @JsonProperty("text")
+    val value: String = ""
 )
 
 data class SoapHeaderFrom(
     @JsonProperty("Address")
-    val address: String
+    val address: ValueText
 )
 
 interface SoapBody

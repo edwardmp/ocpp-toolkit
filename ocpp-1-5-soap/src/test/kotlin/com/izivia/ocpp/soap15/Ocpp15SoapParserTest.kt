@@ -71,10 +71,17 @@ class Ocpp15SoapParserTest {
                 </SOAP-ENV:Envelope>
             """.trimIndent()
 
-        expectThat(Ocpp15SoapParser().parseRequestFromSoap<AuthorizeReq>(message).payload).and {
-            get { idTag }.isEqualTo("AAAAAAAA")
+        expectThat(Ocpp15SoapParser().parseRequestFromSoap<AuthorizeReq>(message)).and {
+            get { messageId }.isEqualTo("urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49")
+            get { chargingStationId }.isEqualTo("CS1")
+            get { action }.isEqualTo("Authorize")
+            get { from }.isEqualTo("http://:8082/")
+            get { to }.isEqualTo("http://example.fr:80/ocpp/v15s/")
+            get { payload }.and {
+                isA<AuthorizeReq>()
+                get { idTag }.isEqualTo("AAAAAAAA")
+            }
         }
-            .isA<AuthorizeReq>()
     }
 
     @Test

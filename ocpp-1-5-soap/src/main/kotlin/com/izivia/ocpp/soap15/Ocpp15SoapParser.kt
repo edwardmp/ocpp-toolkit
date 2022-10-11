@@ -14,11 +14,11 @@ class Ocpp15SoapParser : OcppSoapParser {
             .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
             .readValue(messageStr)
         return RequestSoapMessage(
-            messageId = envelope.header.messageId,
-            chargingStationId = envelope.header.chargeBoxIdentity!!,
-            action = envelope.header.action.removePrefix("/"),
-            from = envelope.header.from?.address,
-            to = envelope.header.to,
+            messageId = envelope.header.messageId.value,
+            chargingStationId = envelope.header.chargeBoxIdentity!!.value,
+            action = envelope.header.action.value.removePrefix("/"),
+            from = envelope.header.from?.address?.value,
+            to = envelope.header.to?.value,
             payload = getRequestBodyContent(envelope)
         )
     }
@@ -55,10 +55,10 @@ class Ocpp15SoapParser : OcppSoapParser {
             .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
             .readValue(messageStr)
         return ResponseSoapMessage(
-            messageId = envelope.header.messageId,
-            relatesTo = envelope.header.relatesTo
+            messageId = envelope.header.messageId.value,
+            relatesTo = envelope.header.relatesTo?.value
                 ?: throw IllegalArgumentException("Malformed envelope: missing <RelatesTo> in the header. envelope = $envelope"),
-            action = envelope.header.action.removePrefix("/").removeSuffix("Response"),
+            action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
             payload = getResponseBodyContent(envelope)
         )
     }
