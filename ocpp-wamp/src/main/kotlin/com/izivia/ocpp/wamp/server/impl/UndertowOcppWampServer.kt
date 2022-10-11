@@ -56,11 +56,13 @@ class UndertowOcppWampServer(
     }
 
     override fun shutdown() {
+        logger.info("shutting down ocpp wamp server of port $port")
         wsApp?.shutdown()
         stop()
     }
 
     override fun stop() {
+        logger.info("stopping ocpp wamp server of port $port")
         server?.stop()
         server = null
         wsApp = null
