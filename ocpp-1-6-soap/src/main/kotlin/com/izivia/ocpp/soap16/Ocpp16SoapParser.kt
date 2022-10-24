@@ -62,6 +62,7 @@ class Ocpp16SoapParser : OcppSoapParser {
         envelope.body.startTransactionResponse != null -> envelope.body.startTransactionResponse!!
         envelope.body.statusNotificationResponse != null -> envelope.body.statusNotificationResponse!!
         envelope.body.stopTransactionResponse != null -> envelope.body.stopTransactionResponse!!
+        envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown response message operation. enveloppe = $envelope")
     }
 

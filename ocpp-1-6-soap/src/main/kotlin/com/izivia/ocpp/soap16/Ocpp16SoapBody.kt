@@ -22,6 +22,7 @@ import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationResp
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.SoapBody
+import com.izivia.ocpp.soap.SoapFault
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class Ocpp16SoapBody(
@@ -45,4 +46,5 @@ internal data class Ocpp16SoapBody(
     val statusNotificationResponse: StatusNotificationResp?,
     val stopTransactionRequest: StopTransactionReq?,
     val stopTransactionResponse: StopTransactionResp?,
+    val fault: SoapFault?
 ) : SoapBody

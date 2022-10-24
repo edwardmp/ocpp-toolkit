@@ -31,10 +31,7 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointEr
 import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointStatus
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
-import com.izivia.ocpp.soap.RequestSoapMessage
-import com.izivia.ocpp.soap.ResponseSoapMessage
-import com.izivia.ocpp.soap.SoapEnvelope
-import com.izivia.ocpp.soap.parseRequestFromSoap
+import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -1372,6 +1369,34 @@ class Ocpp15SoapParserTest {
                     get { status }.isEqualTo(AuthorizationStatus.Accepted)
                     get { expiryDate }.isEqualTo(Instant.parse("2022-05-16T15:42:05.128Z"))
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `should map SoapFault to soap`() {
+        val response = SoapFault.internalError()
+        val messageSoap = Ocpp15SoapParser().mapResponseToSoap(
+            ResponseSoapMessage(
+                messageId = "urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b",
+                relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
+                action = "StopTransaction",
+                payload = response
+            )
+        )
+
+        expectThat(messageSoap.inline()) {
+            get { this }.contains("<a:Action>/stopTransactionResponse</a:Action>")
+            get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
+            get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
+        }
+        expectThat(parseToEnvelope(messageSoap)) {
+            get { body.fault }.isNotNull().and {
+                get { code }.and {
+                    get { value.value }.isEqualTo("Receiver")
+                    get { subCode.value.value }.isEqualTo("InternalError")
+                }
+                get { reason.text.value.value }.isEqualTo("An internal error occurred and the receiver is not able to complete the operation.")
             }
         }
     }
