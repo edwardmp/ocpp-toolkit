@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.izivia.ocpp.json.JsonMessageType.*
 import kotlin.reflect.KClass
 
 abstract class OcppJsonParser(private val mapper: ObjectMapper) {
@@ -38,13 +39,13 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
 
     fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
         ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))?.let {
-            val (msgType, msgId, action, payload) = it.destructured
-            JsonMessage(
-                msgType = JsonMessageType.fromId(msgType.toInt()),
-                msgId = msgId,
-                action = action.takeIf { it.isNotBlank() },
-                payload = payload
-            )
+            val (msgType, msgId, param1, param2, payload) = it.destructured
+            when (msgType.toInt()) {
+                CALL.id -> JsonMessage.Call(msgId, param1, payload)
+                CALL_RESULT.id -> JsonMessage.CallResult(msgId, payload)
+                CALL_ERROR.id -> JsonMessage.CallError(msgId, JsonMessageErrorCode.valueOf(param1), param2, payload)
+                else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")
+            }
         }
 
     fun <T : Any> parsePayloadFromJson(payload: String, clazz: KClass<T>): T =
@@ -54,17 +55,42 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         mapper.writeValueAsString(payload)
 
     fun <T> mapToJson(message: JsonMessage<T>): String =
-        """
-            [
-                ${message.msgType.id},
-                "${message.msgId}",
-                ${message.action?.let { "\"$it\", " } ?: ""}
-                ${mapPayloadToString(message.payload)}
-            ]
-        """.trimIndent()
+        message
+            .let {
+                message
+                    .payload
+                    .takeUnless { it == null || (it is String && it.isBlank()) }
+                    ?: JsonMessageEmptyPayload()
+            }
+            .let { payload ->
+                when (message.msgType) {
+                    CALL -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        message.action,
+                        payload
+                    )
+
+                    CALL_RESULT -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        payload
+                    )
+
+                    CALL_ERROR -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        message.errorCode!!.value,
+                        message.errorDescription,
+                        payload
+                    )
+                }
+            }
+            .let { mapper.writeValueAsString(it) }
 
     companion object {
-        private val ocppMsgRegex = Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
+        private val ocppMsgRegex =
+            Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
     }
 }
 

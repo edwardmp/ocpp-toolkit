@@ -38,7 +38,12 @@ class WampIntegrationTest {
 
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
+                        WampMessage.CallError(
+                            msg.msgId,
+                            "NotSupported",
+                            "",
+                            "{}"
+                        )
                     }
                 }
         })
@@ -116,7 +121,12 @@ class WampIntegrationTest {
 
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
+                        WampMessage.CallError(
+                            msg.msgId,
+                            "NotSupported",
+                            "",
+                            "{}"
+                        )
                     }
                 }
             }

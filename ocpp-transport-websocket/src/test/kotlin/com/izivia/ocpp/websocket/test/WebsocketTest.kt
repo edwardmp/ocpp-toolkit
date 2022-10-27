@@ -16,7 +16,6 @@ import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
-import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import io.mockk.unmockkAll
@@ -50,11 +49,9 @@ class WebsocketTest {
         every { ocppWampClient.connect() } returns Unit
         every { ocppWampClient.close() } returns Unit
         every { ocppWampClient.onAction(any()) } returns Unit
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}",
-            action = "heartbeat"
+            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
         )
         mockkObject(OcppWampClient.Companion)
         every { OcppWampClient.Companion.newClient(any(), any(), any(), any()) } returns ocppWampClient
@@ -77,11 +74,9 @@ class WebsocketTest {
         every { ocppWampClient.connect() } returns Unit
         every { ocppWampClient.close() } returns Unit
         every { ocppWampClient.onAction(any()) } returns Unit
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}",
-            action = "heartbeat"
+            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
         )
         mockkObject(OcppWampClient.Companion)
         every { OcppWampClient.Companion.newClient(any(), any(), any(), any()) } returns ocppWampClient
@@ -118,9 +113,9 @@ class WebsocketTest {
             websocketClient.connect()
             Thread.sleep(100) // wait for connection to be fully established, it seems to cause issues on GH action
 
-            server.sendBlocking("chargePoint2", WampMessage(WampMessageType.CALL,"1","authorize","{\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"))
+            server.sendBlocking("chargePoint2", WampMessage.Call("1","authorize","{\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"))
 
-            server.sendBlocking("chargePoint2", WampMessage(WampMessageType.CALL,"2","heartbeat","{}"))
+            server.sendBlocking("chargePoint2", WampMessage.Call("2","heartbeat","{}"))
 
             websocketClient.close()
         } finally {

@@ -20,7 +20,12 @@ fun main() {
                     WampMessage.CallResult(msg.msgId, """{"currentTime":"${Clock.System.now()}"}""")
                 else -> {
                     println("unhandled action for message: ${msg.toJson()}")
-                    WampMessage.CallError(msg.msgId, "{}")
+                    WampMessage.CallError(
+                        msg.msgId,
+                        "NotSupported",
+                        "",
+                        "{}"
+                    )
                 }
             }
     })

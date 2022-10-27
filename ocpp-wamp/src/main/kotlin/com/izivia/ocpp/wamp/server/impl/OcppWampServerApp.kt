@@ -71,11 +71,20 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
         ws.onMessage {
             val msgString = it.bodyString()
             WampMessage.parse(msgString)?.also { msg ->
-                when {
-                    msg.msgType == WampMessageType.CALL -> {
+                when (msg.msgType) {
+                    WampMessageType.CALL -> {
                         if (shutdown.get()) {
                             logger.info("""[$chargingStationOcppId] [$wsConnectionId] - rejected call - shutting down - $msgString""")
-                            ws.send(WsMessage(WampMessage.CallError(msg.msgId, "{}").toJson()))
+                            ws.send(
+                                WsMessage(
+                                    WampMessage.CallError(
+                                        msg.msgId,
+                                        "InternalError",
+                                        "Rejected call - shutting down",
+                                        "{}"
+                                    ).toJson()
+                                )
+                            )
                             return@onMessage
                         }
 
@@ -85,17 +94,20 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                             .map { it.onAction(WampMessageMeta(ocppVersion, chargingStationOcppId), msg) }
                             .filterNotNull()
                             .firstOrNull()
-                            ?: WampMessage.CallError(msg.msgId, "{}").also { logger.warn("no action handler found for $msg") }
+                            ?: WampMessage.CallError(
+                                msg.msgId,
+                                "InternalError",
+                                "No action handler found",
+                                """{"message":"$msg"}"""
+                            ).also { logger.warn("no action handler found for $msg") }
 
                         logger.info("""[$chargingStationOcppId] [$wsConnectionId] <- ${resp.toJson()}""")
                         ws.send(WsMessage(resp.toJson()))
                     }
-                    msg.msgType == WampMessageType.CALL_RESULT || msg.msgType == WampMessageType.CALL_ERROR -> {
+                    WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
                         chargingStationConnection.callManager.handleResult(
                             "[$chargingStationOcppId] [$wsConnectionId]", msg)
                     }
-                    else ->
-                        logger.warn("unsupported wamp message type: ${msg.msgType} - message = $msgString")
                 }
             }
         }
@@ -116,8 +128,8 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
         getChargingStationConnection(ocppId).sendBlocking(message)
 
     private fun getChargingStationConnection(ocppId: CSOcppId): ChargingStationConnection {
-        var backOffRetryMs = 10L;
-        var backOffRetryAttempts = 5;
+        var backOffRetryMs = 10L
+        var backOffRetryAttempts = 5
         var connection = connections[ocppId]
         while (connection == null && backOffRetryAttempts > 0) {
             Thread.sleep(backOffRetryMs)

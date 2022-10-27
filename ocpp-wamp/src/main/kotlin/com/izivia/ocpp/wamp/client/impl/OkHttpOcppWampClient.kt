@@ -179,7 +179,12 @@ class OkHttpOcppWampClient(
                                     .map { it(WampMessageMeta(ocppVersion, ocppId), msg) }
                                     .filterNotNull()
                                     .firstOrNull()
-                                    ?: WampMessage.CallError(msg.msgId, "{}")
+                                    ?: WampMessage.CallError(
+                                        msg.msgId,
+                                        "InternalError",
+                                        "No handler found",
+                                        "{}"
+                                    )
                                 logger.info("[$ocppId] -> ${r.toJson()}")
                                 wampConnection?.websocket?.send(r.toJson())
                             }
@@ -188,7 +193,14 @@ class OkHttpOcppWampClient(
                                 "[$ocppId] timeout during call handling of" +
                                     " ${msg.action} - $msgString -- ${e.message}"
                             )
-                            wampConnection?.websocket?.send(WampMessage.CallError(msg.msgId, "{}").toJson())
+                            wampConnection?.websocket?.send(
+                                WampMessage.CallError(
+                                    msg.msgId,
+                                    "InternalError",
+                                    "Timeout during call handling",
+                                    "{}"
+                                ).toJson()
+                            )
                         }
                     }
                 }

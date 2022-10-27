@@ -99,14 +99,14 @@ class WampLoadTest {
                 -----------------------------------------------------------------------
                 $connectedCount CHARGING STATIONS CONNECTED
                 -----------------------------------------------------------------------
-                
-                
-                
+
+
+
             """.trimIndent())
             Thread.sleep(delayAfterConnection.inWholeMilliseconds)
 
             println("""
-                
+
                 -----------------------------------------------------------------------
                 STARTING HEARTBEATS
                 -----------------------------------------------------------------------
@@ -133,12 +133,12 @@ class WampLoadTest {
             }
             if (heartbeatLatch.await(1, TimeUnit.MINUTES)) {
                 println("""
-                
+
                 -----------------------------------------------------------------------
                 ALL HEARTBEATS SENT
                 -----------------------------------------------------------------------
-                
-                
+
+
             """.trimIndent())
             } else {
                 println("timeout waiting for heartbeats - remaining ${heartbeatLatch.count}")
@@ -146,11 +146,11 @@ class WampLoadTest {
             val elapsed = Clock.System.now() - start
 
             println("""
-                
+
                 -----------------------------------------------------------------------
                 CLOSING ALL CONNECTIONS
                 -----------------------------------------------------------------------
-                
+
             """.trimIndent())
             ocppIds.forEach { ocppId ->
                 executor.submit {
@@ -171,11 +171,11 @@ class WampLoadTest {
                 """
                         -------------------------------------------------------------------------------------------
                         -LOAD TEST SUCCESSFUL
-                         heartbeats:            $heartbeatsNumber  
-                         charging stations:     $chargingStationNumber 
+                         heartbeats:            $heartbeatsNumber
+                         charging stations:     $chargingStationNumber
                          duration:              $elapsed
                          req per second:        $heartbeatPerSecond/s
-                        -------------------------------------------------------------------------------------------                    
+                        -------------------------------------------------------------------------------------------
                     """.trimIndent()
             )
         } finally {
@@ -201,7 +201,12 @@ class WampLoadTest {
                             WampMessage.CallResult(msg.msgId, """{"currentTime":"${Clock.System.now()}"}""")
                         else -> {
                             println("unhandled action for message: ${msg.toJson()}")
-                            WampMessage.CallError(msg.msgId, "{}")
+                            WampMessage.CallError(
+                                msg.msgId,
+                                "NotSupported",
+                                "Unhandled action for message",
+                                """{"action":"${msg.action}"}"""
+                            )
                         }
                     }
             })

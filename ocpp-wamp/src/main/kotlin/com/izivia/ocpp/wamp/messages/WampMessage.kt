@@ -2,36 +2,75 @@ package com.izivia.ocpp.wamp.messages
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.wamp.messages.WampMessageType.*
 
-data class WampMessage(val msgType:WampMessageType,val msgId:String,val action:String?,val payload:String) {
-    fun toJson() = """[${msgType.id},"$msgId",${action?.takeIf { it.isNotBlank() }?.let { "\"$it\", " }?:""}$payload]"""
+data class WampMessage(
+    val msgType: WampMessageType,
+    val msgId: String,
+    val action: String? = null,
+    val errorCode: String? = null,
+    val errorDescription: String? = null,
+    val payload: String
+) {
+
+    fun toJson(): String = when (msgType) {
+        CALL -> """[${msgType.id},"$msgId","${action!!}",$payload]"""
+        CALL_RESULT -> """[${msgType.id},"$msgId",$payload]"""
+        CALL_ERROR -> """[${msgType.id},"$msgId","${errorCode!!}","${errorDescription!!}",$payload]"""
+    }
 
     companion object {
-        fun Call(msgId:String, action:String, payload: String) = WampMessage(WampMessageType.CALL, msgId, action, payload)
-        fun CallResult(msgId:String, payload: String) = WampMessage(WampMessageType.CALL_RESULT, msgId, null, payload)
-        fun CallError(msgId:String, payload: String) = WampMessage(WampMessageType.CALL_ERROR, msgId, null, payload)
+        fun Call(msgId: String, action: String, payload: String) =
+            WampMessage(
+                msgType = CALL,
+                msgId = msgId,
+                action = action,
+                payload = payload
+            )
 
-        fun parse(str:String) = WampMessageParser.parse(str)
+        fun CallResult(msgId: String, payload: String) =
+            WampMessage(
+                msgType = CALL_RESULT,
+                msgId = msgId,
+                payload = payload
+            )
+
+        fun CallError(msgId: String, errorCode: String, errorDescription: String, payload: String) =
+            WampMessage(
+                msgType = CALL_ERROR,
+                msgId = msgId,
+                errorCode = errorCode,
+                errorDescription = errorDescription,
+                payload = payload
+            )
+
+        fun parse(str: String) = WampMessageParser.parse(str)
     }
 }
 
 object WampMessageParser {
-    private val ocppMsgRegex = Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
+    private val ocppMsgRegex =
+        Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
 
     fun parse(string: String): WampMessage? =
         ocppMsgRegex.matchEntire(string)?.let {
-            val (msgType, msgId, action, payload) = it.destructured
-            WampMessage(WampMessageType.fromId(msgType.toInt()), msgId, action, payload)
+            val (msgType, msgId, param1, param2, payload) = it.destructured
+            when (WampMessageType.fromId(msgType.toInt())) {
+                CALL -> WampMessage.Call(msgId, param1, payload)
+                CALL_RESULT -> WampMessage.CallResult(msgId, payload)
+                CALL_ERROR -> WampMessage.CallError(msgId, param1, param2, payload)
+            }
         }
 }
 
-enum class WampMessageType(val id:Int) {
+enum class WampMessageType(val id: Int) {
     CALL(2), CALL_RESULT(3), CALL_ERROR(4);
 
     companion object {
-        fun fromId(id:Int) = values().filter { it.id == id }.firstOrNull()
-            ?:throw IllegalArgumentException(
-                "$id is not a valid Wamp message type - supported types: ${values().map { it.id }}")
+        fun fromId(id: Int) = values().filter { it.id == id }.firstOrNull()
+            ?: throw IllegalArgumentException(
+                "$id is not a valid Wamp message type - supported types: ${values().map { it.id }}"
+            )
     }
 }
 

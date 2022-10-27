@@ -1,6 +1,7 @@
 package com.izivia.ocpp.websocket
 
 import com.izivia.ocpp.CSOcppId
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.operation.information.ChargingStationConfig
 import com.izivia.ocpp.operation.information.RequestMetadata
 import com.izivia.ocpp.transport.OcppCallErrorException
@@ -72,14 +73,14 @@ class WebsocketServer(
                         val response =
                             onAction(RequestMetadata(meta.ocppId), parser.parsePayloadFromJson(msg.payload, clazz))
                         val payload = parser.mapPayloadToString(response)
-                        WampMessage(WampMessageType.CALL_RESULT, msg.msgId, null, payload)
+                        WampMessage.CallResult(msg.msgId, payload)
                     } catch (e: Exception) {
                         logger.error(e.message)
-                        WampMessage(
-                            WampMessageType.CALL_ERROR,
-                            msg.msgId,
-                            null,
-                            OcppCallErrorPayload(e.message).toJson(parser)
+                        WampMessage.CallError(
+                            msgId = msg.msgId,
+                            errorCode = JsonMessageErrorCode.INTERNAL_ERROR.value,
+                            errorDescription = "",
+                            payload = OcppCallErrorPayload(e.message).toJson(parser)
                         )
                     }
                 } else {
