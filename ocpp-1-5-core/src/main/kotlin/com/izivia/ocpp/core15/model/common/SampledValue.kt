@@ -9,4 +9,7 @@ data class SampledValue(
     val measurand: Measurand? = Measurand.EnergyActiveImportRegister,
     val location: Location? = Location.Outlet,
     val unit: UnitOfMeasure? = UnitOfMeasure.Wh
-)
+) {
+    /* default constructor is required by jackson but will never be used */
+    constructor() : this("VALUE_WILL_NEVER_BE_USED")
+}
