@@ -49,6 +49,7 @@ data class WampMessage(
 }
 
 object WampMessageParser {
+    // Same as JsonMessage - cross-reference 7bb7e3a7-bbef-4ff4-a8e6-6a3622e9bd4b
     private val ocppMsgRegex =
         Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
 
