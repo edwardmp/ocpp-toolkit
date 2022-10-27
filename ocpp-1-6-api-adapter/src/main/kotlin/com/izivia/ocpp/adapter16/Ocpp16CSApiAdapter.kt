@@ -121,8 +121,8 @@ class Ocpp16CSApiAdapter(
         req: RemoteStopTransactionReq
     ): OperationExecution<RemoteStopTransactionReq, RemoteStopTransactionResp> {
         val mapper: RemoteStopTransactionMapper = Mappers.getMapper(RemoteStopTransactionMapper::class.java)
-        val transactionId = transactionIds.getTransactionIdsByLocalId(req.transactionId.toString()).csmsId
-        val response = csApi.requestStopTransaction(meta, mapper.coreToGenReq(req.copy(transactionId = transactionId)))
+        val transactionId = transactionIds.getLocalIdByTransactionId(req.transactionId).localId
+        val response = csApi.requestStopTransaction(meta, mapper.coreToGenReq(req, transactionId))
         return OperationExecution(
             ExecutionMetadata(meta, RequestStatus.SUCCESS),
             req,
