@@ -53,14 +53,23 @@ object WampMessageParser {
         Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
 
     fun parse(string: String): WampMessage? =
-        ocppMsgRegex.matchEntire(string.replace("\n", ""))?.let {
-            val (msgType, msgId, param1, param2, payload) = it.destructured
-            when (WampMessageType.fromId(msgType.toInt())) {
-                CALL -> WampMessage.Call(msgId, param1, payload)
-                CALL_RESULT -> WampMessage.CallResult(msgId, payload)
-                CALL_ERROR -> WampMessage.CallError(msgId, param1, param2, payload)
+        ocppMsgRegex.matchEntire(string.replace("\n", ""))
+            ?.destructured
+            ?.let {
+                when (WampMessageType.fromId(it.component1().toInt())) {
+                    CALL -> it.let { (_, msgId, action, _, payload) ->
+                        WampMessage.Call(msgId, action, payload)
+                    }
+
+                    CALL_RESULT -> it.let { (_, msgId, _, _, payload) ->
+                        WampMessage.CallResult(msgId, payload)
+                    }
+
+                    CALL_ERROR -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                        WampMessage.CallError(msgId, errorCode, errorDescription, payload)
+                    }
+                }
             }
-        }
 }
 
 enum class WampMessageType(val id: Int) {

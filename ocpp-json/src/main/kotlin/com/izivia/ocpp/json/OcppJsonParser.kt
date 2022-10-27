@@ -29,24 +29,37 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         val parsed = parseAsStringPayloadFromJson(messageStr)
             ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
 
+        // Cannot use .copy() because of class cast error between JsonMessage<T> and JsonMessage<String>
         return JsonMessage(
             msgType = parsed.msgType,
             msgId = parsed.msgId,
             action = parsed.action,
+            errorCode = parsed.errorCode,
+            errorDescription = parsed.errorDescription,
             payload = mapper.readValue(parsed.payload, clazz.java)
         )
     }
 
     fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
-        ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))?.let {
-            val (msgType, msgId, param1, param2, payload) = it.destructured
-            when (msgType.toInt()) {
-                CALL.id -> JsonMessage.Call(msgId, param1, payload)
-                CALL_RESULT.id -> JsonMessage.CallResult(msgId, payload)
-                CALL_ERROR.id -> JsonMessage.CallError(msgId, JsonMessageErrorCode.valueOf(param1), param2, payload)
-                else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")
+        ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))
+            ?.destructured
+            ?.let {
+                when (val msgType = it.component1().toInt()) {
+                    CALL.id -> it.let { (_, msgId, action, _, payload) ->
+                        JsonMessage.Call(msgId, action, payload)
+                    }
+
+                    CALL_RESULT.id -> it.let { (_, msgId, _, _, payload) ->
+                        JsonMessage.CallResult(msgId, payload)
+                    }
+
+                    CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                        JsonMessage.CallError(msgId, JsonMessageErrorCode.valueOf(errorCode), errorDescription, payload)
+                    }
+
+                    else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")
+                }
             }
-        }
 
     fun <T : Any> parsePayloadFromJson(payload: String, clazz: KClass<T>): T =
         mapper.readValue(payload, clazz.java)
