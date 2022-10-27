@@ -322,6 +322,59 @@ class Ocpp15SoapParserTest {
     }
 
     @Test
+    fun `should parse message with no options on sample value to MeterValuesReq`() {
+        val message =
+            """
+                <?xml version="1.0" encoding="UTF-8"?>
+                            <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope"
+                            xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                            xmlns:cp="urn://Ocpp/Cp/2012/06/"
+                            xmlns:chan="http://schemas.microsoft.com/ws/2005/02/duplex"
+                            xmlns:wsa5="http://www.w3.org/2005/08/addressing"
+                            xmlns:cs="urn://Ocpp/Cs/2012/06/">
+                    <SOAP-ENV:Header>
+                        <cs:chargeBoxIdentity>TEST</cs:chargeBoxIdentity>
+                        <wsa5:MessageID>789456</wsa5:MessageID>
+                        <wsa5:From><wsa5:Address>http://192.168.153.200:8080</wsa5:Address></wsa5:From>
+                        <wsa5:ReplyTo><wsa5:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa5:Address></wsa5:ReplyTo>
+                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://192.168.154.177:8084/centralSystemService/ocpp15soap</wsa5:To>
+                        <wsa5:Action SOAP-ENV:mustUnderstand="true">/MeterValues</wsa5:Action>
+                    </SOAP-ENV:Header>
+                    <SOAP-ENV:Body>
+                        <cs:meterValuesRequest>
+                            <cs:connectorId>1</cs:connectorId>
+                            <cs:transactionId>15095</cs:transactionId>
+                            <cs:values>
+                                <cs:timestamp>2022-05-17T15:42:19.912Z</cs:timestamp>
+                                <cs:value>valueWithNoParam</cs:value>
+                            </cs:values>
+                        </cs:meterValuesRequest>
+                    </SOAP-ENV:Body>
+                </SOAP-ENV:Envelope>
+            """.trimIndent()
+
+        expectThat(Ocpp15SoapParser().parseRequestFromSoap<MeterValuesReq>(message).payload).and {
+            get { values }.isNotNull().hasSize(1).and {
+                get { get(0) }.and {
+                    get { value }.hasSize(1).and {
+                        get { get(0) }.and {
+                            get { value }.isEqualTo("valueWithNoParam")
+
+                            // defaults should be taken for params
+                            get { context }.isEqualTo(ReadingContext.SamplePeriodic)
+                            get { location }.isEqualTo(Location.Outlet)
+                            get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
+                            get { unit }.isEqualTo(UnitOfMeasure.Wh)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     fun `should parse message to StartTransactionReq`() {
         val message =
             """
