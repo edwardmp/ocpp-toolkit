@@ -74,7 +74,7 @@ class WebsocketServer(
                             onAction(RequestMetadata(meta.ocppId), parser.parsePayloadFromJson(msg.payload, clazz))
                         val payload = parser.mapPayloadToString(response)
                         WampMessage.CallResult(msg.msgId, payload)
-                    } catch (e: Exception) {
+                    } catch (e: Exception) { // TODO Better mapping of exceptions https://izivia.atlassian.net/browse/IDEV-497
                         logger.error(e.message)
                         WampMessage.CallError(
                             msgId = msg.msgId,
