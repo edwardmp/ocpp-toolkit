@@ -54,7 +54,7 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
                     }
 
                     CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                        JsonMessage.CallError(msgId, JsonMessageErrorCode.valueOf(errorCode), errorDescription, payload)
+                        JsonMessage.CallError(msgId, JsonMessageErrorCode.fromValue(errorCode), errorDescription, payload)
                     }
 
                     else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")

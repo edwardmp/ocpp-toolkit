@@ -60,11 +60,23 @@ enum class JsonMessageErrorCode(val value: String) {
     OCCURENCE_CONSTRAINT_VIOLATION("OccurenceConstraintViolation"),
     TYPE_CONSTRAINT_VIOLATION("TypeConstraintViolation"),
     GENERIC_ERROR("GenericError"),
+
     // Specific for OCPP 2.0
     FORMAT_VIOLATION("FormatViolation"),
     MESSAGE_TYPE_NOT_SUPPORTED("MessageTypeNotSupported"),
     OCCURRENCE_CONSTRAINT_VIOLATION("OccurrenceConstraintViolation"),
-    RPC_FRAMEWORK_ERROR("RpcFrameworkError"),
+    RPC_FRAMEWORK_ERROR("RpcFrameworkError");
+
+    companion object {
+        fun fromValue(value: String) =
+            JsonMessageErrorCode
+                .values()
+                .firstOrNull { it.value == value }
+                ?: throw IllegalArgumentException(
+                    "$value is not a valid json message error code - " +
+                            "supported types: ${JsonMessageErrorCode.values().map { it.value }}"
+                )
+    }
 }
 
 class JsonMessageEmptyPayload

@@ -63,7 +63,7 @@ class WebsocketClient(ocppId: String, ocppVersion: OcppVersion, target: String) 
                         logger.error(e.message)
                         WampMessage.CallError(
                             msgId = wampMsg.msgId,
-                            errorCode = JsonMessageErrorCode.INTERNAL_ERROR.value,
+                            errorCode = JsonMessageErrorCode.INTERNAL_ERROR,
                             errorDescription = "",
                             payload = OcppCallErrorPayload(e.message).toJson(parser)
                         )

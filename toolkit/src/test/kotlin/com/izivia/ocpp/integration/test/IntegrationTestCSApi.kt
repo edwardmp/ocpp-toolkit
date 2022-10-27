@@ -128,6 +128,7 @@ import com.izivia.ocpp.api.model.updatefirmware.enumeration.UpdateFirmwareStatus
 import com.izivia.ocpp.integration.ApiFactory
 import com.izivia.ocpp.integration.model.Settings
 import com.izivia.ocpp.integration.model.TransportEnum
+import com.izivia.ocpp.json.JsonMessageErrorCode.INTERNAL_ERROR
 import com.izivia.ocpp.operation.information.ExecutionMetadata
 import com.izivia.ocpp.operation.information.OperationExecution
 import com.izivia.ocpp.operation.information.RequestMetadata
@@ -166,7 +167,7 @@ class IntegrationTestCSApi {
 
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "InternalError", "", "{}")
+                        WampMessage.CallError(msg.msgId, INTERNAL_ERROR, "", "{}")
                     }
                 }
         })

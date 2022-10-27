@@ -2,6 +2,7 @@ package com.izivia.ocpp.wamp.server.impl
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.server.OcppWampServer
@@ -71,12 +72,6 @@ class UndertowOcppWampServer(
     override fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage =
         getWsApp()
             .sendBlocking(ocppId, message)
-            ?: WampMessage.CallError(
-                message.msgId,
-                "InternalError",
-                "",
-                "{}"
-            )
 
     override fun register(handler: OcppWampServerHandler) {
         handlers.add(handler)
@@ -108,7 +103,7 @@ fun main() {
                     println("unhandled action for message: ${msg.toJson()}")
                     WampMessage.CallError(
                         msg.msgId,
-                        "NotSupported",
+                        JsonMessageErrorCode.NOT_SUPPORTED,
                         "unhandled action for message",
                         """{"action":" ${msg.action}"}"""
                     )

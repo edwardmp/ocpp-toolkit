@@ -2,13 +2,14 @@ package com.izivia.ocpp.wamp.messages
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessageType.*
 
 data class WampMessage(
     val msgType: WampMessageType,
     val msgId: String,
     val action: String? = null,
-    val errorCode: String? = null,
+    val errorCode: JsonMessageErrorCode? = null,
     val errorDescription: String? = null,
     val payload: String
 ) {
@@ -16,7 +17,7 @@ data class WampMessage(
     fun toJson(): String = when (msgType) {
         CALL -> """[${msgType.id},"$msgId","${action!!}",$payload]"""
         CALL_RESULT -> """[${msgType.id},"$msgId",$payload]"""
-        CALL_ERROR -> """[${msgType.id},"$msgId","${errorCode!!}","${errorDescription!!}",$payload]"""
+        CALL_ERROR -> """[${msgType.id},"$msgId","${errorCode!!.value}","${errorDescription!!}",$payload]"""
     }
 
     companion object {
@@ -35,7 +36,7 @@ data class WampMessage(
                 payload = payload
             )
 
-        fun CallError(msgId: String, errorCode: String, errorDescription: String, payload: String) =
+        fun CallError(msgId: String, errorCode: JsonMessageErrorCode, errorDescription: String, payload: String) =
             WampMessage(
                 msgType = CALL_ERROR,
                 msgId = msgId,
@@ -67,7 +68,7 @@ object WampMessageParser {
                     }
 
                     CALL_ERROR -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                        WampMessage.CallError(msgId, errorCode, errorDescription, payload)
+                        WampMessage.CallError(msgId, JsonMessageErrorCode.fromValue(errorCode), errorDescription, payload)
                     }
                 }
             }

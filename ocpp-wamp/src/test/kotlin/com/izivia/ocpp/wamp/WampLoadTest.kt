@@ -2,6 +2,7 @@ package com.izivia.ocpp.wamp
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
@@ -203,7 +204,7 @@ class WampLoadTest {
                             println("unhandled action for message: ${msg.toJson()}")
                             WampMessage.CallError(
                                 msg.msgId,
-                                "NotSupported",
+                                JsonMessageErrorCode.NOT_SUPPORTED,
                                 "Unhandled action for message",
                                 """{"action":"${msg.action}"}"""
                             )

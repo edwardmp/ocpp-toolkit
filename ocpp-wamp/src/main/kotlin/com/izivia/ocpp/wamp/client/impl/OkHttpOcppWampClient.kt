@@ -2,6 +2,7 @@ package com.izivia.ocpp.wamp.client.impl
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.WampOnActionHandler
 import com.izivia.ocpp.wamp.core.WampCallManager
@@ -181,7 +182,7 @@ class OkHttpOcppWampClient(
                                     .firstOrNull()
                                     ?: WampMessage.CallError(
                                         msg.msgId,
-                                        "InternalError",
+                                        JsonMessageErrorCode.INTERNAL_ERROR,
                                         "No handler found",
                                         "{}"
                                     )
@@ -196,7 +197,7 @@ class OkHttpOcppWampClient(
                             wampConnection?.websocket?.send(
                                 WampMessage.CallError(
                                     msg.msgId,
-                                    "InternalError",
+                                    JsonMessageErrorCode.INTERNAL_ERROR,
                                     "Timeout during call handling",
                                     "{}"
                                 ).toJson()
