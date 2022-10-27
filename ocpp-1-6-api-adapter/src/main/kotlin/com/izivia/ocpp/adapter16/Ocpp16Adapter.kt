@@ -75,8 +75,8 @@ class Ocpp16Adapter(
         private val logger = LoggerFactory.getLogger(Ocpp16Adapter::class.java)
     }
 
-    private val operations: ChargePointOperations =
-        ChargePointOperations.newChargePointOperations(chargingStationId, transport, Ocpp16CSApiAdapter(csApi))
+    private val operations: ChargePointOperations = ChargePointOperations
+        .newChargePointOperations(chargingStationId, transport, Ocpp16CSApiAdapter(csApi, transactionIds))
 
     override fun connect() {
         transport.connect()
