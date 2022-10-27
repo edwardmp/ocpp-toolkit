@@ -10,6 +10,7 @@ data class SampledValue(
     val location: Location? = Location.Outlet,
     val unit: UnitOfMeasure? = UnitOfMeasure.Wh
 ) {
-    /* default constructor is required by jackson but will never be used */
-    constructor() : this("VALUE_WILL_NEVER_BE_USED")
+    // default constructor is required by jackson but will never be used
+    // known issue IDEV-504
+    private constructor() : this("VALUE_WILL_NEVER_BE_USED")
 }
