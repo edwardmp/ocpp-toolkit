@@ -53,7 +53,7 @@ object WampMessageParser {
         Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
 
     fun parse(string: String): WampMessage? =
-        ocppMsgRegex.matchEntire(string)?.let {
+        ocppMsgRegex.matchEntire(string.replace("\n", ""))?.let {
             val (msgType, msgId, param1, param2, payload) = it.destructured
             when (WampMessageType.fromId(msgType.toInt())) {
                 CALL -> WampMessage.Call(msgId, param1, payload)

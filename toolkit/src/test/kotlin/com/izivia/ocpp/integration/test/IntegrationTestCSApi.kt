@@ -954,15 +954,18 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "GetChargingProfiles",
-                "{\"requestId\": \"00\"," +
-                        " \"evseId\": \"243\"," +
-                        "\"chargingProfile\": " +
-                        "{\"chargingProfilePurpose\": \"TxProfile\", " +
-                        "\"stackLevel\" : \"243\"," +
-                        "\"chargingProfileId\" : [23]," +
-                        "\"chargingLimitSource\" : [\"CSO\"]" +
-                        "}" +
-                        "}"
+                """
+                    {
+                        "requestId": "00",
+                        "evseId": "243",
+                        "chargingProfile": {
+                            "chargingProfilePurpose": "TxProfile",
+                            "stackLevel" : "243",
+                            "chargingProfileId" : [23],
+                            "chargingLimitSource" : ["CSO"]
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
@@ -970,12 +973,14 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "GetInstalledCertificateIds",
-                "{\"certificateType\": " +
-                        "[" +
-                        "\"MORootCertificate\"," +
-                        "\"CSMSRootCertificate\"" +
-                        "]" +
-                        "}"
+                """
+                    {
+                        "certificateType": [
+                            "MORootCertificate",
+                            "CSMSRootCertificate"
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
@@ -990,24 +995,23 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "CustomerInformation",
-                "{" +
-                        "\"requestId\": 12378, " +
-                        "\"report\": false," +
-                        "\"clear\": false," +
-                        "\"customerIdentifier\": \"identifier\"," +
-                        "\"idToken\": " +
-                        "{" +
-                        "\"idToken\": \"id1378\"," +
-                        "\"type\": \"Central\"" +
-                        "}," +
-                        "\"customerCertificate\": " +
-                        "{" +
-                        "\"hashAlgorithm\": \"SHA512\"," +
-                        "\"issuerNameHash\": \"issuernamehash\"," +
-                        "\"issuerKeyHash\": \"issuerkeyhash\"," +
-                        "\"serialNumber\": \"serialn\"" +
-                        "}" +
-                        "}"
+                """
+                    {
+                        "requestId": 12378,
+                        "report": false,
+                        "clear": false,
+                        "customerIdentifier": "identifier",
+                        "idToken": {
+                            "idToken": "id1378",
+                            "type": "Central"},
+                            "customerCertificate": {
+                            "hashAlgorithm": "SHA512",
+                            "issuerNameHash": "issuernamehash",
+                            "issuerKeyHash": "issuerkeyhash",
+                            "serialNumber": "serialn"
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
@@ -1022,13 +1026,15 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "PublishFirmware",
-                "{" +
-                        "\"location\": \"location string\", " +
-                        "\"retries\": 312, " +
-                        "\"checksum\": \"identifier string\", " +
-                        "\"requestId\": 23, " +
-                        "\"retryInterval\": 32 " +
-                        "}"
+                """
+                    {
+                        "location": "location string",
+                        "retries": 312,
+                        "checksum": "identifier string",
+                        "requestId": 23,
+                        "retryInterval": 32
+                    }
+                """.trimIndent()
             )
         )
 
@@ -1036,23 +1042,25 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "SetVariableMonitoring",
-                "{\"setMonitoringData\": " +
-                        "[{" +
-                        "\"id\": 32," +
-                        "\"transaction\": false," +
-                        "\"value\": 45.3," +
-                        "\"type\": \"UpperThreshold\"," +
-                        "\"severity\": 2," +
-                        "\"component\": " +
-                        "{" +
-                        "\"name\": \"name\"" +
-                        "}," +
-                        "\"variable\":" +
-                        "{" +
-                        "\"name\": \"name\"" +
-                        "}" +
-                        "}]" +
-                        "}"
+                """
+                    {
+                        "setMonitoringData": [
+                            {
+                                "id": 32,
+                                "transaction": false,
+                                "value": 45.3,
+                                "type": "UpperThreshold",
+                                "severity": 2,
+                                "component": {
+                                    "name": "name"
+                                },
+                                "variable": {
+                                    "name": "name"
+                                }
+                            }
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
@@ -1067,37 +1075,36 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "SetNetworkProfile",
-                "{\"configurationSlot\": 2," +
-                        " \"connectionData\": " +
-                        "{" +
-                        "\"ocppVersion\":\"OCPP12\"," +
-                        "\"ocppTransport\":\"JSON\"," +
-                        "\"ocppCsmsUrl\":\"url\"," +
-                        "\"messageTimeout\": 3," +
-                        "\"securityProfile\": 56," +
-                        "\"ocppInterface\":\"Wired0\"," +
-                        "\"vpn\":" +
-                        "{" +
-                        "\"server\":\"server\"," +
-                        "\"user\":\"user\"," +
-                        "\"group\":\"group\"," +
-                        "\"password\":\"pass\"," +
-                        "\"key\":\"key\"," +
-                        "\"type\":\"IKEv2\"" +
-                        "}" +
-                        "," +
-                        "\"apn\": " +
-                        "{" +
-                        "\"apn\":\"IKEv2\"," +
-                        "\"apnUserName\":\"username\"," +
-                        "\"apnPassword\":\"pass\"," +
-                        "\"simPin\":43," +
-                        "\"preferredNetwork\":\"pref\"," +
-                        "\"useOnlyPreferredNetwork\":false," +
-                        "\"apnAuthentication\":\"AUTO\"" +
-                        "}" +
-                        "}" +
-                        "}"
+                """
+                    {
+                        "configurationSlot": 2,
+                        "connectionData": {
+                            "ocppVersion": "OCPP12",
+                            "ocppTransport": "JSON",
+                            "ocppCsmsUrl": "url",
+                            "messageTimeout": 3,
+                            "securityProfile": 56,
+                            "ocppInterface": "Wired0",
+                            "vpn": {
+                                "server": "server",
+                                "user": "user",
+                                "group": "group",
+                                "password": "pass",
+                                "key": "key",
+                                "type": "IKEv2"
+                            },
+                            "apn": {
+                                "apn": "IKEv2",
+                                "apnUserName": "username",
+                                "apnPassword": "pass",
+                                "simPin": 43,
+                                "preferredNetwork": "pref",
+                                "useOnlyPreferredNetwork": false,
+                                "apnAuthentication": "AUTO"
+                            }
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
@@ -1135,33 +1142,40 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "SetDisplayMessage",
-                "{\"message\": " +
-                        "{" +
-                        "\"id\":321," +
-                        "\"priority\": \"AlwaysFront\"," +
-                        "\"state\": \"Charging\"," +
-                        "\"startDateTime\": \"2022-02-15T00:00:00.000Z\"," +
-                        "\"endDateTime\": \"2022-02-15T00:00:00.000Z\"," +
-                        "\"transactionId\": \"identifierstringtransacionid\"," +
-                        "\"message\": " +
-                        "{" +
-                        "\"format\": \"ASCII\"," +
-                        "\"language\": \"frfr\"," +
-                        "\"content\": \"messqge content\"" +
-                        "}" +
-                        "}" +
-                        "}"
+                """
+                    {
+                        "message": {
+                            "id": 321,
+                            "priority": "AlwaysFront",
+                            "state": "Charging",
+                            "startDateTime": "2022-02-15T00:00:00.000Z",
+                            "endDateTime": "2022-02-15T00:00:00.000Z",
+                            "transactionId": "identifierstringtransacionid",
+                            "message": {
+                                "format": "ASCII",
+                                "language": "frfr",
+                                "content": "messqge content"
+                            }
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
             "chargePoint2", WampMessage.Call(
                 "1",
-                "DeleteCertificate", "{\"certificateHashData\": " +
-                        "{\"hashAlgorithm\": \"SHA512\"," +
-                        " \"issuerNameHash\": \"someHash\"," +
-                        " \"issuerKeyHash\": \"KeyHashed\", " +
-                        "\"serialNumber\": \"763478643276432\"}}"
+                "DeleteCertificate",
+                """
+                    {
+                        "certificateHashData": {
+                            "hashAlgorithm": "SHA512",
+                            "issuerNameHash": "someHash",
+                            "issuerKeyHash": "KeyHashed",
+                            "serialNumber": "763478643276432"
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
@@ -1169,20 +1183,26 @@ class IntegrationTestCSApi {
             "chargePoint2", WampMessage.Call(
                 "1",
                 "GetMonitoringReport",
-                "{\"requestId\": 43243, " +
-                        "\"monitoringCriteria\": [\"ThresholdMonitoring\"]," +
-                        "\"componentVariable\": [{" +
-                        "\"component\": {" +
-                        "\"name\": \"name\"," +
-                        "\"instance\": \"instance\"" +
-                        "}," +
-                        "\"variable\":  {" +
-                        "\"name\": \"name\"," +
-                        "\"instance\": \"instance\"" +
-                        "}" +
-                        "}" +
-                        "]" +
-                        "}"
+                """
+                    {
+                        "requestId": 43243,
+                        "monitoringCriteria": [
+                            "ThresholdMonitoring"
+                        ],
+                        "componentVariable": [
+                            {
+                                "component": {
+                                    "name": "name",
+                                    "instance": "instance"
+                                },
+                                "variable": {
+                                    "name": "name",
+                                    "instance": "instance"
+                                }
+                            }
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
