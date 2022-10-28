@@ -21,10 +21,10 @@ class RealTransactionRepository : TransactionRepository {
 
     override fun getLocalIdByTransactionId(transactionId: Int): Ocpp16TransactionIds {
         val localId = hashMap.toList().find { it.second == transactionId }?.first
-        if (localId != null) {
-            return Ocpp16TransactionIds(localId, transactionId)
+        return if (localId != null) {
+            Ocpp16TransactionIds(localId, transactionId)
         } else {
-            throw IllegalStateException("value $transactionId not found in hashmap")
+            Ocpp16TransactionIds(transactionId.toString(), transactionId)
         }
     }
 }
