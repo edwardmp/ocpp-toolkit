@@ -661,7 +661,8 @@ fun main(args: Array<String>) {
 
     meterValues(
         csmsApi, ocppId, MeterValuesReq(
-            3, listOf(
+            evseId = 3,
+            meterValue = listOf(
                 MeterValueType(
                     listOf(
                         SampledValueType(0.6), SampledValueType(
@@ -675,7 +676,8 @@ fun main(args: Array<String>) {
                     ),
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                 )
-            )
+            ),
+            transactionId = null
         )
     )
 

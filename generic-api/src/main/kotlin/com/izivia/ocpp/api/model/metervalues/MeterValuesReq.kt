@@ -5,5 +5,6 @@ import com.izivia.ocpp.api.model.common.MeterValueType
 
 data class MeterValuesReq(
     val evseId: Int,
-    val meterValue: List<MeterValueType>
+    val meterValue: List<MeterValueType>,
+    val transactionId: String?
 ): Request
