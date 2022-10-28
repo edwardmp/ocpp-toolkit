@@ -740,7 +740,8 @@ class IntegrationTest {
 
         val requestMetadata = RequestMetadata(ocppId)
         val request = MeterValuesReq(
-            3, listOf(
+            evseId = 3,
+            meterValue = listOf(
                 MeterValueType(
                     listOf(
                         SampledValueType(0.6), SampledValueType(
@@ -754,14 +755,16 @@ class IntegrationTest {
                     ),
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                 )
-            )
+            ),
+            transactionId = null
         )
         val response = csmsApi.meterValues(requestMetadata, request)
         expectThat(response)
             .and { get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS) }
 
         val request2 = MeterValuesReq(
-            3, listOf(
+            evseId = 3,
+            meterValue = listOf(
                 MeterValueType(
                     listOf(
                         SampledValueType(0.6), SampledValueType(
@@ -775,7 +778,8 @@ class IntegrationTest {
                     ),
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                 )
-            )
+            ),
+            transactionId = null
         )
         val response2 = csmsApi.meterValues(requestMetadata, request2)
         expectThat(response2)

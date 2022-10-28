@@ -619,7 +619,8 @@ class AdapterTest {
 
         val operations = Ocpp16Adapter("", transport, csApi, RealTransactionRepository())
         val request = com.izivia.ocpp.api.model.metervalues.MeterValuesReq(
-            1, listOf(
+            evseId = 1,
+            meterValue = listOf(
                 MeterValueType(
                     listOf(
                         SampledValueType(0.6), SampledValueType(
@@ -634,7 +635,8 @@ class AdapterTest {
                     ),
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                 )
-            )
+            ),
+            transactionId = null
         )
         val response = operations.meterValues(requestMetadata, request)
         expectThat(response)

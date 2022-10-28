@@ -17,18 +17,18 @@ import com.izivia.ocpp.api.model.logstatusnotification.LogStatusNotificationReq
 import com.izivia.ocpp.api.model.logstatusnotification.LogStatusNotificationResp
 import com.izivia.ocpp.api.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.api.model.metervalues.MeterValuesResp
-import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesReq
-import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesResp
+import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitReq
+import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitResp
 import com.izivia.ocpp.api.model.notifycustomerinformation.NotifyCustomerInformationReq
 import com.izivia.ocpp.api.model.notifycustomerinformation.NotifyCustomerInformationResp
+import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesReq
+import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesResp
+import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsReq
+import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsResp
 import com.izivia.ocpp.api.model.notifyevchargingschedule.NotifyEVChargingScheduleReq
 import com.izivia.ocpp.api.model.notifyevchargingschedule.NotifyEVChargingScheduleResp
 import com.izivia.ocpp.api.model.notifyevent.NotifyEventReq
 import com.izivia.ocpp.api.model.notifyevent.NotifyEventResp
-import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitReq
-import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitResp
-import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsReq
-import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsResp
 import com.izivia.ocpp.api.model.notifymonitoringreport.NotifyMonitoringReportReq
 import com.izivia.ocpp.api.model.notifymonitoringreport.NotifyMonitoringReportResp
 import com.izivia.ocpp.api.model.notifyreport.NotifyReportReq
@@ -110,7 +110,12 @@ class Ocpp16Adapter(
         request: MeterValuesReq
     ): OperationExecution<MeterValuesReq, MeterValuesResp> = try {
         val mapper: MeterValuesMapper = Mappers.getMapper(MeterValuesMapper::class.java)
-        val response = operations.meterValues(meta, mapper.genToCoreReq(request))
+        val transactionId = request.transactionId
+            ?.let { transactionIds.getTransactionIdsByLocalId(it) }
+            ?.csmsId
+        val response = request
+            .copy(transactionId = transactionId?.toString())
+            .let { operations.meterValues(meta, mapper.genToCoreReq(it)) }
         OperationExecution(response.executionMeta, request, mapper.coreToGenResp(response.response))
     } catch (e: IllegalStateException) {
         logger.warn(e.message)
@@ -331,8 +336,8 @@ class Ocpp16Adapter(
     }
 
     override fun reportChargingProfiles(
-            meta: RequestMetadata,
-            request: ReportChargingProfilesReq
+        meta: RequestMetadata,
+        request: ReportChargingProfilesReq
     ): OperationExecution<ReportChargingProfilesReq, ReportChargingProfilesResp> {
         throw IllegalStateException("ReportChargingProfiles can't be call in OCPP 1.6")
     }

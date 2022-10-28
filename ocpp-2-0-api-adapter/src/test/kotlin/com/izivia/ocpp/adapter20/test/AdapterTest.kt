@@ -593,7 +593,7 @@ class AdapterTest {
         ): OperationExecution<GetChargingProfilesReq, GetChargingProfilesResp> {
             val response = GetChargingProfilesResp(
                     GetChargingProfileStatusEnumType.Accepted,
-            );
+            )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
@@ -790,7 +790,8 @@ class AdapterTest {
 
         val operations = Ocpp20Adapter("c1", transport, csApi)
         val request = MeterValuesReq(
-            1, listOf(
+            evseId = 1,
+            meterValue = listOf(
                 MeterValueType(
                     listOf(
                         SampledValueType(0.6), SampledValueType(
@@ -804,7 +805,8 @@ class AdapterTest {
                     ),
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                 )
-            )
+            ),
+            transactionId = null
         )
         val response = operations.meterValues(requestMetadata, request)
         expectThat(response)

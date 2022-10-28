@@ -15,10 +15,11 @@ abstract class MeterValuesMapper {
     fun genToCoreReq(meterValuesReq: MeterValuesReqGen): MeterValuesReq {
         val connectorId: Int = meterValuesReq.evseId
         val meterValue = meterValuesReq.meterValue
+        val transactionId = meterValuesReq.transactionId?.toInt()
         val meterValueList = meterValue.map { (s, t) ->
             MeterValue(sampledValue = s.map { CommonMapper.convertSampledValue(it) }, timestamp = t)
         }
-        return MeterValuesReq(connectorId = connectorId, meterValue = meterValueList)
+        return MeterValuesReq(connectorId = connectorId, meterValue = meterValueList, transactionId = transactionId)
     }
 
     abstract fun coreToGenResp(meterValuesResp: MeterValuesResp?): MeterValuesRespGen
