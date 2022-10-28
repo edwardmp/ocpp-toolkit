@@ -2,6 +2,7 @@ package com.izivia.ocpp.wamp.server.impl
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.server.OcppWampServer
@@ -17,8 +18,8 @@ class UndertowOcppWampServer(
     val ocppVersions: Set<OcppVersion>,
     path: String = "ws",
     val timeoutInMs: Long = 30_000,
-    private val onWsConnectHandler: (CSOcppId)-> Unit = {},
-    private val onWsCloseHandler: (CSOcppId)-> Unit = {}
+    private val onWsConnectHandler: (CSOcppId) -> Unit = {},
+    private val onWsCloseHandler: (CSOcppId) -> Unit = {}
 ) : OcppWampServer {
     private val handlers = mutableListOf<OcppWampServerHandler>()
     private val selectedHandler = ConcurrentHashMap<CSOcppId, List<OcppWampServerHandler>>()
@@ -70,7 +71,7 @@ class UndertowOcppWampServer(
 
     override fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage =
         getWsApp()
-            .sendBlocking(ocppId, message)?:WampMessage.CallError(message.msgId, "{}")
+            .sendBlocking(ocppId, message)
 
     override fun register(handler: OcppWampServerHandler) {
         handlers.add(handler)
@@ -94,14 +95,20 @@ fun main() {
         override fun accept(ocppId: CSOcppId): Boolean = listOf("TEST1", "TEST2").contains(ocppId)
 
         override fun onAction(meta: WampMessageMeta, msg: WampMessage): WampMessage? =
-                when (msg.action?.lowercase()) {
-                    "heartbeat" ->
-                        WampMessage.CallResult(msg.msgId, """{"currentTime":"${Clock.System.now()}"}""")
-                    else -> {
-                        println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
-                    }
+            when (msg.action?.lowercase()) {
+                "heartbeat" ->
+                    WampMessage.CallResult(msg.msgId, """{"currentTime":"${Clock.System.now()}"}""")
+
+                else -> {
+                    println("unhandled action for message: ${msg.toJson()}")
+                    WampMessage.CallError(
+                        msg.msgId,
+                        JsonMessageErrorCode.NOT_SUPPORTED,
+                        "unhandled action for message",
+                        """{"action":" ${msg.action}"}"""
+                    )
                 }
+            }
     })
 
     server.start()

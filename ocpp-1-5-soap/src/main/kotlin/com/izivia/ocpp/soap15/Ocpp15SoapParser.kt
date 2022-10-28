@@ -87,6 +87,7 @@ class Ocpp15SoapParser : OcppSoapParser {
         envelope.body.stopTransactionResponse != null -> envelope.body.stopTransactionResponse!!
         envelope.body.unlockConnectorResponse != null -> envelope.body.unlockConnectorResponse!!
         envelope.body.updateFirmwareResponse != null -> envelope.body.updateFirmwareResponse!!
+        envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown response message operation. enveloppe = $envelope")
     }
 

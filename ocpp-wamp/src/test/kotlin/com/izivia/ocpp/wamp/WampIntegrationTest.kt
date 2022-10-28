@@ -3,6 +3,7 @@ package com.izivia.ocpp.wamp
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.OcppVersion.OCPP_1_6
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
@@ -38,7 +39,12 @@ class WampIntegrationTest {
 
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
+                        WampMessage.CallError(
+                            msg.msgId,
+                            JsonMessageErrorCode.NOT_SUPPORTED,
+                            "",
+                            "{}"
+                        )
                     }
                 }
         })
@@ -116,7 +122,12 @@ class WampIntegrationTest {
 
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
+                        WampMessage.CallError(
+                            msg.msgId,
+                            JsonMessageErrorCode.NOT_SUPPORTED,
+                            "",
+                            "{}"
+                        )
                     }
                 }
             }

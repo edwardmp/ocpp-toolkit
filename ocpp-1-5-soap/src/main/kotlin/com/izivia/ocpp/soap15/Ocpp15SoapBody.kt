@@ -49,6 +49,7 @@ import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.SoapBody
+import com.izivia.ocpp.soap.SoapFault
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class Ocpp15SoapBody(
@@ -99,5 +100,6 @@ internal data class Ocpp15SoapBody(
     val unlockConnectorRequest: UnlockConnectorReq?,
     val unlockConnectorResponse: UnlockConnectorResp?,
     val updateFirmwareRequest: UpdateFirmwareReq?,
-    val updateFirmwareResponse: UpdateFirmwareResp?
+    val updateFirmwareResponse: UpdateFirmwareResp?,
+    val fault: SoapFault?
 ) : SoapBody

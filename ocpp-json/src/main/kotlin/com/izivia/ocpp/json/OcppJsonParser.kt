@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.izivia.ocpp.json.JsonMessageType.*
 import kotlin.reflect.KClass
 
 abstract class OcppJsonParser(private val mapper: ObjectMapper) {
@@ -28,24 +29,37 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         val parsed = parseAsStringPayloadFromJson(messageStr)
             ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
 
+        // Cannot use .copy() because of class cast error between JsonMessage<T> and JsonMessage<String>
         return JsonMessage(
             msgType = parsed.msgType,
             msgId = parsed.msgId,
             action = parsed.action,
+            errorCode = parsed.errorCode,
+            errorDescription = parsed.errorDescription,
             payload = mapper.readValue(parsed.payload, clazz.java)
         )
     }
 
     fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
-        ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))?.let {
-            val (msgType, msgId, action, payload) = it.destructured
-            JsonMessage(
-                msgType = JsonMessageType.fromId(msgType.toInt()),
-                msgId = msgId,
-                action = action.takeIf { it.isNotBlank() },
-                payload = payload
-            )
-        }
+        ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))
+            ?.destructured
+            ?.let {
+                when (val msgType = it.component1().toInt()) {
+                    CALL.id -> it.let { (_, msgId, action, _, payload) ->
+                        JsonMessage.Call(msgId, action, payload)
+                    }
+
+                    CALL_RESULT.id -> it.let { (_, msgId, _, _, payload) ->
+                        JsonMessage.CallResult(msgId, payload)
+                    }
+
+                    CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                        JsonMessage.CallError(msgId, JsonMessageErrorCode.fromValue(errorCode), errorDescription, payload)
+                    }
+
+                    else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")
+                }
+            }
 
     fun <T : Any> parsePayloadFromJson(payload: String, clazz: KClass<T>): T =
         mapper.readValue(payload, clazz.java)
@@ -54,17 +68,43 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         mapper.writeValueAsString(payload)
 
     fun <T> mapToJson(message: JsonMessage<T>): String =
-        """
-            [
-                ${message.msgType.id},
-                "${message.msgId}",
-                ${message.action?.let { "\"$it\", " } ?: ""}
-                ${mapPayloadToString(message.payload)}
-            ]
-        """.trimIndent()
+        message
+            .let {
+                message
+                    .payload
+                    .takeUnless { it == null || (it is String && it.isBlank()) }
+                    ?: JsonMessageEmptyPayload()
+            }
+            .let { payload ->
+                when (message.msgType) {
+                    CALL -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        message.action,
+                        payload
+                    )
+
+                    CALL_RESULT -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        payload
+                    )
+
+                    CALL_ERROR -> listOf(
+                        message.msgType.id,
+                        message.msgId,
+                        message.errorCode!!.value,
+                        message.errorDescription,
+                        payload
+                    )
+                }
+            }
+            .let { mapper.writeValueAsString(it) }
 
     companion object {
-        private val ocppMsgRegex = Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
+        // Same as WampMessage - cross-reference 7bb7e3a7-bbef-4ff4-a8e6-6a3622e9bd4b
+        private val ocppMsgRegex =
+            Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
     }
 }
 

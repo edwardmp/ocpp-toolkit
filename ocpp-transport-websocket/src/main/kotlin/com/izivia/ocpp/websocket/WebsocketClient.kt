@@ -1,6 +1,7 @@
 package com.izivia.ocpp.websocket
 
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.transport.ClientTransport
 import com.izivia.ocpp.transport.OcppCallErrorException
 import com.izivia.ocpp.transport.OcppCallErrorPayload
@@ -57,14 +58,14 @@ class WebsocketClient(ocppId: String, ocppVersion: OcppVersion, target: String) 
                     try {
                         val response = fn(parser.parsePayloadFromJson(wampMsg.payload, clazz))
                         val payload = parser.mapPayloadToString(response)
-                        WampMessage(WampMessageType.CALL_RESULT, wampMsg.msgId, null, payload)
-                    } catch (e: Exception) {
+                        WampMessage.CallResult(wampMsg.msgId, payload)
+                    } catch (e: Exception) { // TODO Better mapping of exceptions https://izivia.atlassian.net/browse/IDEV-497
                         logger.error(e.message)
-                        WampMessage(
-                            WampMessageType.CALL_ERROR,
-                            wampMsg.msgId,
-                            null,
-                            OcppCallErrorPayload(e.message).toJson(parser)
+                        WampMessage.CallError(
+                            msgId = wampMsg.msgId,
+                            errorCode = JsonMessageErrorCode.INTERNAL_ERROR,
+                            errorDescription = "",
+                            payload = OcppCallErrorPayload(e.message).toJson(parser)
                         )
                     }
                 } else {

@@ -215,7 +215,6 @@ import com.izivia.ocpp.transport.OcppVersion
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
-import com.izivia.ocpp.wamp.messages.WampMessageType
 import io.mockk.unmockkAll
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.AfterEach
@@ -671,11 +670,9 @@ class IntegrationTest {
     @Test
     fun `heartbeat request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}",
-            action = "heartbeat"
+            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -692,11 +689,9 @@ class IntegrationTest {
     @Test
     fun `heartbeat request send`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}",
-            action = "heartbeat"
+            payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -713,11 +708,9 @@ class IntegrationTest {
     @Test
     fun `authorize 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"idTagInfo\":{\"status\" : \"Accepted\", \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"parentIdTag\" : \"Tag2\" }}",
-            action = "authorize"
+            payload = "{\"idTagInfo\":{\"status\" : \"Accepted\", \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"parentIdTag\" : \"Tag2\" }}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -736,11 +729,9 @@ class IntegrationTest {
     @Test
     fun `meterValues request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "meterValues"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -794,11 +785,9 @@ class IntegrationTest {
     @Test
     fun `dataTransfer 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\" : \"Accepted\", \"data\" : \"2022-02-15T00:00:00.000Z\"}",
-            action = "DataTransfer"
+            payload = "{\"status\" : \"Accepted\", \"data\" : \"2022-02-15T00:00:00.000Z\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -818,11 +807,9 @@ class IntegrationTest {
     @Test
     fun `bootNotification 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"currentTime\" : \"2022-02-15T00:00:00.000Z\", \"interval\" : 10, \"status\": \"Accepted\"}",
-            action = "BootNotification"
+            payload = "{\"currentTime\" : \"2022-02-15T00:00:00.000Z\", \"interval\" : 10, \"status\": \"Accepted\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -843,11 +830,9 @@ class IntegrationTest {
     @Test
     fun `start transaction 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"idTagInfo\" : { \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"status\" : \"Accepted\"}, \"transactionId\" : 100}",
-            action = "startTransaction"
+            payload = "{\"idTagInfo\" : { \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"status\" : \"Accepted\"}, \"transactionId\" : 100}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -889,11 +874,9 @@ class IntegrationTest {
     @Test
     fun `status notification request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "statusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -912,11 +895,9 @@ class IntegrationTest {
     @Test
     fun `notifyReport 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyReport"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -935,11 +916,9 @@ class IntegrationTest {
     @Test
     fun `notifyReport 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyReport"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -969,11 +948,9 @@ class IntegrationTest {
     @Test
     fun `firmwareStatusNotification 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "FirmwareStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -992,11 +969,9 @@ class IntegrationTest {
     @Test
     fun `firmwareStatusNotification 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "FirmwareStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1014,11 +989,9 @@ class IntegrationTest {
     @Test
     fun `clearedChargingLimit 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "ClearedChargingLimit"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1036,11 +1009,9 @@ class IntegrationTest {
     @Test
     fun `clearedChargingLimit 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "ClearedChargingLimit"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1060,11 +1031,9 @@ class IntegrationTest {
     @Test
     fun `getCertificateStatus 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\"}",
-            action = "GetCertificateStatus"
+            payload = "{\"status\": \"Accepted\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1081,11 +1050,9 @@ class IntegrationTest {
     @Test
     fun `getCertificateStatus 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\"}",
-            action = "GetCertificateStatus"
+            payload = "{\"status\": \"Accepted\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1105,11 +1072,9 @@ class IntegrationTest {
     @Test
     fun `notifyCustomerInformation 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyCustomerInformation"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1132,11 +1097,9 @@ class IntegrationTest {
     @Test
     fun `notifyCustomerInformation 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyCustomerInformation"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1160,11 +1123,9 @@ class IntegrationTest {
     @Test
     fun `notifyEvent 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyEvent"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1204,11 +1165,9 @@ class IntegrationTest {
     @Test
     fun `notifyEVChargingSchedule 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}",
-            action = "NotifyEVChargingSchedule"
+            payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1237,11 +1196,9 @@ class IntegrationTest {
     @Test
     fun `notifyEVChargingSchedule 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}",
-            action = "NotifyEVChargingSchedule"
+            payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1271,11 +1228,9 @@ class IntegrationTest {
     @Test
     fun `notifyChargingLimit 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyChargingLimit"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1293,11 +1248,9 @@ class IntegrationTest {
     @Test
     fun `notifyChargingLimit 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyChargingLimit"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1317,11 +1270,9 @@ class IntegrationTest {
     @Test
     fun `logStatusNotification 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "LogStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1341,11 +1292,9 @@ class IntegrationTest {
     @Test
     fun `logStatusNotification 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "LogStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1365,11 +1314,9 @@ class IntegrationTest {
     @Test
     fun `publishFirmwareStatusNotification 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "PublishFirmwareStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1388,11 +1335,9 @@ class IntegrationTest {
     @Test
     fun `publishFirmwareStatusNotification 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "PublishFirmwareStatusNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1414,11 +1359,9 @@ class IntegrationTest {
     @Test
     fun `notifyDisplayMessages 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyDisplayMessages"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1460,11 +1403,9 @@ class IntegrationTest {
     }
     @Test
     fun `notifyEVChargingNeeds 1-6 request`() {
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyEVChargingNeeds"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1482,11 +1423,9 @@ class IntegrationTest {
     @Test
     fun `notifyEVChargingNeeds 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\"}",
-            action = "NotifyEVChargingNeeds"
+            payload = "{\"status\": \"Accepted\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1519,11 +1458,9 @@ class IntegrationTest {
     @Test
     fun `notifyMonitoringReport 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyMonitoringReport"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1542,11 +1479,9 @@ class IntegrationTest {
     @Test
     fun `notifyMonitoringReport 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "NotifyMonitoringReport"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1608,11 +1543,9 @@ class IntegrationTest {
     @Test
     fun `reservationStatusUpdate 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "ReservationStatusUpdate"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1630,11 +1563,9 @@ class IntegrationTest {
     @Test
     fun `reservationStatusUpdate 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "ReservationStatusUpdate"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1654,11 +1585,9 @@ class IntegrationTest {
     @Test
     fun `securityEventNotification 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "SecurityEventNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1677,11 +1606,9 @@ class IntegrationTest {
     @Test
     fun `securityEventNotification 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "SecurityEventNotification"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1702,11 +1629,9 @@ class IntegrationTest {
     @Test
     fun `signCertificate 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "SignCertificate"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1724,11 +1649,9 @@ class IntegrationTest {
     @Test
     fun `signCertificate 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{\"status\": \"Accepted\"}",
-            action = "SignCertificate"
+            payload = "{\"status\": \"Accepted\"}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1750,11 +1673,9 @@ class IntegrationTest {
     @Test
     fun `reportChargingProfiles 1-6 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-            msgType = WampMessageType.CALL_RESULT,
-            payload = "{}",
-            action = "ReportChargingProfiles"
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_1_6, TransportEnum.WEBSOCKET, target = "")
@@ -1791,11 +1712,9 @@ class IntegrationTest {
     @Test
     fun `reportChargingProfiles 2-0 request`() {
 
-        every { ocppWampClient.sendBlocking(any()) } returns WampMessage(
+        every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
                 msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-                msgType = WampMessageType.CALL_RESULT,
-                payload = "{}",
-                action = "ReportChargingProfiles"
+                payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")

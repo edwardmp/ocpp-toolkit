@@ -12,18 +12,20 @@ import javax.xml.stream.XMLInputFactory
 
 
 class OcppSoapMapper : ObjectMapper(
-    XmlMapper(getNewFactory(true),  CustomXmlModule)
+    XmlMapper(getNewFactory(true), CustomXmlModule)
         .registerModule(kotlinModule())
         .registerModule(KotlinxInstantModule())
         .setSerializationInclusion(Include.NON_NULL)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 )
 
-fun getNewFactory(nsAware: Boolean) : XmlFactory {
-    val customXmlFactory: XMLInputFactory = XMLInputFactory.newFactory()
-    customXmlFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, nsAware)
-    return XmlFactory(customXmlFactory)
-}
+fun getNewFactory(nsAware: Boolean): XmlFactory =
+    XMLInputFactory
+        .newFactory()
+        .apply {
+            setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, nsAware)
+        }
+        .let { XmlFactory(it) }
 
 private object CustomXmlModule : JacksonXmlModule() {
     init {

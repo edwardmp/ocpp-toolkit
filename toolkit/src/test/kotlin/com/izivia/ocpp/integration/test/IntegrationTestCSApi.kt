@@ -1,7 +1,7 @@
 package com.izivia.ocpp.integration.test
 
+import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.api.CSApi
-import com.izivia.ocpp.api.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.api.model.cancelreservation.CancelReservationReq
 import com.izivia.ocpp.api.model.cancelreservation.CancelReservationResp
 import com.izivia.ocpp.api.model.cancelreservation.enumeration.CancelReservationStatusEnumType
@@ -17,50 +17,47 @@ import com.izivia.ocpp.api.model.clearcache.enumeration.ClearCacheStatusEnumType
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileResp
 import com.izivia.ocpp.api.model.clearchargingprofile.enumeration.ClearChargingProfileStatusEnumType
+import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageReq
+import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageResp
+import com.izivia.ocpp.api.model.cleardisplaymessage.enumeration.ClearMessageStatusEnumType
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearMonitoringResultType
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoringReq
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoringResp
 import com.izivia.ocpp.api.model.clearvariablemonitoring.enumeration.ClearMonitoringStatusEnumType
-import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageReq
-import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageResp
-import com.izivia.ocpp.api.model.cleardisplaymessage.enumeration.ClearMessageStatusEnumType
 import com.izivia.ocpp.api.model.common.CertificateHashDataType
 import com.izivia.ocpp.api.model.common.ComponentType
 import com.izivia.ocpp.api.model.common.StatusInfoType
 import com.izivia.ocpp.api.model.common.VariableType
-import com.izivia.ocpp.api.model.common.enumeration.GenericDeviceModelStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.GenericStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.RequestStartStopStatusEnumType
+import com.izivia.ocpp.api.model.common.enumeration.*
+import com.izivia.ocpp.api.model.costupdated.CostUpdatedReq
+import com.izivia.ocpp.api.model.costupdated.CostUpdatedResp
+import com.izivia.ocpp.api.model.customerinformation.CustomerInformationReq
+import com.izivia.ocpp.api.model.customerinformation.CustomerInformationResp
+import com.izivia.ocpp.api.model.customerinformation.enumeration.CustomerInformationStatusEnumType
 import com.izivia.ocpp.api.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.api.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.api.model.datatransfer.enumeration.DataTransferStatusEnumType
+import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateReq
+import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateResp
+import com.izivia.ocpp.api.model.deletecertificate.enumerations.DeleteCertificateStatusEnumType
 import com.izivia.ocpp.api.model.getallvariables.GetAllVariablesReq
 import com.izivia.ocpp.api.model.getallvariables.GetAllVariablesResp
 import com.izivia.ocpp.api.model.getallvariables.KeyValue
 import com.izivia.ocpp.api.model.getbasereport.GetBaseReportReq
 import com.izivia.ocpp.api.model.getbasereport.GetBaseReportResp
-import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleReq
-import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesReq
 import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesResp
 import com.izivia.ocpp.api.model.getchargingprofiles.enumeration.GetChargingProfileStatusEnumType
+import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleReq
+import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleResp
+import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesReq
+import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesResp
+import com.izivia.ocpp.api.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
 import com.izivia.ocpp.api.model.getinstalledcertificateids.CertificateHashDataChainType
 import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsReq
 import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsResp
 import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetCertificateIdUseEnumType
 import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetInstalledCertificateStatusEnumType
-import com.izivia.ocpp.api.model.customerinformation.CustomerInformationReq
-import com.izivia.ocpp.api.model.customerinformation.CustomerInformationResp
-import com.izivia.ocpp.api.model.customerinformation.enumeration.CustomerInformationStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.MonitorEnumType
-import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesReq
-import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesResp
-import com.izivia.ocpp.api.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
-import com.izivia.ocpp.api.model.costupdated.CostUpdatedReq
-import com.izivia.ocpp.api.model.costupdated.CostUpdatedResp
-import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateReq
-import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateResp
-import com.izivia.ocpp.api.model.deletecertificate.enumerations.DeleteCertificateStatusEnumType
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionReq
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionResp
 import com.izivia.ocpp.api.model.getlog.GetLogReq
@@ -76,11 +73,11 @@ import com.izivia.ocpp.api.model.getvariables.GetVariableResultType
 import com.izivia.ocpp.api.model.getvariables.GetVariablesReq
 import com.izivia.ocpp.api.model.getvariables.GetVariablesResp
 import com.izivia.ocpp.api.model.getvariables.enumeration.GetVariableStatusEnumType
-import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareReq
-import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareResp
 import com.izivia.ocpp.api.model.installcertificate.InstallCertificateReq
 import com.izivia.ocpp.api.model.installcertificate.InstallCertificateResp
 import com.izivia.ocpp.api.model.installcertificate.enumeration.InstallCertificateStatusEnumType
+import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareReq
+import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareResp
 import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionReq
 import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionResp
 import com.izivia.ocpp.api.model.remotestop.RequestStopTransactionReq
@@ -98,19 +95,20 @@ import com.izivia.ocpp.api.model.sendlocallist.enumeration.SendLocalListStatusEn
 import com.izivia.ocpp.api.model.setchargingprofile.SetChargingProfileReq
 import com.izivia.ocpp.api.model.setchargingprofile.SetChargingProfileResp
 import com.izivia.ocpp.api.model.setchargingprofile.enumeration.ChargingProfileStatusEnumType
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
+import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageReq
+import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageResp
+import com.izivia.ocpp.api.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
+import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseReq
+import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseResp
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelReq
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelResp
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileReq
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileResp
 import com.izivia.ocpp.api.model.setnetworkprofile.enumeration.SetNetworkProfileStatusEnumType
-import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseReq
-import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseResp
-import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageReq
-import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageResp
-import com.izivia.ocpp.api.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
+import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
 import com.izivia.ocpp.api.model.setvariables.SetVariableResultType
 import com.izivia.ocpp.api.model.setvariables.SetVariablesReq
 import com.izivia.ocpp.api.model.setvariables.SetVariablesResp
@@ -127,19 +125,16 @@ import com.izivia.ocpp.api.model.unpublishfirmware.enumeration.UnpublishFirmware
 import com.izivia.ocpp.api.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.api.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.api.model.updatefirmware.enumeration.UpdateFirmwareStatusEnumType
-import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
 import com.izivia.ocpp.integration.ApiFactory
 import com.izivia.ocpp.integration.model.Settings
 import com.izivia.ocpp.integration.model.TransportEnum
+import com.izivia.ocpp.json.JsonMessageErrorCode.INTERNAL_ERROR
 import com.izivia.ocpp.operation.information.ExecutionMetadata
 import com.izivia.ocpp.operation.information.OperationExecution
 import com.izivia.ocpp.operation.information.RequestMetadata
 import com.izivia.ocpp.operation.information.RequestStatus
-import com.izivia.ocpp.OcppVersion
-import com.izivia.ocpp.transport.OcppVersion as OcppVersionTransport
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
-import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import kotlinx.datetime.Clock
@@ -151,6 +146,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import java.lang.Thread.sleep
+import com.izivia.ocpp.transport.OcppVersion as OcppVersionTransport
 
 class IntegrationTestCSApi {
 
@@ -168,9 +164,10 @@ class IntegrationTestCSApi {
                 when (msg.action?.lowercase()) {
                     "heartbeat" ->
                         WampMessage.CallResult(msg.msgId, """{"currentTime":"${Clock.System.now()}"}""")
+
                     else -> {
                         println("unhandled action for message: ${msg.toJson()}")
-                        WampMessage.CallError(msg.msgId, "{}")
+                        WampMessage.CallError(msg.msgId, INTERNAL_ERROR, "", "{}")
                     }
                 }
         })
@@ -305,7 +302,10 @@ class IntegrationTestCSApi {
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
-            override fun updateFirmware(meta: RequestMetadata, req: UpdateFirmwareReq): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
+            override fun updateFirmware(
+                meta: RequestMetadata,
+                req: UpdateFirmwareReq
+            ): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
                 val response = UpdateFirmwareResp(
                     status = UpdateFirmwareStatusEnumType.Accepted,
                     statusInfo = StatusInfoType("reason", "additional")
@@ -432,102 +432,103 @@ class IntegrationTestCSApi {
             }
 
             override fun publishFirmware(
-                    meta: RequestMetadata,
-                    req: PublishFirmwareReq
+                meta: RequestMetadata,
+                req: PublishFirmwareReq
             ): OperationExecution<PublishFirmwareReq, PublishFirmwareResp> {
                 val response = PublishFirmwareResp(GenericStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun getChargingProfiles(
-                    meta: RequestMetadata,
-                    req: GetChargingProfilesReq
+                meta: RequestMetadata,
+                req: GetChargingProfilesReq
             ): OperationExecution<GetChargingProfilesReq, GetChargingProfilesResp> {
-                val response = GetChargingProfilesResp (
-                        GetChargingProfileStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
+                val response = GetChargingProfilesResp(
+                    GetChargingProfileStatusEnumType.Accepted,
+                    StatusInfoType("reason", "info")
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun customerInformation(
-                    meta: RequestMetadata,
-                    req: CustomerInformationReq
+                meta: RequestMetadata,
+                req: CustomerInformationReq
             ): OperationExecution<CustomerInformationReq, CustomerInformationResp> {
                 val response = CustomerInformationResp(
-                        CustomerInformationStatusEnumType.Accepted,
+                    CustomerInformationStatusEnumType.Accepted,
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun installCertificate(
-                    meta: RequestMetadata,
-                    req: InstallCertificateReq
+                meta: RequestMetadata,
+                req: InstallCertificateReq
             ): OperationExecution<InstallCertificateReq, InstallCertificateResp> {
                 val response = InstallCertificateResp(
-                        InstallCertificateStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
+                    InstallCertificateStatusEnumType.Accepted,
+                    StatusInfoType("reason", "info")
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun getInstalledCertificateIds(
-                    meta: RequestMetadata,
-                    req: GetInstalledCertificateIdsReq
+                meta: RequestMetadata,
+                req: GetInstalledCertificateIdsReq
             ): OperationExecution<GetInstalledCertificateIdsReq, GetInstalledCertificateIdsResp> {
                 val response = GetInstalledCertificateIdsResp(
-                        GetInstalledCertificateStatusEnumType.Accepted,
-                        listOf(
-                                CertificateHashDataChainType(
-                                        GetCertificateIdUseEnumType.CSMSRootCertificate,
-                                        CertificateHashDataType(
-                                            HashAlgorithmEnumType.SHA512,
-                                                "",
-                                                "",
-                                                ""
-                                        ),
-                                        listOf(
-                                                CertificateHashDataType(
-                                                        HashAlgorithmEnumType.SHA512,
-                                                        "",
-                                                        "",
-                                                        ""
-                                                ),
-                                                CertificateHashDataType(
-                                                        HashAlgorithmEnumType.SHA512,
-                                                        "",
-                                                        "",
-                                                        "")
-                                        )
+                    GetInstalledCertificateStatusEnumType.Accepted,
+                    listOf(
+                        CertificateHashDataChainType(
+                            GetCertificateIdUseEnumType.CSMSRootCertificate,
+                            CertificateHashDataType(
+                                HashAlgorithmEnumType.SHA512,
+                                "",
+                                "",
+                                ""
+                            ),
+                            listOf(
+                                CertificateHashDataType(
+                                    HashAlgorithmEnumType.SHA512,
+                                    "",
+                                    "",
+                                    ""
                                 ),
+                                CertificateHashDataType(
+                                    HashAlgorithmEnumType.SHA512,
+                                    "",
+                                    "",
+                                    ""
+                                )
+                            )
                         ),
-                        StatusInfoType("reason", "info")
+                    ),
+                    StatusInfoType("reason", "info")
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun unpublishFirmware(
-                    meta: RequestMetadata,
-                    req: UnpublishFirmwareReq
+                meta: RequestMetadata,
+                req: UnpublishFirmwareReq
             ): OperationExecution<UnpublishFirmwareReq, UnpublishFirmwareResp> {
                 val response = UnpublishFirmwareResp(UnpublishFirmwareStatusEnumType.DownloadOngoing)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun setVariableMonitoring(
-                    meta: RequestMetadata,
-                    req: SetVariableMonitoringReq
+                meta: RequestMetadata,
+                req: SetVariableMonitoringReq
             ): OperationExecution<SetVariableMonitoringReq, SetVariableMonitoringResp> {
                 val response = SetVariableMonitoringResp(
                     listOf(
-                        SetMonitoringResultType (
-                                id = 23,
-                                status = SetMonitoringStatusEnumType.Accepted,
-                                type = MonitorEnumType.Delta,
-                                severity = 3,
-                                component = ComponentType("name"),
-                                variable = VariableType("name"),
-                                statusInfo = StatusInfoType("reason", "info")
+                        SetMonitoringResultType(
+                            id = 23,
+                            status = SetMonitoringStatusEnumType.Accepted,
+                            type = MonitorEnumType.Delta,
+                            severity = 3,
+                            component = ComponentType("name"),
+                            variable = VariableType("name"),
+                            statusInfo = StatusInfoType("reason", "info")
                         )
                     )
                 )
@@ -535,78 +536,78 @@ class IntegrationTestCSApi {
             }
 
             override fun setMonitoringLevel(
-                    meta: RequestMetadata,
-                    req: SetMonitoringLevelReq
+                meta: RequestMetadata,
+                req: SetMonitoringLevelReq
             ): OperationExecution<SetMonitoringLevelReq, SetMonitoringLevelResp> {
                 val response = SetMonitoringLevelResp(
-                        GenericStatusEnumType.Accepted,
-                        StatusInfoType("reason","additionnal")
+                    GenericStatusEnumType.Accepted,
+                    StatusInfoType("reason", "additionnal")
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun setNetworkProfile(
-                    meta: RequestMetadata,
-                    req: SetNetworkProfileReq
+                meta: RequestMetadata,
+                req: SetNetworkProfileReq
             ): OperationExecution<SetNetworkProfileReq, SetNetworkProfileResp> {
                 val response = SetNetworkProfileResp(SetNetworkProfileStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun getTransactionStatus(
-                    meta: RequestMetadata,
-                    req: GetTransactionStatusReq
+                meta: RequestMetadata,
+                req: GetTransactionStatusReq
             ): OperationExecution<GetTransactionStatusReq, GetTransactionStatusResp> {
-                val response = GetTransactionStatusResp(false,true)
+                val response = GetTransactionStatusResp(false, true)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun setMonitoringBase(
-                    meta: RequestMetadata,
-                    req: SetMonitoringBaseReq
+                meta: RequestMetadata,
+                req: SetMonitoringBaseReq
             ): OperationExecution<SetMonitoringBaseReq, SetMonitoringBaseResp> {
                 val response = SetMonitoringBaseResp(GenericDeviceModelStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun getDisplayMessages(
-                    meta: RequestMetadata,
-                    req: GetDisplayMessagesReq
+                meta: RequestMetadata,
+                req: GetDisplayMessagesReq
             ): OperationExecution<GetDisplayMessagesReq, GetDisplayMessagesResp> {
                 val response = GetDisplayMessagesResp(
                     GetDisplayMessagesStatusEnumType.Accepted,
-                    StatusInfoType("reason","more")
+                    StatusInfoType("reason", "more")
                 )
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun costUpdated(
-                    meta: RequestMetadata,
-                    req: CostUpdatedReq
+                meta: RequestMetadata,
+                req: CostUpdatedReq
             ): OperationExecution<CostUpdatedReq, CostUpdatedResp> {
                 val response = CostUpdatedResp()
-                return OperationExecution(ExecutionMetadata(meta,RequestStatus.SUCCESS),req,response)
+                return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun setDisplayMessage(
-                    meta: RequestMetadata,
-                    req: SetDisplayMessageReq
+                meta: RequestMetadata,
+                req: SetDisplayMessageReq
             ): OperationExecution<SetDisplayMessageReq, SetDisplayMessageResp> {
                 val response = SetDisplayMessageResp(DisplayMessageStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun deleteCertificate(
-                    meta: RequestMetadata,
-                    req: DeleteCertificateReq
+                meta: RequestMetadata,
+                req: DeleteCertificateReq
             ): OperationExecution<DeleteCertificateReq, DeleteCertificateResp> {
                 val response = DeleteCertificateResp(DeleteCertificateStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
             }
 
             override fun getMonitoringReport(
-                    meta: RequestMetadata,
-                    req: GetMonitoringReportReq
+                meta: RequestMetadata,
+                req: GetMonitoringReportReq
             ): OperationExecution<GetMonitoringReportReq, GetMonitoringReportResp> {
                 val response = GetMonitoringReportResp(GenericDeviceModelStatusEnumType.Accepted)
                 return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
@@ -617,7 +618,8 @@ class IntegrationTestCSApi {
     @Test
     fun `1-6 test`() {
 
-        val settings = Settings(OcppVersionTransport.OCPP_1_6, TransportEnum.WEBSOCKET, target = "ws://localhost:$port/ws")
+        val settings =
+            Settings(OcppVersionTransport.OCPP_1_6, TransportEnum.WEBSOCKET, target = "ws://localhost:$port/ws")
         val ocppId = "chargePoint2"
 
         val csApiSpy = spy(csApi)
@@ -626,107 +628,108 @@ class IntegrationTestCSApi {
         csmsApi.connect()
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ChangeAvailability", "{\"connectorId\": 1,\"type\": \"Operative\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ChangeConfiguration", "{\"key\": \"key\",\"value\": \"empty\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ClearCache", "{}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "RemoteStartTransaction", "{\"idTag\": \"Tag1\",\"connectorId\": 2}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "RemoteStopTransaction", "{\"transactionId\": 15}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "UnlockConnector", "{\"connectorId\": 2}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "Reset", "{\"type\": \"Hard\"}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetConfiguration", "{}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetConfiguration", "{\"key\": [\"AllowOfflineTxForUnknownId\",\"AuthorizationCacheEnabled\"]}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "CancelReservation", "{\"reservationId\": 3}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ClearChargingProfile", "{\"id\": 4}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetCompositeSchedule", "{\"connectorId\": 1, \"duration\": 2}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetLocalListVersion", "{}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "UpdateFirmware", "{\"location\": \"http://www.ietf.org/rfc/rfc2396.txt\",\"retrieveDate\": \"2022-02-15T00:00:00.000Z\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "UpdateFirmware",
+                "{\"location\": \"http://www.ietf.org/rfc/rfc2396.txt\",\"retrieveDate\": \"2022-02-15T00:00:00.000Z\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SendLocalList", "{\"listVersion\": 1, \"updateType\": \"Full\"}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "TriggerMessage", "{\"requestedMessage\": \"BootNotification\"}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "TriggerMessage", "{\"requestedMessage\": \"BootNotification\"}"
+            )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL,
+            "chargePoint2", WampMessage.Call(
+
                 "1",
                 "SetChargingProfile",
                 "{\"connectorId\": 1, \"csChargingProfiles\": {\"chargingProfileId\": 1, \"stackLevel\": 1, \"chargingProfilePurpose\": \"ChargePointMaxProfile\", \"chargingProfileKind\": \"Absolute\", \"chargingSchedule\": {\"chargingRateUnit\": \"W\", \"chargingSchedulePeriod\": [{\"startPeriod\": 1, \"limit\": 1.5}]}}}"
@@ -734,29 +737,31 @@ class IntegrationTestCSApi {
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "ReserveNow", "{\"connectorId\": 1, \"expiryDate\": \"2022-02-15T00:00:00.000Z\", \"idTag\": \"Tag1\", \"parentIdTag\": \"Tag2\", \"reservationId\": 2}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "ReserveNow",
+                "{\"connectorId\": 1, \"expiryDate\": \"2022-02-15T00:00:00.000Z\", \"idTag\": \"Tag1\", \"parentIdTag\": \"Tag2\", \"reservationId\": 2}"
+            )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetDiagnostics", "{\"location\": \"http://www.ietf.org/rfc/rfc2396.txt\"}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "DataTransfer", "{\"vendorId\": \"vendorId\", \"messageId\": \"messageId\", \"data\": \"Some data\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "DataTransfer", "{\"vendorId\": \"vendorId\", \"messageId\": \"messageId\", \"data\": \"Some data\"}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "CertificateSigned", "{\"certificateChain\": \"certificateChain\", \"certificateType\": \"ChargingStationCertificate\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "CertificateSigned",
+                "{\"certificateChain\": \"certificateChain\", \"certificateType\": \"ChargingStationCertificate\"}"
             )
         )
 
@@ -787,7 +792,8 @@ class IntegrationTestCSApi {
 
     @Test
     fun `2-0 test`() {
-        val settings = Settings(OcppVersionTransport.OCPP_2_0, TransportEnum.WEBSOCKET, target = "ws://localhost:$port/ws")
+        val settings =
+            Settings(OcppVersionTransport.OCPP_2_0, TransportEnum.WEBSOCKET, target = "ws://localhost:$port/ws")
         val ocppId = "chargePoint2"
 
         val csApiSpy = spy(csApi)
@@ -796,64 +802,64 @@ class IntegrationTestCSApi {
         csmsApi.connect()
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ChangeAvailability", "{\"operationalStatus\": \"Operative\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL,
+            "chargePoint2", WampMessage.Call(
+
                 "1",
                 "SetVariables",
                 "{\"setVariableData\": [ {\"attributeValue\": \"value\", \"component\": {\"name\": \"component1\"}, \"variable\": {\"name\":\"variable1\"}} ]}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ClearCache", "{}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL,
+            "chargePoint2", WampMessage.Call(
+
                 "1",
                 "RequestStartTransaction",
                 "{\"remoteStartId\": 12,\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "RequestStopTransaction", "{\"transactionId\": \"15\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "UnlockConnector", "{\"connectorId\": 2,\"evseId\": 0}"
             )
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(WampMessageType.CALL, "1", "Reset", "{\"type\": \"OnIdle\"}")
+            WampMessage.Call("1", "Reset", "{\"type\": \"OnIdle\"}")
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(
-                WampMessageType.CALL, "1", "GetVariables",
+            WampMessage.Call(
+                "1", "GetVariables",
                 "{\"getVariableData\": [{\"component\": {\"name\": \"component\"}, \"variable\": {\"name\":\"AllowOfflineTxForUnknownId\"}}]}"
             )
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(WampMessageType.CALL, "1", "GetReport", "{\"requestId\": 1}")
+            WampMessage.Call("1", "GetReport", "{\"requestId\": 1}")
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(
-                WampMessageType.CALL,
+            WampMessage.Call(
+
                 "1",
                 "GetBaseReport",
                 "{\"requestId\": 1, \"reportBase\": \"ConfigurationInventory\"}"
@@ -861,326 +867,352 @@ class IntegrationTestCSApi {
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(WampMessageType.CALL, "1", "CancelReservation", "{\"reservationId\": 3}")
+            WampMessage.Call("1", "CancelReservation", "{\"reservationId\": 3}")
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ClearChargingProfile", "{\"chargingProfileId\": 4}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetCompositeSchedule", "{\"evseId\": 1, \"duration\": 2}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetLocalListVersion", "{}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "UpdateFirmware", "{\"requestId\": 1, \"firmware\": { \"location\": \"http://www.ietf.org/rfc/rfc2396.txt\", \"retrieveDateTime\": \"2022-02-15T00:00:00.000Z\"}}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "UpdateFirmware",
+                "{\"requestId\": 1, \"firmware\": { \"location\": \"http://www.ietf.org/rfc/rfc2396.txt\", \"retrieveDateTime\": \"2022-02-15T00:00:00.000Z\"}}"
+            )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SendLocalList", "{\"versionNumber\": 1, \"updateType\": \"Full\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "TriggerMessage", "{\"requestedMessage\": \"BootNotification\"}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "TriggerMessage", "{\"requestedMessage\": \"BootNotification\"}"
+            )
         )
         server.sendBlocking(
             "chargePoint2",
-            WampMessage(
-                WampMessageType.CALL,
+            WampMessage.Call(
+
                 "1",
                 "SetChargingProfile",
                 "{\"evseId\": 1, \"chargingProfile\": {\"id\": 1, \"stackLevel\": 1, \"chargingProfilePurpose\": \"TxProfile\", \"chargingProfileKind\": \"Absolute\", \"chargingSchedule\": [{\"id\": 1, \"chargingRateUnit\": \"W\", \"chargingSchedulePeriod\": [{\"startPeriod\": 1, \"limit\": 1.5}]}]}}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "ReserveNow", "{\"id\": 1, \"expiryDateTime\": \"2022-02-15T00:00:00.000Z\", \"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "ReserveNow",
+                "{\"id\": 1, \"expiryDateTime\": \"2022-02-15T00:00:00.000Z\", \"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"
+            )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "GetLog", "{\"requestId\": 1, \"logType\": \"DiagnosticsLog\", \"log\": {\"remoteLocation\": \"http://www.ietf.org/rfc/rfc2396.txt\"}}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "GetLog",
+                "{\"requestId\": 1, \"logType\": \"DiagnosticsLog\", \"log\": {\"remoteLocation\": \"http://www.ietf.org/rfc/rfc2396.txt\"}}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "DataTransfer", "{\"vendorId\": \"vendorId\", \"messageId\": \"messageId\", \"data\": \"Some data\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "DataTransfer", "{\"vendorId\": \"vendorId\", \"messageId\": \"messageId\", \"data\": \"Some data\"}"
             )
         )
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "ClearDisplayMessage", "{\"id\": 1}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "CertificateSigned", "{\"certificateChain\": \"certificateChain\", \"certificateType\": \"ChargingStationCertificate\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "CertificateSigned",
+                "{\"certificateChain\": \"certificateChain\", \"certificateType\": \"ChargingStationCertificate\"}"
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "GetChargingProfiles",
-            "{\"requestId\": \"00\"," +
-                    " \"evseId\": \"243\"," +
-                    "\"chargingProfile\": " +
-                        "{\"chargingProfilePurpose\": \"TxProfile\", " +
-                        "\"stackLevel\" : \"243\"," +
-                        "\"chargingProfileId\" : [23]," +
-                        "\"chargingLimitSource\" : [\"CSO\"]" +
-                        "}" +
-                    "}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "GetChargingProfiles",
+                """
+                    {
+                        "requestId": "00",
+                        "evseId": "243",
+                        "chargingProfile": {
+                            "chargingProfilePurpose": "TxProfile",
+                            "stackLevel" : "243",
+                            "chargingProfileId" : [23],
+                            "chargingLimitSource" : ["CSO"]
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetInstalledCertificateIds",
-                "{\"certificateType\": " +
-                            "[" +
-                                "\"MORootCertificate\"," +
-                                "\"CSMSRootCertificate\"" +
-                            "]" +
-                        "}"
+                """
+                    {
+                        "certificateType": [
+                            "MORootCertificate",
+                            "CSMSRootCertificate"
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "InstallCertificate", "{\"certificateType\": \"CSMSRootCertificate\", \"certificate\": \"certificateString\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "InstallCertificate",
+                "{\"certificateType\": \"CSMSRootCertificate\", \"certificate\": \"certificateString\"}"
             )
         )
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "CustomerInformation",
-                "{" +
-                            "\"requestId\": 12378, " +
-                            "\"report\": false," +
-                            "\"clear\": false," +
-                            "\"customerIdentifier\": \"identifier\"," +
-                            "\"idToken\": " +
-                                "{" +
-                                    "\"idToken\": \"id1378\"," +
-                                    "\"type\": \"Central\"" +
-                                "}," +
-                            "\"customerCertificate\": " +
-                                "{" +
-                                    "\"hashAlgorithm\": \"SHA512\"," +
-                                    "\"issuerNameHash\": \"issuernamehash\"," +
-                                    "\"issuerKeyHash\": \"issuerkeyhash\"," +
-                                    "\"serialNumber\": \"serialn\"" +
-                                "}" +
-                        "}"
+                """
+                    {
+                        "requestId": 12378,
+                        "report": false,
+                        "clear": false,
+                        "customerIdentifier": "identifier",
+                        "idToken": {
+                            "idToken": "id1378",
+                            "type": "Central"},
+                            "customerCertificate": {
+                            "hashAlgorithm": "SHA512",
+                            "issuerNameHash": "issuernamehash",
+                            "issuerKeyHash": "issuerkeyhash",
+                            "serialNumber": "serialn"
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "UnpublishFirmware", "{\"checksum\": \"value\"}"
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "PublishFirmware",
-                "{" +
-                            "\"location\": \"location string\", " +
-                            "\"retries\": 312, " +
-                            "\"checksum\": \"identifier string\", " +
-                            "\"requestId\": 23, " +
-                            "\"retryInterval\": 32 " +
-                        "}"
+                """
+                    {
+                        "location": "location string",
+                        "retries": 312,
+                        "checksum": "identifier string",
+                        "requestId": 23,
+                        "retryInterval": 32
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SetVariableMonitoring",
-                "{\"setMonitoringData\": " +
-                            "[{" +
-                                "\"id\": 32," +
-                                "\"transaction\": false," +
-                                "\"value\": 45.3," +
-                                "\"type\": \"UpperThreshold\"," +
-                                "\"severity\": 2," +
-                                "\"component\": " +
-                                    "{" +
-                                        "\"name\": \"name\"" +
-                                    "}," +
-                                "\"variable\":" +
-                                    "{" +
-                                        "\"name\": \"name\"" +
-                                    "}" +
-                            "}]" +
-                        "}"
+                """
+                    {
+                        "setMonitoringData": [
+                            {
+                                "id": 32,
+                                "transaction": false,
+                                "value": 45.3,
+                                "type": "UpperThreshold",
+                                "severity": 2,
+                                "component": {
+                                    "name": "name"
+                                },
+                                "variable": {
+                                    "name": "name"
+                                }
+                            }
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SetMonitoringLevel", "{\"severity\": 3}"
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SetNetworkProfile",
-                "{\"configurationSlot\": 2," +
-                        " \"connectionData\": " +
-                            "{" +
-                                "\"ocppVersion\":\"OCPP12\"," +
-                                "\"ocppTransport\":\"JSON\"," +
-                                "\"ocppCsmsUrl\":\"url\"," +
-                                "\"messageTimeout\": 3," +
-                                "\"securityProfile\": 56," +
-                                "\"ocppInterface\":\"Wired0\"," +
-                                "\"vpn\":" +
-                                    "{" +
-                                        "\"server\":\"server\"," +
-                                        "\"user\":\"user\"," +
-                                        "\"group\":\"group\"," +
-                                        "\"password\":\"pass\"," +
-                                        "\"key\":\"key\"," +
-                                        "\"type\":\"IKEv2\"" +
-                                    "}" +
-                                "," +
-                                "\"apn\": " +
-                                    "{" +
-                                        "\"apn\":\"IKEv2\"," +
-                                        "\"apnUserName\":\"username\"," +
-                                        "\"apnPassword\":\"pass\"," +
-                                        "\"simPin\":43," +
-                                        "\"preferredNetwork\":\"pref\"," +
-                                        "\"useOnlyPreferredNetwork\":false," +
-                                        "\"apnAuthentication\":\"AUTO\"" +
-                                    "}" +
-                            "}" +
-                        "}"
+                """
+                    {
+                        "configurationSlot": 2,
+                        "connectionData": {
+                            "ocppVersion": "OCPP12",
+                            "ocppTransport": "JSON",
+                            "ocppCsmsUrl": "url",
+                            "messageTimeout": 3,
+                            "securityProfile": 56,
+                            "ocppInterface": "Wired0",
+                            "vpn": {
+                                "server": "server",
+                                "user": "user",
+                                "group": "group",
+                                "password": "pass",
+                                "key": "key",
+                                "type": "IKEv2"
+                            },
+                            "apn": {
+                                "apn": "IKEv2",
+                                "apnUserName": "username",
+                                "apnPassword": "pass",
+                                "simPin": 43,
+                                "preferredNetwork": "pref",
+                                "useOnlyPreferredNetwork": false,
+                                "apnAuthentication": "AUTO"
+                            }
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetTransactionStatus", "{\"transactionId\": \"valueid\"}"
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SetMonitoringBase", "{\"monitoringBase\": \"All\"}"
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
-                "GetDisplayMessages", "{\"id\":[321],\"requestId\":\"624387\",\"priority\":\"AlwaysFront\",\"state\":\"Charging\"}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "GetDisplayMessages",
+                "{\"id\":[321],\"requestId\":\"624387\",\"priority\":\"AlwaysFront\",\"state\":\"Charging\"}"
             )
         )
 
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "CostUpdated", "{\"totalCost\": \"43.3\", \"transactionId\": \"transactionId\"}"
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "SetDisplayMessage",
-                "{\"message\": " +
-                            "{" +
-                                "\"id\":321," +
-                                "\"priority\": \"AlwaysFront\"," +
-                                "\"state\": \"Charging\"," +
-                                "\"startDateTime\": \"2022-02-15T00:00:00.000Z\"," +
-                                "\"endDateTime\": \"2022-02-15T00:00:00.000Z\"," +
-                                "\"transactionId\": \"identifierstringtransacionid\"," +
-                                "\"message\": " +
-                                    "{" +
-                                        "\"format\": \"ASCII\"," +
-                                        "\"language\": \"frfr\"," +
-                                        "\"content\": \"messqge content\"" +
-                                    "}" +
-                            "}" +
-                        "}"
+                """
+                    {
+                        "message": {
+                            "id": 321,
+                            "priority": "AlwaysFront",
+                            "state": "Charging",
+                            "startDateTime": "2022-02-15T00:00:00.000Z",
+                            "endDateTime": "2022-02-15T00:00:00.000Z",
+                            "transactionId": "identifierstringtransacionid",
+                            "message": {
+                                "format": "ASCII",
+                                "language": "frfr",
+                                "content": "messqge content"
+                            }
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "DeleteCertificate", "{\"certificateHashData\": " +
-                    "{\"hashAlgorithm\": \"SHA512\"," +
-                    " \"issuerNameHash\": \"someHash\"," +
-                    " \"issuerKeyHash\": \"KeyHashed\", " +
-                    "\"serialNumber\": \"763478643276432\"}}"
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "DeleteCertificate",
+                """
+                    {
+                        "certificateHashData": {
+                            "hashAlgorithm": "SHA512",
+                            "issuerNameHash": "someHash",
+                            "issuerKeyHash": "KeyHashed",
+                            "serialNumber": "763478643276432"
+                        }
+                    }
+                """.trimIndent()
             )
         )
 
         server.sendBlocking(
-                "chargePoint2", WampMessage(
-                WampMessageType.CALL, "1",
+            "chargePoint2", WampMessage.Call(
+                "1",
                 "GetMonitoringReport",
-                "{\"requestId\": 43243, " +
-                        "\"monitoringCriteria\": [\"ThresholdMonitoring\"]," +
-                        "\"componentVariable\": [{" +
-                                    "\"component\": {" +
-                                        "\"name\": \"name\"," +
-                                        "\"instance\": \"instance\"" +
-                                    "}," +
-                                    "\"variable\":  {" +
-                                        "\"name\": \"name\"," +
-                                        "\"instance\": \"instance\"" +
-                                    "}" +
-                                "}" +
-                            "]" +
-                        "}"
+                """
+                    {
+                        "requestId": 43243,
+                        "monitoringCriteria": [
+                            "ThresholdMonitoring"
+                        ],
+                        "componentVariable": [
+                            {
+                                "component": {
+                                    "name": "name",
+                                    "instance": "instance"
+                                },
+                                "variable": {
+                                    "name": "name",
+                                    "instance": "instance"
+                                }
+                            }
+                        ]
+                    }
+                """.trimIndent()
             )
         )
 
 
         server.sendBlocking(
-            "chargePoint2", WampMessage(
-            WampMessageType.CALL, "1",
-            "ClearVariableMonitoring", "{\"ids\": [1, 2]}"
-        )
+            "chargePoint2", WampMessage.Call(
+                "1",
+                "ClearVariableMonitoring", "{\"ids\": [1, 2]}"
+            )
         )
 
         verify(csApiSpy, times(1)).reset(any(), any())
@@ -1220,7 +1252,7 @@ class IntegrationTestCSApi {
         verify(csApiSpy, times(1)).getDisplayMessages(any(), any())
         verify(csApiSpy, times(1)).costUpdated(any(), any())
         verify(csApiSpy, times(1)).setDisplayMessage(any(), any())
-        verify(csApiSpy, times(1)).deleteCertificate(any(),any())
+        verify(csApiSpy, times(1)).deleteCertificate(any(), any())
         verify(csApiSpy, times(1)).getMonitoringReport(any(), any())
         verify(csApiSpy, times(1)).clearVariableMonitoring(any(), any())
 
