@@ -225,9 +225,9 @@ class MapperTest {
         expectThat(resp)
             .and { get { status }.isEqualTo(RemoteStartStopStatus.Rejected) }
 
-        val req = mapper.coreToGenReq(RemoteStopTransactionReq(1))
+        val req = mapper.coreToGenReq(RemoteStopTransactionReq(1), "3")
         expectThat(req)
-            .and { get { transactionId }.isEqualTo("1") }
+            .and { get { transactionId }.isEqualTo("3") }
     }
 
     @Test

@@ -18,4 +18,13 @@ class RealTransactionRepository : TransactionRepository {
             throw IllegalStateException("key ${id} not found in hashmap")
         }
     }
+
+    override fun getLocalIdByTransactionId(transactionId: Int): Ocpp16TransactionIds {
+        val localId = hashMap.toList().find { it.second == transactionId }?.first
+        return if (localId != null) {
+            Ocpp16TransactionIds(localId, transactionId)
+        } else {
+            Ocpp16TransactionIds(transactionId.toString(), transactionId)
+        }
+    }
 }

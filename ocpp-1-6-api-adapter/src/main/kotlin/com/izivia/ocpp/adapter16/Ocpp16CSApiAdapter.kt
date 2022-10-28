@@ -48,7 +48,10 @@ import com.izivia.ocpp.operation.information.RequestStatus
 import org.mapstruct.factory.Mappers
 import kotlin.random.Random
 
-class Ocpp16CSApiAdapter(private val csApi: CSApi) : CSMSOperations {
+class Ocpp16CSApiAdapter(
+    private val csApi: CSApi,
+    private val transactionIds: TransactionRepository
+) : CSMSOperations {
 
     override fun reset(meta: RequestMetadata, req: ResetReq): OperationExecution<ResetReq, ResetResp> {
         val mapper: ResetMapper = Mappers.getMapper(ResetMapper::class.java)
@@ -118,7 +121,8 @@ class Ocpp16CSApiAdapter(private val csApi: CSApi) : CSMSOperations {
         req: RemoteStopTransactionReq
     ): OperationExecution<RemoteStopTransactionReq, RemoteStopTransactionResp> {
         val mapper: RemoteStopTransactionMapper = Mappers.getMapper(RemoteStopTransactionMapper::class.java)
-        val response = csApi.requestStopTransaction(meta, mapper.coreToGenReq(req))
+        val transactionId = transactionIds.getLocalIdByTransactionId(req.transactionId).localId
+        val response = csApi.requestStopTransaction(meta, mapper.coreToGenReq(req, transactionId))
         return OperationExecution(
             ExecutionMetadata(meta, RequestStatus.SUCCESS),
             req,
