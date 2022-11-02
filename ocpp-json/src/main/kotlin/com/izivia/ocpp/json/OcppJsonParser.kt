@@ -40,6 +40,24 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         )
     }
 
+    fun <T : Any> parseAnyFromJson(messageStr: String, expectedClass: KClass<T>): JsonMessage<Any> {
+        val parsed = parseAsStringPayloadFromJson(messageStr)
+            ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
+
+        // Cannot use .copy() because of class cast error between JsonMessage<T> and JsonMessage<String>
+        return JsonMessage(
+            msgType = parsed.msgType,
+            msgId = parsed.msgId,
+            action = parsed.action,
+            errorCode = parsed.errorCode,
+            errorDescription = parsed.errorDescription,
+            payload = when (parsed.msgType) {
+                CALL, CALL_RESULT -> mapper.readValue(parsed.payload, expectedClass.java)
+                CALL_ERROR -> parsed.payload
+            }
+        )
+    }
+
     fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
         ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))
             ?.destructured
@@ -110,3 +128,6 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
 
 inline fun <reified T : Any> OcppJsonParser.parseFromJson(messageStr: String): JsonMessage<T> =
     parseFromJson(messageStr, T::class)
+
+inline fun <reified T : Any> OcppJsonParser.parseAnyFromJson(messageStr: String): JsonMessage<Any> =
+    parseAnyFromJson(messageStr, T::class)
