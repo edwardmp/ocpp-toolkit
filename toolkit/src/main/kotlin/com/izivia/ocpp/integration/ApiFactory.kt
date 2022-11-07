@@ -19,6 +19,7 @@ import com.izivia.ocpp.operation.information.ChargingStationConfig
 import com.izivia.ocpp.soap15.Ocpp15SoapParser
 import com.izivia.ocpp.soap16.Ocpp16SoapParser
 import com.izivia.ocpp.transport.ClientTransport
+import com.izivia.ocpp.transport.RequestHeaders
 import com.izivia.ocpp.transport.ServerTransport
 import com.izivia.ocpp.websocket.WebsocketClient
 import com.izivia.ocpp.websocket.WebsocketServer
@@ -47,20 +48,24 @@ class ApiFactory {
             ocppId: String,
             ocppVersion: OcppVersionTransport,
             target: String,
+            headers: RequestHeaders = emptyList(),
             newMessageId: () -> String = { UUID.randomUUID().toString() }
         ): ClientTransport =
             when (transportType) {
                 WEBSOCKET -> createClientTransportWebsocket(
                     ocppVersion,
                     ocppId,
-                    target
+                    target,
+                    headers
                 )
+
                 SOAP -> createClientTransportSoap(
                     clientPath!!,
                     clientPort!!,
                     ocppId,
                     ocppVersion,
                     target,
+                    headers,
                     newMessageId
                 )
             }
@@ -68,9 +73,10 @@ class ApiFactory {
         private fun createClientTransportWebsocket(
             ocppVersion: OcppVersionTransport,
             ocppId: String,
-            target: String
+            target: String,
+            headers: RequestHeaders = emptyList()
         ): ClientTransport =
-            WebsocketClient(ocppId, OcppVersion.valueOf(ocppVersion.name), target)
+            WebsocketClient(ocppId, OcppVersion.valueOf(ocppVersion.name), target, headers)
 
         private fun createClientTransportSoap(
             path: String,
@@ -78,6 +84,7 @@ class ApiFactory {
             ocppId: String,
             ocppVersion: OcppVersionTransport,
             target: String,
+            headers: RequestHeaders = emptyList(),
             newMessageId: () -> String
         ): ClientTransport =
             OcppSoapClientTransport(
@@ -85,6 +92,7 @@ class ApiFactory {
                 ocppId,
                 target,
                 getSoapParser(ocppVersion),
+                headers,
                 newMessageId
             )
 
@@ -104,14 +112,20 @@ class ApiFactory {
         ): ServerTransport =
             OcppSoapServerTransport.createServer(ocppVersion, port, path, getSoapParser(ocppVersion), newMessageId)
 
-        fun getCSMSApi(settings: Settings, ocppId: String, csApi: CSApi): CSMSApi {
+        fun getCSMSApi(
+            settings: Settings,
+            ocppId: String,
+            csApi: CSApi,
+            headers: RequestHeaders = emptyList()
+        ): CSMSApi {
             val transport: ClientTransport = createClientTransport(
                 settings.clientPath,
                 settings.clientPort,
                 settings.transportType,
                 ocppId,
                 settings.ocppVersion,
-                settings.target
+                settings.target,
+                headers
             )
             return when (settings.ocppVersion) {
                 OcppVersionTransport.OCPP_1_5 -> throw NotImplementedError("Ocpp 1.5 api adapted not yet implemented")
@@ -126,6 +140,7 @@ class ApiFactory {
             transportType: TransportEnum,
             clientPath: String?,
             clientPort: Int?,
+            headers: RequestHeaders = emptyList(),
             ocppCSCallbacks: OcppCSCallbacks16
         ): ChargePointOperations16 =
             RealChargePointOperations16(
@@ -136,7 +151,8 @@ class ApiFactory {
                     ocppVersion = OcppVersionTransport.OCPP_1_6,
                     ocppId = chargePointId,
                     transportType = transportType,
-                    target = csmsUrl
+                    target = csmsUrl,
+                    headers = headers
                 ),
                 csmsOperations = DefaultCSMSOperations16(ocppCSCallbacks)
             )
@@ -147,6 +163,7 @@ class ApiFactory {
             transportType: TransportEnum,
             clientPath: String?,
             clientPort: Int?,
+            headers: RequestHeaders = emptyList(),
             ocppCSCallbacks: OcppCSCallbacks15
         ): ChargePointOperations15 =
             RealChargePointOperations15(
@@ -157,7 +174,8 @@ class ApiFactory {
                     ocppVersion = OcppVersionTransport.OCPP_1_5,
                     ocppId = chargePointId,
                     transportType = transportType,
-                    target = csmsUrl
+                    target = csmsUrl,
+                    headers = headers
                 ),
                 csmsOperations = DefaultCSMSOperations15(ocppCSCallbacks)
             )
@@ -168,6 +186,7 @@ class ApiFactory {
             transportType: TransportEnum,
             clientPath: String?,
             clientPort: Int?,
+            headers: RequestHeaders = emptyList(),
             ocppCSCallbacks: OcppCSCallbacks20
         ): ChargePointOperations20 =
             RealChargePointOperations20(
@@ -178,7 +197,8 @@ class ApiFactory {
                     ocppVersion = OcppVersionTransport.OCPP_2_0,
                     ocppId = chargePointId,
                     transportType = transportType,
-                    target = csmsUrl
+                    target = csmsUrl,
+                    headers = headers
                 ),
                 csmsOperations = DefaultCSMSOperations20(ocppCSCallbacks)
             )

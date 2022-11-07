@@ -69,7 +69,8 @@ class OcppSoapServerTransport private constructor(
         val message = HttpMessage(
             ocppId = ocppId,
             action = action,
-            payload = request.bodyString()
+            payload = request.bodyString(),
+            headers = request.headers
         )
         handlers
             .asSequence()

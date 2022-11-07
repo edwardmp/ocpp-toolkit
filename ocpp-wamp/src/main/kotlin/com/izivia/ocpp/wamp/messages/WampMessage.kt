@@ -85,4 +85,11 @@ enum class WampMessageType(val id: Int) {
     }
 }
 
-data class WampMessageMeta(val ocppVersion: OcppVersion, val ocppId: CSOcppId)
+data class WampMessageMeta(
+    val ocppVersion: OcppVersion,
+    val ocppId: CSOcppId,
+    val headers: WampMessageMetaHeaders = emptyList()
+)
+
+typealias WampMessageMetaHeaders = List<WampMessageMetaHeader>
+typealias WampMessageMetaHeader = Pair<String, String?>

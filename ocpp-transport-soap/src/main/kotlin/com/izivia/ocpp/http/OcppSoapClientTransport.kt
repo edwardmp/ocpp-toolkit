@@ -3,6 +3,7 @@ package com.izivia.ocpp.http
 import com.izivia.ocpp.soap.*
 import com.izivia.ocpp.transport.ClientTransport
 import com.izivia.ocpp.transport.OcppCallErrorException
+import com.izivia.ocpp.transport.RequestHeaders
 import org.http4k.client.JavaHttpClient
 import org.http4k.contract.contract
 import org.http4k.contract.div
@@ -18,9 +19,10 @@ import kotlin.reflect.KClass
 class OcppSoapClientTransport(
     private val clientSettings: SoapClientSettings,
     private val ocppId: String,
-    private val target: String,
+    target: String,
     private val ocppSoapParser: OcppSoapParser,
-    private val newMessageId: () -> String = { UUID.randomUUID().toString() },
+    private val headers: RequestHeaders = emptyList(),
+    private val newMessageId: () -> String = { UUID.randomUUID().toString() }
 ) : ClientTransport {
 
     companion object {
@@ -68,6 +70,7 @@ class OcppSoapClientTransport(
 
     override fun <T, P : Any> sendMessageClass(clazz: KClass<P>, action: String, message: T): P {
         val request = Request(Method.POST, targetRoute)
+            .headers(headers)
             .body(
                 ocppSoapParser.mapRequestToSoap(
                     RequestSoapMessage(

@@ -5,6 +5,7 @@ import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.transport.ClientTransport
 import com.izivia.ocpp.transport.OcppCallErrorException
 import com.izivia.ocpp.transport.OcppCallErrorPayload
+import com.izivia.ocpp.transport.RequestHeaders
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
@@ -17,10 +18,13 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class WebsocketClient(ocppId: String, ocppVersion: OcppVersion, target: String) : ClientTransport {
-
+class WebsocketClient(ocppId: String,
+                      ocppVersion: OcppVersion,
+                      target: String,
+                      headers: RequestHeaders = emptyList()
+) : ClientTransport {
     private val client: OcppWampClient =
-        OcppWampClient.newClient(Uri.of(target), ocppId, ocppVersion)
+        OcppWampClient.newClient(Uri.of(target), ocppId, ocppVersion, headers = headers)
     private val parser = getJsonMapper(ocppVersion)
     private val wampMessageMeta = WampMessageMeta(ocppVersion, ocppId)
 

@@ -5,6 +5,7 @@ import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
+import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import org.http4k.core.Uri
 
 interface OcppWampClient {
@@ -19,8 +20,16 @@ interface OcppWampClient {
             ocppId: CSOcppId,
             ocppVersion: OcppVersion,
             timeoutInMs: Long = 30_000,
-            baseAutoReconnectDelayInMs: Long = 250
-        ) = OkHttpOcppWampClient(target, ocppId, ocppVersion, timeoutInMs, baseAutoReconnectDelayInMs)
+            baseAutoReconnectDelayInMs: Long = 250,
+            headers: WampMessageMetaHeaders = emptyList()
+        ) = OkHttpOcppWampClient(
+            target,
+            ocppId,
+            ocppVersion,
+            timeoutInMs,
+            baseAutoReconnectDelayInMs,
+            headers
+        )
     }
 }
 
