@@ -92,7 +92,12 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                         logger.info("""[$chargingStationOcppId] [$wsConnectionId] -> ${it.bodyString()}""")
                         val resp = handler.asSequence()
                             // use sequence to avoid greedy mapping, to find the first handler with non null result
-                            .map { it.onAction(WampMessageMeta(ocppVersion, chargingStationOcppId), msg) }
+                            .map {
+                                it.onAction(
+                                    WampMessageMeta(ocppVersion, chargingStationOcppId, ws.upgradeRequest.headers),
+                                    msg
+                                )
+                            }
                             .filterNotNull()
                             .firstOrNull()
                             ?: WampMessage.CallError(

@@ -8,6 +8,7 @@ import com.izivia.ocpp.wamp.client.WampOnActionHandler
 import com.izivia.ocpp.wamp.core.WampCallManager
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
+import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
@@ -20,11 +21,12 @@ import java.net.ConnectException
 import java.util.concurrent.*
 
 class OkHttpOcppWampClient(
-    private val target: Uri,
+    target: Uri,
     val ocppId: CSOcppId,
     val ocppVersion: OcppVersion,
     val timeoutInMs: Long = 30_000,
-    baseAutoReconnectDelayInMs: Long = 250
+    baseAutoReconnectDelayInMs: Long = 250,
+    private val headers: WampMessageMetaHeaders = emptyList()
 ) : OcppWampClient {
     val serverUri = target.path("${target.path.removeSuffix("/")}/$ocppId")
 
@@ -101,6 +103,13 @@ class OkHttpOcppWampClient(
         socketOkHttpClient.newWebSocket(
             Request.Builder().url(serverUri.toString())
                 .header("Sec-WebSocket-Protocol", ocppVersion.subprotocol)
+                .run {
+                    headers
+                        .filter { header -> header.second != null }
+                        .foldRight(this) { header, acc ->
+                            acc.header(header.first, header.second!!)
+                        }
+                }
                 .build(),
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
