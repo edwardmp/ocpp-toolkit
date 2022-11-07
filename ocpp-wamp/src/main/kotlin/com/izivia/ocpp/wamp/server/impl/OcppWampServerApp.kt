@@ -6,6 +6,7 @@ import com.izivia.ocpp.json.JsonMessageErrorCode
 import com.izivia.ocpp.wamp.core.WampCallManager
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
+import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import org.http4k.routing.bind
@@ -23,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                         private val handlers: (CSOcppId)-> List<OcppWampServerHandler>,
-                        private val onWsConnectHandler: (CSOcppId)-> Unit = {},
-                        private val onWsCloseHandler: (CSOcppId)-> Unit = {},
+                        private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+                        private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
                         private val ocppWsEndpoint: OcppWsEndpoint,
                         val timeoutInMs:Long) {
     companion object {
@@ -48,7 +49,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
             ?.let { ocppVersions.filter { v -> v.subprotocol == it.lowercase() }.firstOrNull() }
             ?:throw IllegalArgumentException("malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}")
         val handler = handlers(chargingStationOcppId)
-        onWsConnectHandler(chargingStationOcppId)
+        onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
 
         if (connections[chargingStationOcppId] != null) {
             // already connected
@@ -65,7 +66,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
             } else {
                 logger.info("warn: do not clear ws on close - not current connection in map")
             }
-            onWsCloseHandler(chargingStationOcppId)
+            onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
         }
 
         logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
