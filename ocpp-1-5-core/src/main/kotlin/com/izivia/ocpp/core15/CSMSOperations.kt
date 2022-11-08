@@ -38,45 +38,55 @@ interface CSMSOperations : CSCallbacks {
     fun reset(meta: RequestMetadata, req: ResetReq): OperationExecution<ResetReq, ResetResp>
 
     fun changeAvailability(
-        meta: RequestMetadata, req: ChangeAvailabilityReq
+        meta: RequestMetadata,
+        req: ChangeAvailabilityReq
     ): OperationExecution<ChangeAvailabilityReq, ChangeAvailabilityResp>
 
     fun changeConfiguration(
-        meta: RequestMetadata, req: ChangeConfigurationReq
+        meta: RequestMetadata,
+        req: ChangeConfigurationReq
     ): OperationExecution<ChangeConfigurationReq, ChangeConfigurationResp>
 
     fun clearCache(meta: RequestMetadata, req: ClearCacheReq): OperationExecution<ClearCacheReq, ClearCacheResp>
 
     fun remoteStartTransaction(
-        meta: RequestMetadata, req: RemoteStartTransactionReq
+        meta: RequestMetadata,
+        req: RemoteStartTransactionReq
     ): OperationExecution<RemoteStartTransactionReq, RemoteStartTransactionResp>
 
     fun remoteStopTransaction(
-        meta: RequestMetadata, req: RemoteStopTransactionReq
+        meta: RequestMetadata,
+        req: RemoteStopTransactionReq
     ): OperationExecution<RemoteStopTransactionReq, RemoteStopTransactionResp>
 
     fun unlockConnector(
-        meta: RequestMetadata, req: UnlockConnectorReq
+        meta: RequestMetadata,
+        req: UnlockConnectorReq
     ): OperationExecution<UnlockConnectorReq, UnlockConnectorResp>
 
     fun getConfiguration(
-        meta: RequestMetadata, req: GetConfigurationReq
+        meta: RequestMetadata,
+        req: GetConfigurationReq
     ): OperationExecution<GetConfigurationReq, GetConfigurationResp>
 
     fun cancelReservation(
-        meta: RequestMetadata, req: CancelReservationReq
+        meta: RequestMetadata,
+        req: CancelReservationReq
     ): OperationExecution<CancelReservationReq, CancelReservationResp>
 
     fun getLocalListVersion(
-        meta: RequestMetadata, req: GetLocalListVersionReq
+        meta: RequestMetadata,
+        req: GetLocalListVersionReq
     ): OperationExecution<GetLocalListVersionReq, GetLocalListVersionResp>
 
     fun updateFirmware(
-        meta: RequestMetadata, req: UpdateFirmwareReq
+        meta: RequestMetadata,
+        req: UpdateFirmwareReq
     ): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp>
 
     fun sendLocalList(
-        meta: RequestMetadata, req: SendLocalListReq
+        meta: RequestMetadata,
+        req: SendLocalListReq
     ): OperationExecution<SendLocalListReq, SendLocalListResp>
 
     fun reserveNow(meta: RequestMetadata, req: ReserveNowReq): OperationExecution<ReserveNowReq, ReserveNowResp>
@@ -84,6 +94,7 @@ interface CSMSOperations : CSCallbacks {
     fun dataTransfer(meta: RequestMetadata, req: DataTransferReq): OperationExecution<DataTransferReq, DataTransferResp>
 
     fun getDiagnostics(
-        meta: RequestMetadata, req: GetDiagnosticsReq
+        meta: RequestMetadata,
+        req: GetDiagnosticsReq
     ): OperationExecution<GetDiagnosticsReq, GetDiagnosticsResp>
 }

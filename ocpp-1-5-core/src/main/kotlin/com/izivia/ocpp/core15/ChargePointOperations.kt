@@ -33,7 +33,9 @@ import java.net.ConnectException
 interface ChargePointOperations : CSMSCallbacks {
     companion object {
         fun newChargePointOperations(
-            chargingStationId: String, transport: ClientTransport, csmsOperations: CSMSOperations
+            chargingStationId: String,
+            transport: ClientTransport,
+            csmsOperations: CSMSOperations
         ) = RealChargePointOperations(chargingStationId, transport, csmsOperations)
     }
 
@@ -68,7 +70,8 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun startTransaction(
-        meta: RequestMetadata, request: StartTransactionReq
+        meta: RequestMetadata,
+        request: StartTransactionReq
     ): OperationExecution<StartTransactionReq, StartTransactionResp>
 
     /**
@@ -76,7 +79,8 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun stopTransaction(
-        meta: RequestMetadata, request: StopTransactionReq
+        meta: RequestMetadata,
+        request: StopTransactionReq
     ): OperationExecution<StopTransactionReq, StopTransactionResp>
 
     /**
@@ -84,7 +88,8 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun statusNotification(
-        meta: RequestMetadata, request: StatusNotificationReq
+        meta: RequestMetadata,
+        request: StatusNotificationReq
     ): OperationExecution<StatusNotificationReq, StatusNotificationResp>
 
     /**
@@ -92,7 +97,8 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun dataTransfer(
-        meta: RequestMetadata, request: DataTransferReq
+        meta: RequestMetadata,
+        request: DataTransferReq
     ): OperationExecution<DataTransferReq, DataTransferResp>
 
     /**
@@ -101,7 +107,8 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun bootNotification(
-        meta: RequestMetadata, request: BootNotificationReq
+        meta: RequestMetadata,
+        request: BootNotificationReq
     ): OperationExecution<BootNotificationReq, BootNotificationResp>
 
     /**
@@ -109,15 +116,16 @@ interface ChargePointOperations : CSMSCallbacks {
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun firmwareStatusNotification(
-        meta: RequestMetadata, request: FirmwareStatusNotificationReq
+        meta: RequestMetadata,
+        request: FirmwareStatusNotificationReq
     ): OperationExecution<FirmwareStatusNotificationReq, FirmwareStatusNotificationResp>
-
 
     /**
      * Sends log information to the CSMS
      */
     @Throws(IllegalStateException::class, ConnectException::class)
     fun diagnosticsStatusNotification(
-        meta: RequestMetadata, request: DiagnosticsStatusNotificationReq
+        meta: RequestMetadata,
+        request: DiagnosticsStatusNotificationReq
     ): OperationExecution<DiagnosticsStatusNotificationReq, DiagnosticsStatusNotificationResp>
 }

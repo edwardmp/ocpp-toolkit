@@ -12,8 +12,9 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
         val parsed = parseAsStringPayloadFromJson(messageStr)
             ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
 
-        if (parsed.action == null)
+        if (parsed.action == null) {
             throw IllegalArgumentException("The message action must not be null. message = $messageStr")
+        }
 
         val clazz = getRequestPayloadClass(parsed.action, messageStr)
 
@@ -72,7 +73,12 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
                     }
 
                     CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                        JsonMessage.CallError(msgId, JsonMessageErrorCode.fromValue(errorCode), errorDescription, payload)
+                        JsonMessage.CallError(
+                            msgId,
+                            JsonMessageErrorCode.fromValue(errorCode),
+                            errorDescription,
+                            payload
+                        )
                     }
 
                     else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")

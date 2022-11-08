@@ -1,36 +1,36 @@
 package com.izivia.ocpp.soap15
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.soap.OcppSoapParserImpl
+import com.izivia.ocpp.soap.SoapEnvelope
 
-
-class Ocpp15SoapParser : OcppSoapParser {
-
-    private val mapper = Ocpp15SoapMapper
-    private var NS_OCPP: String = "urn://Ocpp/Cp/2012/06/"
-
-    override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
-        val envelope: SoapEnvelope<Ocpp15SoapBody> = Ocpp15SoapMapperIn
+class Ocpp15SoapParser : OcppSoapParserImpl(
+    ns_ocpp = "urn://Ocpp/Cp/2012/06/",
+    soapMapperInput = Ocpp15SoapMapperIn,
+    soapMapperOutput = Ocpp15SoapMapper
+) {
+    override fun readToEnvelop(soap: String): SoapEnvelope<*> {
+        return soapMapperInput
             .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
-            .readValue(messageStr)
-        return RequestSoapMessage(
-            messageId = envelope.header.messageId.value,
-            chargingStationId = envelope.header.chargeBoxIdentity!!.value,
-            action = envelope.header.action.value.removePrefix("/"),
-            from = envelope.header.from?.address?.value,
-            to = envelope.header.to?.value,
-            payload = getRequestBodyContent(envelope)
-        )
+            .readValue<SoapEnvelope<Ocpp15SoapBody>?>(soap)
     }
 
-    private fun getRequestBodyContent(envelope: SoapEnvelope<Ocpp15SoapBody>): Any = when {
+    override fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any =
+        getRealRequestBodyContent(envelope as SoapEnvelope<Ocpp15SoapBody>)
+
+    override fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any =
+        getRealResponseBodyContent(envelope as SoapEnvelope<Ocpp15SoapBody>)
+
+    private fun getRealRequestBodyContent(envelope: SoapEnvelope<Ocpp15SoapBody>): Any = when {
         envelope.body.authorizeRequest != null -> envelope.body.authorizeRequest!!
         envelope.body.bootNotificationRequest != null -> envelope.body.bootNotificationRequest!!
         envelope.body.cancelReservationRequest != null -> envelope.body.cancelReservationRequest!!
         envelope.body.changeAvailabilityRequest != null -> envelope.body.changeAvailabilityRequest!!
         envelope.body.clearCacheRequest != null -> envelope.body.clearCacheRequest!!
         envelope.body.dataTransferRequest != null -> envelope.body.dataTransferRequest!!
-        envelope.body.diagnosticsStatusNotificationRequest != null -> envelope.body.diagnosticsStatusNotificationRequest!!
+        envelope.body.diagnosticsStatusNotificationRequest != null ->
+            envelope.body.diagnosticsStatusNotificationRequest!!
+
         envelope.body.firmwareStatusNotificationRequest != null -> envelope.body.firmwareStatusNotificationRequest!!
         envelope.body.getConfigurationRequest != null -> envelope.body.getConfigurationRequest!!
         envelope.body.getDiagnosticsRequest != null -> envelope.body.getDiagnosticsRequest!!
@@ -47,30 +47,21 @@ class Ocpp15SoapParser : OcppSoapParser {
         envelope.body.stopTransactionRequest != null -> envelope.body.stopTransactionRequest!!
         envelope.body.unlockConnectorRequest != null -> envelope.body.unlockConnectorRequest!!
         envelope.body.updateFirmwareRequest != null -> envelope.body.updateFirmwareRequest!!
+        envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown request message operation. enveloppe = $envelope")
     }
 
-    override fun parseAnyResponseFromSoap(messageStr: String): ResponseSoapMessage<Any> {
-        val envelope: SoapEnvelope<Ocpp15SoapBody> = Ocpp15SoapMapperIn
-            .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
-            .readValue(messageStr)
-        return ResponseSoapMessage(
-            messageId = envelope.header.messageId.value,
-            relatesTo = envelope.header.relatesTo?.value
-                ?: throw IllegalArgumentException("Malformed envelope: missing <RelatesTo> in the header. envelope = $envelope"),
-            action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
-            payload = getResponseBodyContent(envelope)
-        )
-    }
-
-    private fun getResponseBodyContent(envelope: SoapEnvelope<Ocpp15SoapBody>): Any = when {
+    private fun getRealResponseBodyContent(envelope: SoapEnvelope<Ocpp15SoapBody>): Any = when {
         envelope.body.authorizeResponse != null -> envelope.body.authorizeResponse!!
         envelope.body.bootNotificationResponse != null -> envelope.body.bootNotificationResponse!!
         envelope.body.cancelReservationResponse != null -> envelope.body.cancelReservationResponse!!
         envelope.body.changeAvailabilityResponse != null -> envelope.body.changeAvailabilityResponse!!
+        envelope.body.changeConfigurationResponse != null -> envelope.body.changeConfigurationResponse!!
         envelope.body.clearCacheResponse != null -> envelope.body.clearCacheResponse!!
         envelope.body.dataTransferResponse != null -> envelope.body.dataTransferResponse!!
-        envelope.body.diagnosticsStatusNotificationResponse != null -> envelope.body.diagnosticsStatusNotificationResponse!!
+        envelope.body.diagnosticsStatusNotificationResponse != null ->
+            envelope.body.diagnosticsStatusNotificationResponse!!
+
         envelope.body.firmwareStatusNotificationResponse != null -> envelope.body.firmwareStatusNotificationResponse!!
         envelope.body.getConfigurationResponse != null -> envelope.body.getConfigurationResponse!!
         envelope.body.getDiagnosticsResponse != null -> envelope.body.getDiagnosticsResponse!!
@@ -90,42 +81,4 @@ class Ocpp15SoapParser : OcppSoapParser {
         envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown response message operation. enveloppe = $envelope")
     }
-
-    override fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String {
-        val action: String = response.action.replaceFirstChar { it.lowercase() } + "Response"
-        val headers = SoapHeaderOut(messageId = response.messageId,
-                                 action = "/" + action,
-                                 to = "http://www.w3.org/2005/08/addressing/anonymous",
-                                 relatesTo = response.relatesTo,
-                                 from = null,
-                                 chargeBoxIdentity = null)
-        val xmlMapper = Ocpp15SoapMapper
-        val xmlBuilder = SoapEnvelopeOut(header = headers,
-                                         body = response.payload,
-                                         ocpp=NS_OCPP)
-        return xmlMapper.writeValueAsString(xmlBuilder)
-    }
-
-    override fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String {
-        val headers = SoapHeaderOut(messageId = request.messageId,
-            action = "/" + request.action,
-            to = "http://www.w3.org/2005/08/addressing/anonymous",
-            relatesTo = null,
-            from = request.from?.let { SoapHeaderFromOut(it) },
-            chargeBoxIdentity = request.chargingStationId)
-        val xmlMapper = Ocpp15SoapMapper
-        val xmlBuilder = SoapEnvelopeOut(header = headers,
-                                         body = request.payload,
-                                         ocpp=NS_OCPP)
-        return xmlMapper.writeValueAsString(xmlBuilder)
-    }
 }
-
-private fun String.addXmlNamespace(): String =
-    if (matches(".*/>\$".toRegex()))
-        split("/")[0] + " xmlns=\"urn://Ocpp/Cs/2012/06/\"/>"
-    else
-        split(">".toRegex(), limit = 2)
-            .let { (first, second) ->
-                first.removeSuffix(">") + " xmlns=\"urn://Ocpp/Cs/2012/06/\">" + second
-            }
