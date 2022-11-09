@@ -3,6 +3,7 @@ package com.izivia.ocpp.soap16
 import com.fasterxml.jackson.core.type.TypeReference
 import com.izivia.ocpp.soap.OcppSoapParserImpl
 import com.izivia.ocpp.soap.SoapEnvelope
+import kotlin.reflect.full.memberProperties
 
 class Ocpp16SoapParser : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2015/10/",

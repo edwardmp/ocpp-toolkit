@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap16
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -320,14 +321,14 @@ private abstract class BootNotificationRespMixin(
 
 @JsonRootName("bootNotificationRequest")
 private abstract class BootNotificationReqMixin(
-    @JacksonXmlProperty(localName = "o:chargeBoxSerialNumber")
-    val chargeBoxSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:chargePointModel")
     val chargePointModel: String,
-    @JacksonXmlProperty(localName = "o:chargePointSerialNumber")
-    val chargePointSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:chargePointVendor")
     val chargePointVendor: String,
+    @JacksonXmlProperty(localName = "o:chargePointSerialNumber")
+    val chargePointSerialNumber: String? = null,
+    @JacksonXmlProperty(localName = "o:chargeBoxSerialNumber")
+    val chargeBoxSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:firmwareVersion")
     val firmwareVersion: String? = null,
     @JacksonXmlProperty(localName = "o:iccid")

@@ -26,10 +26,9 @@ abstract class OcppSoapParserImpl(
 ) : OcppSoapParser {
 
     override fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String {
-        val action: String = response.action.replaceFirstChar { it.uppercase() } + "Response"
         val headers = SoapHeaderOut(
             messageId = response.messageId,
-            action = "/$action",
+            action = "/${response.action.replaceFirstChar { it.uppercase() }}Response",
             relatesTo = response.relatesTo,
             to = response.to,
             from = SoapHeaderFromOut(response.from ?: SOAP_ANONYMOUS),
@@ -73,7 +72,7 @@ abstract class OcppSoapParserImpl(
     override fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String {
         val headers = SoapHeaderOut(
             messageId = request.messageId,
-            action = "/${request.action}",
+            action = "/${request.action.replaceFirstChar { it.uppercase() }}",
             to = request.to ?: SOAP_ANONYMOUS,
             relatesTo = null,
             from = SoapHeaderFromOut(request.from ?: SOAP_ANONYMOUS),
