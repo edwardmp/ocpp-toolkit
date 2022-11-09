@@ -101,7 +101,9 @@ class OcppSoapServerTransport private constructor(
                 override fun accept(ocppId: String): Boolean = accept(ocppId).acceptConnection
 
                 override fun onAction(msg: HttpMessage): HttpMessage? =
-                    if (this@OcppSoapServerTransport.ocppVersion == ocppVersion && msg.action?.lowercase() == action.lowercase()) {
+                    if (this@OcppSoapServerTransport.ocppVersion == ocppVersion &&
+                        msg.action?.lowercase() == action.lowercase()
+                    ) {
                         val message = ocppSoapParser.parseRequestFromSoap(msg.payload, clazz)
                         val response = onAction(RequestMetadata(message.messageId), message.payload)
                         val payload = ocppSoapParser.mapResponseToSoap(
@@ -109,7 +111,9 @@ class OcppSoapServerTransport private constructor(
                                 messageId = "urn:uuid:${newMessageId()}",
                                 relatesTo = message.messageId,
                                 action = message.action,
-                                payload = response
+                                payload = response,
+                                from = message.to,
+                                to = message.from
                             )
                         )
                         HttpMessage(msg.ocppId, action, payload)
