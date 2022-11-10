@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -34,6 +35,9 @@ object OcppConstant {
 
     const val SOAP = "http://www.w3.org/2003/05/soap-envelope"
     const val ADDRESSING = "http://www.w3.org/2005/08/addressing"
+    const val SOAP_ANONYMOUS = "http://www.w3.org/2005/08/addressing/anonymous"
+    val SOAP_ANONYMOUS_VT = ValueText(SOAP_ANONYMOUS)
+    val SOAP_ANONYMOUS_FROM = SoapHeaderFromOut(SOAP_ANONYMOUS_VT)
 
     const val XMLNS_S = "xmlns:s"
     const val XMLNS_A = "xmlns:a"
@@ -56,9 +60,9 @@ data class SoapHeader(
     val action: ValueText,
     val chargeBoxIdentity: ValueText?,
     @JsonProperty(OcppConstant.FROM)
-    val from: SoapHeaderFrom?,
+    val from: SoapHeaderFrom = SoapHeaderFrom(OcppConstant.SOAP_ANONYMOUS_VT),
     @JsonProperty(OcppConstant.TO)
-    val to: ValueText?,
+    val to: ValueText = OcppConstant.SOAP_ANONYMOUS_VT,
     @JsonProperty(OcppConstant.RELATES_TO)
     val relatesTo: ValueText?
 )
@@ -72,7 +76,7 @@ data class ValueText(
 
 data class SoapHeaderFrom(
     @JsonProperty(OcppConstant.ADDRESS)
-    val address: ValueText
+    val address: ValueText = OcppConstant.SOAP_ANONYMOUS_VT
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -84,16 +88,16 @@ data class SoapHeaderOut(
     @JsonProperty(OcppConstant.NS_CHARGEBOX_IDENTITY)
     val chargeBoxIdentity: String?,
     @JsonProperty(OcppConstant.NS_FROM)
-    val from: SoapHeaderFromOut?,
+    val from: SoapHeaderFromOut,
     @JsonProperty(OcppConstant.NS_TO)
-    val to: String?,
+    val to: String,
     @JsonProperty(OcppConstant.NS_RELATE_TO)
     val relatesTo: String?
 )
 
 data class SoapHeaderFromOut(
     @JsonProperty(OcppConstant.NS_ADDRESS)
-    val address: String
+    val address: ValueText
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -114,3 +118,5 @@ data class SoapEnvelopeOut<T>(
 )
 
 interface SoapBody
+
+fun String.toValueText(): ValueText = ValueText(this)

@@ -1,13 +1,12 @@
 package com.izivia.ocpp.soap
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.izivia.ocpp.soap.OcppSoapParser.Companion.SOAP_ANONYMOUS
+import com.izivia.ocpp.soap.OcppConstant.SOAP_ANONYMOUS
+import com.izivia.ocpp.soap.OcppConstant.SOAP_ANONYMOUS_FROM
 import kotlin.reflect.KClass
 
 interface OcppSoapParser {
-    companion object {
-        const val SOAP_ANONYMOUS = "http://www.w3.org/2005/08/addressing/anonymous"
-    }
+
     fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any>
     fun parseAnyResponseFromSoap(messageStr: String): ResponseSoapMessage<Any>
     fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String
@@ -30,8 +29,8 @@ abstract class OcppSoapParserImpl(
             messageId = response.messageId,
             action = "/${response.action.replaceFirstChar { it.uppercase() }}Response",
             relatesTo = response.relatesTo,
-            to = response.to,
-            from = SoapHeaderFromOut(response.from ?: SOAP_ANONYMOUS),
+            to = response.to ?: SOAP_ANONYMOUS,
+            from = response.from?.let { SoapHeaderFromOut(response.from.toValueText()) } ?: SOAP_ANONYMOUS_FROM,
             chargeBoxIdentity = response.chargeBoxIdentity
         )
         val xmlBuilder = SoapEnvelopeOut(
@@ -48,8 +47,8 @@ abstract class OcppSoapParserImpl(
             messageId = envelope.header.messageId.value,
             chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
             action = envelope.header.action.value.removePrefix("/"),
-            from = envelope.header.from?.address?.value,
-            to = envelope.header.to?.value,
+            from = envelope.header.from.address.value,
+            to = envelope.header.to.value,
             payload = getRequestBodyContent(envelope)
         )
     }
@@ -64,7 +63,7 @@ abstract class OcppSoapParserImpl(
                 ),
             action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
             payload = getResponseBodyContent(envelope),
-            from = envelope.header.from?.address?.value,
+            from = envelope.header.from.address.value,
             to = envelope.header.to.toString()
         )
     }
@@ -75,7 +74,7 @@ abstract class OcppSoapParserImpl(
             action = "/${request.action.replaceFirstChar { it.uppercase() }}",
             to = request.to ?: SOAP_ANONYMOUS,
             relatesTo = null,
-            from = SoapHeaderFromOut(request.from ?: SOAP_ANONYMOUS),
+            from = request.from?.let { SoapHeaderFromOut(request.from.toValueText()) } ?: SOAP_ANONYMOUS_FROM,
             chargeBoxIdentity = request.chargingStationId
         )
         val xmlBuilder = SoapEnvelopeOut(

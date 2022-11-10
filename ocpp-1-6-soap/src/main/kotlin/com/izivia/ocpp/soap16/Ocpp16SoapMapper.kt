@@ -90,8 +90,7 @@ import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core16.model.unlockconnector.enumeration.UnlockStatus
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
-import com.izivia.ocpp.soap.EnumMixin
-import com.izivia.ocpp.soap.OcppSoapMapper
+import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
 import java.math.BigDecimal
 
@@ -174,6 +173,10 @@ internal object Ocpp16SoapMapper : ObjectMapper(
         .addMixIn(UnlockConnectorResp::class.java, UnlockConnectorRespMixin::class.java)
         .addMixIn(UpdateFirmwareReq::class.java, UpdateFirmwareReqMixin::class.java)
         .addMixIn(UpdateFirmwareResp::class.java, UpdateFirmwareRespMixin::class.java)
+        .addMixIn(SoapFault::class.java, SoapFaultMixin::class.java)
+        .addMixIn(FaultCode::class.java, FaultCodeMixin::class.java)
+        .addMixIn(FaultReason::class.java, FaultReasonMixin::class.java)
+        .addMixIn(FaultSubCode::class.java, FaultSubCodeMixin::class.java)
 )
 
 private abstract class ChargingSchedulePeriodMixin(
