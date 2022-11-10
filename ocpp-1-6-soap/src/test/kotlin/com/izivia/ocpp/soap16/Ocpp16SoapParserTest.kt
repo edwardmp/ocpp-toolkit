@@ -13,6 +13,8 @@ import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core16.model.datatransfer.enumeration.DataTransferStatus
 import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationResp
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.enumeration.DiagnosticsStatus
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationReq
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationResp
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.enumeration.FirmwareStatus
@@ -30,7 +32,6 @@ import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
@@ -171,9 +172,28 @@ class ocpp16SoapParserTest {
     }
 
     @Test
-    @Disabled
     fun `should parse message to DiagnosticsStatusNotificationReq`() {
-        // TODO
+        val message = """
+            <ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+             xmlns:ns1="http://www.w3.org/2005/08/addressing"
+             xmlns:ns2="urn://Ocpp/Cp/2015/10/">
+             <ns0:Header>
+                <ns1:From><ns1:Address>http://192.168.153.113:8080</ns1:Address></ns1:From>
+                <ns1:To>http://192.168.153.113:8080</ns1:To>
+                <ns1:ReplyTo><ns1:Address>http://www.w3.org/2005/08/addressing/anonymous</ns1:Address></ns1:ReplyTo>
+                <ns2:chargeBoxIdentity>TEST</ns2:chargeBoxIdentity>
+                <ns1:MessageID>f8465c53A250aA4c53A9feeAd79510d972cf</ns1:MessageID>
+                <ns1:Action>/DiagnosticsStatusNotification</ns1:Action>
+             </ns0:Header>
+             <ns0:Body>
+                <ns2:diagnosticsStatusNotificationRequest>
+                    <ns2:status>Uploaded</ns2:status>
+                    </ns2:diagnosticsStatusNotificationRequest>
+             </ns0:Body></ns0:Envelope>
+        """.trimIndent()
+        expectThat(ocpp16SoapParser.parseRequestFromSoap<DiagnosticsStatusNotificationReq>(message).payload).and {
+            get { status }.isEqualTo(DiagnosticsStatus.Uploaded)
+        }
     }
 
     @Test
@@ -995,16 +1015,60 @@ class ocpp16SoapParserTest {
         }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationReq to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+
+        val request = DiagnosticsStatusNotificationReq(
+            status = DiagnosticsStatus.Uploaded
+        )
+
+        val reqSoap = ocpp16SoapParser.mapRequestToSoap(
+            RequestSoapMessage(
+                messageId = messageId,
+                action = "DiagnosticsStatusNotification",
+                payload = request,
+                from = "source",
+                to = "destination",
+                chargingStationId = "testId"
+            )
+        )
+
+        expectThat(reqSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotification</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+        }
+        expectThat(ocpp16SoapParser.parseAnyRequestFromSoap(reqSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationReq>().and {
+                get { status }.isEqualTo(DiagnosticsStatus.Uploaded)
+            }
+        }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationResp to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+        val relateTo = UUID.randomUUID().toString()
+        val response = DiagnosticsStatusNotificationResp()
+        val messageSoap = ocpp16SoapParser.mapResponseToSoap(
+            ResponseSoapMessage(
+                messageId = messageId,
+                relatesTo = relateTo,
+                action = "DiagnosticsStatusNotification",
+                payload = response,
+                from = "destination",
+                to = "source"
+            )
+        )
+
+        expectThat(messageSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotificationResponse</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+            get { this }.contains("<a:RelatesTo>$relateTo</a:RelatesTo>")
+        }
+        expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationResp>()
+        }
     }
 
     @Test
@@ -1121,7 +1185,7 @@ class ocpp16SoapParserTest {
                     relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     action = "Heartbeat",
                     payload = response,
-                    from = "source",
+                    from = null,
                     to = "destination"
                 )
             )
@@ -1169,7 +1233,7 @@ class ocpp16SoapParserTest {
                     messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     chargingStationId = "CS1",
                     action = "MeterValues",
-                    from = "source",
+                    from = null,
                     to = "destination",
                     payload = response
                 )
@@ -1181,7 +1245,7 @@ class ocpp16SoapParserTest {
             xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID>
 <a:Action>/MeterValues</a:Action><o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
-<a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From><a:To>destination</a:To>
 </s:Header><s:Body><o:meterValuesRequest><o:connectorId>1</o:connectorId>
 <o:meterValue><sampledValue><value>15213716</value><context>Sample.Periodic</context><format>Raw</format>
 <location>Inlet</location><measurand>Energy.Active.Import.Register</measurand><unit>Wh</unit></sampledValue>
@@ -1220,7 +1284,7 @@ class ocpp16SoapParserTest {
                     action = "MeterValues",
                     payload = response,
                     from = "source",
-                    to = "destination"
+                    to = null
                 )
             )
 
@@ -1255,8 +1319,8 @@ class ocpp16SoapParserTest {
                     messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     chargingStationId = "CS1",
                     action = "StartTransaction",
-                    from = "source",
-                    to = "destination",
+                    from = null,
+                    to = null,
                     payload = response
                 )
             )
@@ -1265,7 +1329,9 @@ class ocpp16SoapParserTest {
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/StartTransaction</a:Action>
-<o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
+<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From>
+<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>
 </s:Header><s:Body><o:startTransactionRequest>
 <connectorId>1</connectorId><idTag>AAAAAAAA</idTag><meterStart>18804500</meterStart>
 <timestamp>2022-05-17T15:41:58.351Z</timestamp></o:startTransactionRequest></s:Body></s:Envelope>""".trimSoap()
@@ -1298,8 +1364,8 @@ class ocpp16SoapParserTest {
                     relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     action = "StartTransaction",
                     payload = response,
-                    from = "source",
-                    to = "destination"
+                    from = null,
+                    to = null
                 )
             )
 
@@ -1312,6 +1378,12 @@ class ocpp16SoapParserTest {
             )
             get { this }.contains(
                 "<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>"
+            )
+            get { this }.contains(
+                "<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>"
             )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
@@ -1385,8 +1457,8 @@ class ocpp16SoapParserTest {
                     relatesTo = relatesTo,
                     action = action,
                     payload = response,
-                    from = "source",
-                    to = "destination"
+                    from = "",
+                    to = null
                 )
             )
 
@@ -1399,6 +1471,12 @@ class ocpp16SoapParserTest {
             )
             get { this }.contains(
                 "<a:RelatesTo>$relatesTo</a:RelatesTo>"
+            )
+            get { this }.contains(
+                "<a:From><a:Address/></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>"
             )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
@@ -1484,6 +1562,12 @@ class ocpp16SoapParserTest {
             get { this }.contains(
                 "<a:RelatesTo>$relatesTo</a:RelatesTo>"
             )
+            get { this }.contains(
+                "<a:From><a:Address>source</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>destination</a:To>"
+            )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<StopTransactionResp>().and {
@@ -1514,17 +1598,19 @@ class ocpp16SoapParserTest {
                 )
             )
 
-        expectThat(messageSoap) {
-            get { this }.contains(
-                "<a:Action>/${action}Response</a:Action>"
-            )
-            get { this }.contains(
-                "<a:MessageID>$messageId</a:MessageID>"
-            )
-            get { this }.contains(
-                "<a:RelatesTo>$relatesTo</a:RelatesTo>"
-            )
-        }
+        val expectedEnvelope = """<s:Envelope
+                xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+                xmlns:a="http://www.w3.org/2005/08/addressing"
+                xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
+<a:MessageID>$messageId</a:MessageID><a:Action>/StopTransactionResponse</a:Action>
+<a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<a:RelatesTo>$relatesTo</a:RelatesTo></s:Header><s:Body>
+<s:Fault><s:Code><s:Value>Receiver</s:Value><o:Subcode><o:Value>InternalError</o:Value></o:Subcode>
+</s:Code><s:Reason>
+<s:Text lang="en">An internal error occurred and the receiver is not able to complete the operation.</s:Text>
+</s:Reason></s:Fault></s:Body></s:Envelope>""".trimSoap()
+
+        expectThat(messageSoap).isEqualTo(expectedEnvelope)
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<SoapFault>().and {
                 get { code }.and {

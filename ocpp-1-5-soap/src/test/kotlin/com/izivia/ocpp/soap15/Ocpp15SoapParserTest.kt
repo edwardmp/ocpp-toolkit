@@ -13,6 +13,7 @@ import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core15.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core15.model.datatransfer.enumeration.DataTransferStatus
 import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
+import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationResp
 import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.enumeration.DiagnosticsStatus
 import com.izivia.ocpp.core15.model.firmwarestatusnotification.FirmwareStatusNotificationReq
 import com.izivia.ocpp.core15.model.firmwarestatusnotification.FirmwareStatusNotificationResp
@@ -162,7 +163,6 @@ class Ocpp15SoapParserTest {
     }
 
     @Test
-    @Disabled
     fun `should parse message to DiagnosticsStatusNotificationReq`() {
         val message = """
             <ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
@@ -1042,16 +1042,60 @@ class Ocpp15SoapParserTest {
         }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationReq to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+
+        val request = DiagnosticsStatusNotificationReq(
+            status = DiagnosticsStatus.Uploaded
+        )
+
+        val reqSoap = ocpp15SoapParser.mapRequestToSoap(
+            RequestSoapMessage(
+                messageId = messageId,
+                action = "DiagnosticsStatusNotification",
+                payload = request,
+                from = "source",
+                to = "destination",
+                chargingStationId = "testId"
+            )
+        )
+
+        expectThat(reqSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotification</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+        }
+        expectThat(ocpp15SoapParser.parseAnyRequestFromSoap(reqSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationReq>().and {
+                get { status }.isEqualTo(DiagnosticsStatus.Uploaded)
+            }
+        }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationResp to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+        val relateTo = UUID.randomUUID().toString()
+        val response = DiagnosticsStatusNotificationResp()
+        val messageSoap = ocpp15SoapParser.mapResponseToSoap(
+            ResponseSoapMessage(
+                messageId = messageId,
+                relatesTo = relateTo,
+                action = "DiagnosticsStatusNotification",
+                payload = response,
+                from = "destination",
+                to = "source"
+            )
+        )
+
+        expectThat(messageSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotificationResponse</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+            get { this }.contains("<a:RelatesTo>$relateTo</a:RelatesTo>")
+        }
+        expectThat(ocpp15SoapParser.parseAnyResponseFromSoap(messageSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationResp>()
+        }
     }
 
     @Test
@@ -1471,7 +1515,7 @@ class Ocpp15SoapParserTest {
                 relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                 action = "StopTransaction",
                 payload = response,
-                from = "source",
+                from = null,
                 to = "destination"
             )
         )
@@ -1480,6 +1524,12 @@ class Ocpp15SoapParserTest {
             get { this }.contains("<a:Action>/StopTransactionResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
+            get { this }.contains(
+                "<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>destination</a:To>"
+            )
         }
         expectThat(ocpp15SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<StopTransactionResp>().and {

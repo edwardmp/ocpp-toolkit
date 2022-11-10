@@ -77,8 +77,7 @@ import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core15.model.unlockconnector.enumeration.UnlockStatus
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareResp
-import com.izivia.ocpp.soap.EnumMixin
-import com.izivia.ocpp.soap.OcppSoapMapper
+import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
 
 internal object Ocpp15SoapMapperIn : ObjectMapper(
@@ -149,6 +148,10 @@ internal object Ocpp15SoapMapper : ObjectMapper(
         .addMixIn(UnlockConnectorResp::class.java, UnlockConnectorRespMixin::class.java)
         .addMixIn(UpdateFirmwareReq::class.java, UpdateFirmwareReqMixin::class.java)
         .addMixIn(UpdateFirmwareResp::class.java, UpdateFirmwareRespMixin::class.java)
+        .addMixIn(SoapFault::class.java, SoapFaultMixin::class.java)
+        .addMixIn(FaultCode::class.java, FaultCodeMixin::class.java)
+        .addMixIn(FaultReason::class.java, FaultReasonMixin::class.java)
+        .addMixIn(FaultSubCode::class.java, FaultSubCodeMixin::class.java)
 )
 
 private abstract class IdTagInfoMixin(
