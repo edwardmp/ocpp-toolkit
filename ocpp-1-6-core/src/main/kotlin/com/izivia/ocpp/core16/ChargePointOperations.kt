@@ -30,10 +30,14 @@ import java.net.ConnectException
 /**
  * Operations initiated by Charge Point
  */
-interface ChargePointOperations: CSMSCallbacks {
+interface ChargePointOperations : CSMSCallbacks {
     companion object {
-        fun newChargePointOperations(chargingStationId: String, transport: ClientTransport, csmsOperations: CSMSOperations) =
-            RealChargePointOperations(chargingStationId,transport, csmsOperations)
+        fun newChargePointOperations(
+            chargingStationId: String,
+            transport: ClientTransport,
+            csmsOperations: CSMSOperations
+        ) =
+            RealChargePointOperations(chargingStationId, transport, csmsOperations)
     }
 
     @Throws(IllegalStateException::class, ConnectException::class)
@@ -66,43 +70,63 @@ interface ChargePointOperations: CSMSCallbacks {
      * If this transaction ends a reservation the StartTransaction.req MUST contain the reservationId.
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun startTransaction(meta: RequestMetadata, request: StartTransactionReq): OperationExecution<StartTransactionReq, StartTransactionResp>
+    fun startTransaction(
+        meta: RequestMetadata,
+        request: StartTransactionReq
+    ): OperationExecution<StartTransactionReq, StartTransactionResp>
 
     /**
      * Sends a StopTransaction request to the Central System to inform about a transaction that has been stopped.
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun stopTransaction(meta: RequestMetadata, request: StopTransactionReq): OperationExecution<StopTransactionReq, StopTransactionResp>
+    fun stopTransaction(
+        meta: RequestMetadata,
+        request: StopTransactionReq
+    ): OperationExecution<StopTransactionReq, StopTransactionResp>
 
     /**
      * Sends a notification to the Central System about a status change or an error within the Charge Point
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun statusNotification(meta: RequestMetadata, request: StatusNotificationReq): OperationExecution<StatusNotificationReq, StatusNotificationResp>
+    fun statusNotification(
+        meta: RequestMetadata,
+        request: StatusNotificationReq
+    ): OperationExecution<StatusNotificationReq, StatusNotificationResp>
 
     /**
      * Sends information to the Central System for a function not supported by OCPP
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun dataTransfer(meta: RequestMetadata, request: DataTransferReq): OperationExecution<DataTransferReq, DataTransferResp>
+    fun dataTransfer(
+        meta: RequestMetadata,
+        request: DataTransferReq
+    ): OperationExecution<DataTransferReq, DataTransferResp>
 
     /**
      * Sends a request to the Central System with information about its configuration
      * each time it boots or reboots
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun bootNotification(meta: RequestMetadata, request: BootNotificationReq): OperationExecution<BootNotificationReq, BootNotificationResp>
+    fun bootNotification(
+        meta: RequestMetadata,
+        request: BootNotificationReq
+    ): OperationExecution<BootNotificationReq, BootNotificationResp>
 
     /**
      * Sends notifications to inform the Central System about the progress of the firmware update
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun firmwareStatusNotification(meta: RequestMetadata, request: FirmwareStatusNotificationReq): OperationExecution<FirmwareStatusNotificationReq, FirmwareStatusNotificationResp>
-
+    fun firmwareStatusNotification(
+        meta: RequestMetadata,
+        request: FirmwareStatusNotificationReq
+    ): OperationExecution<FirmwareStatusNotificationReq, FirmwareStatusNotificationResp>
 
     /**
      * Sends log information to the CSMS
      */
     @Throws(IllegalStateException::class, ConnectException::class)
-    fun diagnosticsStatusNotification(meta: RequestMetadata, request: DiagnosticsStatusNotificationReq): OperationExecution<DiagnosticsStatusNotificationReq, DiagnosticsStatusNotificationResp>
+    fun diagnosticsStatusNotification(
+        meta: RequestMetadata,
+        request: DiagnosticsStatusNotificationReq
+    ): OperationExecution<DiagnosticsStatusNotificationReq, DiagnosticsStatusNotificationResp>
 }

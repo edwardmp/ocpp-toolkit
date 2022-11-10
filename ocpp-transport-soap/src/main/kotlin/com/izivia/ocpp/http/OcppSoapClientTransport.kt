@@ -84,9 +84,9 @@ class OcppSoapClientTransport(
                 )
             )
         val response = client(request)
-        return if (response.status == Status.OK)
+        return if (response.status == Status.OK) {
             ocppSoapParser.parseResponseFromSoap(response.bodyString(), clazz).payload
-        else {
+        } else {
             logger.warn("an error occurred. response = $response")
             throw OcppCallErrorException(response.bodyString())
         }
@@ -102,7 +102,9 @@ class OcppSoapClientTransport(
                         messageId = "urn:uuid:${newMessageId()}",
                         relatesTo = message.messageId,
                         action = message.action,
-                        payload = response
+                        payload = response,
+                        from = message.from,
+                        to = message.to
                     )
                 )
                 HttpMessage(msg.ocppId, action, payload)

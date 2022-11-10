@@ -1,87 +1,101 @@
-package com.izivia.ocpp.soap15
+package com.izivia.ocpp.soap16
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
-import com.izivia.ocpp.core15.model.authorize.AuthorizeReq
-import com.izivia.ocpp.core15.model.authorize.AuthorizeResp
-import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
-import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
-import com.izivia.ocpp.core15.model.bootnotification.enumeration.RegistrationStatus
-import com.izivia.ocpp.core15.model.cancelreservation.CancelReservationReq
-import com.izivia.ocpp.core15.model.cancelreservation.CancelReservationResp
-import com.izivia.ocpp.core15.model.cancelreservation.enumeration.CancelReservationStatus
-import com.izivia.ocpp.core15.model.changeavailability.ChangeAvailabilityReq
-import com.izivia.ocpp.core15.model.changeavailability.ChangeAvailabilityResp
-import com.izivia.ocpp.core15.model.changeavailability.enumeration.AvailabilityStatus
-import com.izivia.ocpp.core15.model.changeavailability.enumeration.AvailabilityType
-import com.izivia.ocpp.core15.model.changeconfiguration.ChangeConfigurationReq
-import com.izivia.ocpp.core15.model.changeconfiguration.ChangeConfigurationResp
-import com.izivia.ocpp.core15.model.changeconfiguration.enumeration.ConfigurationStatus
-import com.izivia.ocpp.core15.model.clearcache.ClearCacheReq
-import com.izivia.ocpp.core15.model.clearcache.ClearCacheResp
-import com.izivia.ocpp.core15.model.clearcache.enumeration.ClearCacheStatus
-import com.izivia.ocpp.core15.model.common.IdTagInfo
-import com.izivia.ocpp.core15.model.common.MeterValue
-import com.izivia.ocpp.core15.model.common.SampledValue
-import com.izivia.ocpp.core15.model.common.enumeration.*
-import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
-import com.izivia.ocpp.core15.model.datatransfer.DataTransferResp
-import com.izivia.ocpp.core15.model.datatransfer.enumeration.DataTransferStatus
-import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
-import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationResp
-import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.enumeration.DiagnosticsStatus
-import com.izivia.ocpp.core15.model.firmwarestatusnotification.FirmwareStatusNotificationReq
-import com.izivia.ocpp.core15.model.firmwarestatusnotification.FirmwareStatusNotificationResp
-import com.izivia.ocpp.core15.model.firmwarestatusnotification.enumeration.FirmwareStatus
-import com.izivia.ocpp.core15.model.getconfiguration.GetConfigurationReq
-import com.izivia.ocpp.core15.model.getconfiguration.GetConfigurationResp
-import com.izivia.ocpp.core15.model.getconfiguration.KeyValue
-import com.izivia.ocpp.core15.model.getdiagnostics.GetDiagnosticsReq
-import com.izivia.ocpp.core15.model.getdiagnostics.GetDiagnosticsResp
-import com.izivia.ocpp.core15.model.getlocallistversion.GetLocalListVersionReq
-import com.izivia.ocpp.core15.model.getlocallistversion.GetLocalListVersionResp
-import com.izivia.ocpp.core15.model.heartbeat.HeartbeatReq
-import com.izivia.ocpp.core15.model.heartbeat.HeartbeatResp
-import com.izivia.ocpp.core15.model.metervalues.MeterValuesReq
-import com.izivia.ocpp.core15.model.metervalues.MeterValuesResp
-import com.izivia.ocpp.core15.model.remotestart.RemoteStartTransactionReq
-import com.izivia.ocpp.core15.model.remotestart.RemoteStartTransactionResp
-import com.izivia.ocpp.core15.model.remotestop.RemoteStopTransactionReq
-import com.izivia.ocpp.core15.model.remotestop.RemoteStopTransactionResp
-import com.izivia.ocpp.core15.model.reservenow.ReserveNowReq
-import com.izivia.ocpp.core15.model.reservenow.ReserveNowResp
-import com.izivia.ocpp.core15.model.reservenow.enumeration.ReservationStatus
-import com.izivia.ocpp.core15.model.reset.ResetReq
-import com.izivia.ocpp.core15.model.reset.ResetResp
-import com.izivia.ocpp.core15.model.reset.enumeration.ResetStatus
-import com.izivia.ocpp.core15.model.reset.enumeration.ResetType
-import com.izivia.ocpp.core15.model.sendlocallist.AuthorisationData
-import com.izivia.ocpp.core15.model.sendlocallist.SendLocalListReq
-import com.izivia.ocpp.core15.model.sendlocallist.SendLocalListResp
-import com.izivia.ocpp.core15.model.sendlocallist.enumeration.UpdateStatus
-import com.izivia.ocpp.core15.model.sendlocallist.enumeration.UpdateType
-import com.izivia.ocpp.core15.model.starttransaction.StartTransactionReq
-import com.izivia.ocpp.core15.model.starttransaction.StartTransactionResp
-import com.izivia.ocpp.core15.model.statusnotification.StatusNotificationReq
-import com.izivia.ocpp.core15.model.statusnotification.StatusNotificationResp
-import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointErrorCode
-import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointStatus
-import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
-import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
-import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorReq
-import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorResp
-import com.izivia.ocpp.core15.model.unlockconnector.enumeration.UnlockStatus
-import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
-import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareResp
+import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
+import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
+import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
+import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.core16.model.bootnotification.enumeration.RegistrationStatus
+import com.izivia.ocpp.core16.model.cancelreservation.CancelReservationReq
+import com.izivia.ocpp.core16.model.cancelreservation.CancelReservationResp
+import com.izivia.ocpp.core16.model.cancelreservation.enumeration.CancelReservationStatus
+import com.izivia.ocpp.core16.model.changeavailability.ChangeAvailabilityReq
+import com.izivia.ocpp.core16.model.changeavailability.ChangeAvailabilityResp
+import com.izivia.ocpp.core16.model.changeavailability.enumeration.AvailabilityStatus
+import com.izivia.ocpp.core16.model.changeavailability.enumeration.AvailabilityType
+import com.izivia.ocpp.core16.model.changeconfiguration.ChangeConfigurationReq
+import com.izivia.ocpp.core16.model.changeconfiguration.ChangeConfigurationResp
+import com.izivia.ocpp.core16.model.changeconfiguration.enumeration.ConfigurationStatus
+import com.izivia.ocpp.core16.model.clearcache.ClearCacheReq
+import com.izivia.ocpp.core16.model.clearcache.ClearCacheResp
+import com.izivia.ocpp.core16.model.clearcache.enumeration.ClearCacheStatus
+import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileReq
+import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileResp
+import com.izivia.ocpp.core16.model.clearchargingprofile.enumeration.ClearChargingProfileStatus
+import com.izivia.ocpp.core16.model.common.*
+import com.izivia.ocpp.core16.model.common.enumeration.*
+import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
+import com.izivia.ocpp.core16.model.datatransfer.DataTransferResp
+import com.izivia.ocpp.core16.model.datatransfer.enumeration.DataTransferStatus
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationResp
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.enumeration.DiagnosticsStatus
+import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationReq
+import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationResp
+import com.izivia.ocpp.core16.model.firmwarestatusnotification.enumeration.FirmwareStatus
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
+import com.izivia.ocpp.core16.model.getcompositeschedule.enumeration.GetCompositeScheduleStatus
+import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationReq
+import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationResp
+import com.izivia.ocpp.core16.model.getconfiguration.KeyValue
+import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsReq
+import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
+import com.izivia.ocpp.core16.model.getlocallistversion.GetLocalListVersionReq
+import com.izivia.ocpp.core16.model.getlocallistversion.GetLocalListVersionResp
+import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
+import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
+import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
+import com.izivia.ocpp.core16.model.metervalues.MeterValuesResp
+import com.izivia.ocpp.core16.model.remotestart.ChargingSchedulePeriod
+import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionReq
+import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionResp
+import com.izivia.ocpp.core16.model.remotestart.enumeration.ChargingProfileKindType
+import com.izivia.ocpp.core16.model.remotestart.enumeration.RecurrencyKindType
+import com.izivia.ocpp.core16.model.remotestop.RemoteStopTransactionReq
+import com.izivia.ocpp.core16.model.remotestop.RemoteStopTransactionResp
+import com.izivia.ocpp.core16.model.reservenow.ReserveNowReq
+import com.izivia.ocpp.core16.model.reservenow.ReserveNowResp
+import com.izivia.ocpp.core16.model.reservenow.enumeration.ReservationStatus
+import com.izivia.ocpp.core16.model.reset.ResetReq
+import com.izivia.ocpp.core16.model.reset.ResetResp
+import com.izivia.ocpp.core16.model.reset.enumeration.ResetStatus
+import com.izivia.ocpp.core16.model.reset.enumeration.ResetType
+import com.izivia.ocpp.core16.model.sendlocallist.AuthorizationData
+import com.izivia.ocpp.core16.model.sendlocallist.SendLocalListReq
+import com.izivia.ocpp.core16.model.sendlocallist.SendLocalListResp
+import com.izivia.ocpp.core16.model.sendlocallist.enumeration.UpdateStatus
+import com.izivia.ocpp.core16.model.sendlocallist.enumeration.UpdateType
+import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileReq
+import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileResp
+import com.izivia.ocpp.core16.model.setchargingprofile.enumeration.ChargingProfileStatus
+import com.izivia.ocpp.core16.model.starttransaction.StartTransactionReq
+import com.izivia.ocpp.core16.model.starttransaction.StartTransactionResp
+import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationReq
+import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationResp
+import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointErrorCode
+import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointStatus
+import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
+import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
+import com.izivia.ocpp.core16.model.stoptransaction.enumeration.Reason
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageResp
+import com.izivia.ocpp.core16.model.triggermessage.enumeration.MessageTrigger
+import com.izivia.ocpp.core16.model.triggermessage.enumeration.TriggerMessageStatus
+import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
+import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
+import com.izivia.ocpp.core16.model.unlockconnector.enumeration.UnlockStatus
+import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
+import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.EnumMixin
 import com.izivia.ocpp.soap.OcppSoapMapper
 import kotlinx.datetime.Instant
+import java.math.BigDecimal
 
-internal object Ocpp15SoapMapperIn : ObjectMapper(
+internal object Ocpp16SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
@@ -90,7 +104,7 @@ internal object Ocpp15SoapMapperIn : ObjectMapper(
         .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
 )
 
-internal object Ocpp15SoapMapper : ObjectMapper(
+internal object Ocpp16SoapMapper : ObjectMapper(
     OcppSoapMapper()
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
@@ -109,12 +123,16 @@ internal object Ocpp15SoapMapper : ObjectMapper(
         .addMixIn(ChangeConfigurationResp::class.java, ChangeConfigurationRespMixin::class.java)
         .addMixIn(ClearCacheReq::class.java, ClearCacheReqMixin::class.java)
         .addMixIn(ClearCacheResp::class.java, ClearCacheRespMixin::class.java)
+        .addMixIn(ClearChargingProfileReq::class.java, ClearChargingProfileReqMixin::class.java)
+        .addMixIn(ClearChargingProfileResp::class.java, ClearChargingProfileRespMixin::class.java)
         .addMixIn(DataTransferResp::class.java, DataTransferRespMixin::class.java)
         .addMixIn(DataTransferReq::class.java, DataTransferReqMixin::class.java)
         .addMixIn(DiagnosticsStatusNotificationResp::class.java, DiagnosticsStatusNotificationRespMixin::class.java)
         .addMixIn(DiagnosticsStatusNotificationReq::class.java, DiagnosticsStatusNotificationReqMixin::class.java)
         .addMixIn(FirmwareStatusNotificationResp::class.java, FirmwareStatusNotificationRespMixin::class.java)
         .addMixIn(FirmwareStatusNotificationReq::class.java, FirmwareStatusNotificationReqMixin::class.java)
+        .addMixIn(GetCompositeScheduleReq::class.java, GetCompositeScheduleReqMixin::class.java)
+        .addMixIn(GetCompositeScheduleResp::class.java, GetCompositeScheduleRespMixin::class.java)
         .addMixIn(GetConfigurationReq::class.java, GetConfigurationReqMixin::class.java)
         .addMixIn(GetConfigurationResp::class.java, GetConfigurationRespMixin::class.java)
         .addMixIn(GetDiagnosticsReq::class.java, GetDiagnosticsReqMixin::class.java)
@@ -138,17 +156,135 @@ internal object Ocpp15SoapMapper : ObjectMapper(
         .addMixIn(ResetResp::class.java, ResetRespMixin::class.java)
         .addMixIn(SendLocalListReq::class.java, SendLocalListReqMixin::class.java)
         .addMixIn(SendLocalListResp::class.java, SendLocalListRespMixin::class.java)
-        .addMixIn(AuthorisationData::class.java, AuthorisationDataMixin::class.java)
+        .addMixIn(AuthorizationData::class.java, AuthorisationDataMixin::class.java)
+        .addMixIn(SetChargingProfileReq::class.java, SetChargingProfileReqMixin::class.java)
+        .addMixIn(SetChargingProfileResp::class.java, SetChargingProfileRespMixin::class.java)
+        .addMixIn(ChargingProfile::class.java, ChargingProfileMixin::class.java)
+        .addMixIn(ChargingSchedule::class.java, ChargingScheduleMixin::class.java)
+        .addMixIn(ChargingSchedulePeriod::class.java, ChargingSchedulePeriodMixin::class.java)
         .addMixIn(StartTransactionResp::class.java, StartTransactionRespMixin::class.java)
         .addMixIn(StartTransactionReq::class.java, StartTransactionReqMixin::class.java)
         .addMixIn(StatusNotificationResp::class.java, StatusNotificationRespMixin::class.java)
         .addMixIn(StatusNotificationReq::class.java, StatusNotificationReqMixin::class.java)
         .addMixIn(StopTransactionResp::class.java, StopTransactionRespMixin::class.java)
         .addMixIn(StopTransactionReq::class.java, StopTransactionReqMixin::class.java)
+        .addMixIn(TriggerMessageReq::class.java, TriggerMessageReqMixin::class.java)
+        .addMixIn(TriggerMessageResp::class.java, TriggerMessageRespMixin::class.java)
         .addMixIn(UnlockConnectorReq::class.java, UnlockConnectorReqMixin::class.java)
         .addMixIn(UnlockConnectorResp::class.java, UnlockConnectorRespMixin::class.java)
         .addMixIn(UpdateFirmwareReq::class.java, UpdateFirmwareReqMixin::class.java)
         .addMixIn(UpdateFirmwareResp::class.java, UpdateFirmwareRespMixin::class.java)
+)
+
+private abstract class ChargingSchedulePeriodMixin(
+    @JacksonXmlProperty(localName = "o:startPeriod")
+    val startPeriod: Int,
+    @JacksonXmlProperty(localName = "o:limit")
+    val limit: BigDecimal,
+    @JacksonXmlProperty(localName = "o:numberPhases")
+    val numberPhases: Int? = null
+)
+
+private abstract class ChargingScheduleMixin(
+    @JacksonXmlProperty(localName = "o:duration")
+    val duration: Int? = null,
+    @JacksonXmlProperty(localName = "o:startSchedule")
+    val startSchedule: Instant? = null,
+    @JacksonXmlProperty(localName = "o:chargingRateUnit")
+    val chargingRateUnit: ChargingRateUnitType,
+    @JacksonXmlProperty(localName = "o:chargingSchedulePeriod")
+    val chargingSchedulePeriod: List<ChargingSchedulePeriod>,
+    @JacksonXmlProperty(localName = "o:minChargingRate")
+    val minChargingRate: BigDecimal? = null
+)
+
+private abstract class ChargingProfileMixin(
+    @JacksonXmlProperty(localName = "o:chargingProfileId")
+    val chargingProfileId: Int,
+    @JacksonXmlProperty(localName = "o:transactionId")
+    val transactionId: Int? = null,
+    @JacksonXmlProperty(localName = "o:stackLevel")
+    val stackLevel: Int,
+    @JacksonXmlProperty(localName = "o:chargingProfilePurpose")
+    val chargingProfilePurpose: ChargingProfilePurposeType,
+    @JacksonXmlProperty(localName = "o:chargingProfileKind")
+    val chargingProfileKind: ChargingProfileKindType,
+    @JacksonXmlProperty(localName = "o:recurrencyKind")
+    val recurrencyKind: RecurrencyKindType? = null,
+    @JacksonXmlProperty(localName = "o:validFrom")
+    val validFrom: Instant? = null,
+    @JacksonXmlProperty(localName = "o:validTo")
+    val validTo: Instant? = null,
+    @JacksonXmlProperty(localName = "o:chargingSchedule")
+    val chargingSchedule: ChargingSchedule
+)
+
+@JsonRootName("SetChargingProfileResponse")
+private abstract class SetChargingProfileRespMixin(
+    @JacksonXmlProperty(localName = "o:status")
+    val status: ChargingProfileStatus
+)
+
+@JsonRootName("SetChargingProfileRequest")
+private abstract class SetChargingProfileReqMixin(
+    @JacksonXmlProperty(localName = "o:connectorId")
+    val connectorId: Int? = null,
+    @JacksonXmlProperty(localName = "o:csChargingProfiles")
+    val csChargingProfiles: ChargingProfile
+)
+
+@JsonRootName("GetCompositeScheduleResponse")
+private abstract class GetCompositeScheduleRespMixin(
+    @JacksonXmlProperty(localName = "o:status")
+    val status: GetCompositeScheduleStatus,
+    @JacksonXmlProperty(localName = "o:connectorId")
+    val connectorId: Int? = null,
+    @JacksonXmlProperty(localName = "o:scheduleStart")
+    val scheduleStart: Instant? = null,
+    @JacksonXmlProperty(localName = "o:chargingSchedule")
+    val chargingSchedule: ChargingSchedule? = null
+)
+
+@JsonRootName("GetCompositeScheduleRequest")
+private abstract class GetCompositeScheduleReqMixin(
+    @JacksonXmlProperty(localName = "o:connectorId")
+    val connectorId: Int,
+    @JacksonXmlProperty(localName = "o:duration")
+    val duration: Int,
+    @JacksonXmlProperty(localName = "o:chargingRateUnit")
+    val chargingRateUnit: ChargingRateUnitType? = null
+)
+
+@JsonRootName("clearChargingProfileResponse")
+private abstract class ClearChargingProfileRespMixin(
+    @JacksonXmlProperty(localName = "o:status")
+    val status: ClearChargingProfileStatus
+)
+
+@JsonRootName("clearChargingProfileRequest")
+private abstract class ClearChargingProfileReqMixin(
+    @JacksonXmlProperty(localName = "o:id")
+    val id: Int? = null,
+    @JacksonXmlProperty(localName = "o:connectorId")
+    val connectorId: Int? = null,
+    @JacksonXmlProperty(localName = "o:chargingProfilePurpose")
+    val chargingProfilePurpose: ChargingProfilePurposeType? = null,
+    @JacksonXmlProperty(localName = "o:stackLevel")
+    val stackLevel: Int? = null
+)
+
+@JsonRootName("triggerMessageResponse")
+private abstract class TriggerMessageReqMixin(
+    @JacksonXmlProperty(localName = "o:requestMessage")
+    val requestMessage: MessageTrigger,
+    @JacksonXmlProperty(localName = "o:connectorId")
+    val connectorId: Int? = null
+)
+
+@JsonRootName("triggerMessageRequest")
+private abstract class TriggerMessageRespMixin(
+    @JacksonXmlProperty(localName = "o:status")
+    val status: TriggerMessageStatus
 )
 
 private abstract class IdTagInfoMixin(
@@ -176,22 +312,22 @@ private abstract class AuthorizeReqMixin(
 private abstract class BootNotificationRespMixin(
     @JacksonXmlProperty(localName = "o:currentTime")
     val currentTime: Instant,
-    @JacksonXmlProperty(localName = "o:heartbeatInterval")
-    val heartbeatInterval: Int,
+    @JacksonXmlProperty(localName = "o:interval")
+    val interval: Int,
     @JacksonXmlProperty(localName = "o:status")
     val status: RegistrationStatus
 )
 
 @JsonRootName("bootNotificationRequest")
 private abstract class BootNotificationReqMixin(
-    @JacksonXmlProperty(localName = "o:chargeBoxSerialNumber")
-    val chargeBoxSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:chargePointModel")
     val chargePointModel: String,
-    @JacksonXmlProperty(localName = "o:chargePointSerialNumber")
-    val chargePointSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:chargePointVendor")
     val chargePointVendor: String,
+    @JacksonXmlProperty(localName = "o:chargePointSerialNumber")
+    val chargePointSerialNumber: String? = null,
+    @JacksonXmlProperty(localName = "o:chargeBoxSerialNumber")
+    val chargeBoxSerialNumber: String? = null,
     @JacksonXmlProperty(localName = "o:firmwareVersion")
     val firmwareVersion: String? = null,
     @JacksonXmlProperty(localName = "o:iccid")
@@ -357,8 +493,8 @@ private abstract class MeterValuesRespMixin
 private abstract class MeterValuesReqMixin(
     @JacksonXmlProperty(localName = "o:connectorId")
     val connectorId: Int,
-    @JacksonXmlProperty(localName = "o:values")
-    val values: List<MeterValue>? = null,
+    @JacksonXmlProperty(localName = "o:meterValue")
+    val meterValue: List<MeterValue>? = null,
     @JacksonXmlProperty(localName = "o:transactionId")
     val transactionId: Int? = null
 )
@@ -366,24 +502,25 @@ private abstract class MeterValuesReqMixin(
 private abstract class MeterValueMixin(
     @JacksonXmlProperty(localName = "o:timestamp")
     val timestamp: Instant,
-    @JacksonXmlProperty(localName = "o:value")
-    val value: List<SampledValue>
+    @JacksonXmlProperty(localName = "o:sampledValue")
+    val sampledValue: List<SampledValue>
 )
 
 private abstract class SampledValueMixin(
-    @JsonProperty("text")
-    @JacksonXmlText
+    @JacksonXmlProperty(localName = "o:value")
     val value: String,
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "o:context")
     val context: ReadingContext? = ReadingContext.SamplePeriodic,
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "o:format")
     val format: ValueFormat? = ValueFormat.Raw,
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "o:measurand")
     val measurand: Measurand? = Measurand.EnergyActiveImportRegister,
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty(localName = "o:location")
     val location: Location? = Location.Outlet,
-    @JacksonXmlProperty(isAttribute = true)
-    val unit: UnitOfMeasure? = UnitOfMeasure.Wh
+    @JacksonXmlProperty(localName = "o:unit")
+    val unit: UnitOfMeasure? = UnitOfMeasure.Wh,
+    @JacksonXmlProperty(localName = "o:pĥase")
+    val phase: Phase? = null
 )
 
 @JsonRootName("remoteStartTransactionResponse")
@@ -397,7 +534,9 @@ private abstract class RemoteStartTransactionReqMixin(
     @JacksonXmlProperty(localName = "o:connectorId")
     val connectorId: Int? = null,
     @JacksonXmlProperty(localName = "o:idTag")
-    val idTag: String
+    val idTag: String,
+    @JacksonXmlProperty(localName = "o:chargingProfile")
+    val chargingProfile: ChargingProfile? = null
 )
 
 @JsonRootName("remoteStopTransactionResponse")
@@ -446,20 +585,16 @@ private abstract class ResetReqMixin(
 
 @JsonRootName("sendLocalListRequest")
 private abstract class SendLocalListReqMixin(
-    @JacksonXmlProperty(localName = "o:hash")
-    val hash: String? = null,
     @JacksonXmlProperty(localName = "o:listVersion")
     val listVersion: Int,
     @JacksonXmlProperty(localName = "o:localAuthorizationList")
-    val localAuthorizationList: List<AuthorisationData>? = null,
+    val localAuthorizationList: List<AuthorizationData>? = null,
     @JacksonXmlProperty(localName = "o:updateType")
     val updateType: UpdateType
 )
 
 @JsonRootName("sendLocalListResponse")
 private abstract class SendLocalListRespMixin(
-    @JacksonXmlProperty(localName = "o:hash")
-    val hash: String? = null,
     @JacksonXmlProperty(localName = "o:status")
     val status: UpdateStatus
 )
@@ -530,6 +665,8 @@ private abstract class StopTransactionReqMixin(
     val timestamp: Instant,
     @JacksonXmlProperty(localName = "o:transactionId")
     val transactionId: Int,
+    @JacksonXmlProperty(localName = "o:reason")
+    val reason: Reason? = Reason.Local,
     @JacksonXmlProperty(localName = "o:transactionData")
     val transactionData: List<MeterValue>? = null
 )

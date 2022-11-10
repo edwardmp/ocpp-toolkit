@@ -45,7 +45,9 @@ enum class JsonMessageType(val id: Int) {
     companion object {
         fun fromId(id: Int) = values()
             .firstOrNull { it.id == id }
-            ?: throw IllegalArgumentException("$id is not a valid json message type - supported types: ${values().map { it.id }}")
+            ?: throw IllegalArgumentException(
+                "$id is not a valid json message type - supported types: ${values().map { it.id }}"
+            )
     }
 }
 
@@ -74,7 +76,7 @@ enum class JsonMessageErrorCode(val value: String) {
                 .firstOrNull { it.value == value }
                 ?: throw IllegalArgumentException(
                     "$value is not a valid json message error code - " +
-                            "supported types: ${JsonMessageErrorCode.values().map { it.value }}"
+                        "supported types: ${JsonMessageErrorCode.values().map { it.value }}"
                 )
     }
 }

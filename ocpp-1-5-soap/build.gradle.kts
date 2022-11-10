@@ -13,7 +13,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:_")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:_")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:_")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:_")
 
     testImplementation(kotlin("test-junit"))
 }

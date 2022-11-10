@@ -52,7 +52,7 @@ import com.izivia.ocpp.soap.SoapBody
 import com.izivia.ocpp.soap.SoapFault
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class Ocpp15SoapBody(
+data class Ocpp15SoapBody(
     val authorizeRequest: AuthorizeReq?,
     val authorizeResponse: AuthorizeResp?,
     val bootNotificationRequest: BootNotificationReq?,
