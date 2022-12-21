@@ -8,5 +8,9 @@ data class StopTransactionReq(
     val meterStop: Int,
     val timestamp: Instant,
     val transactionId: Int,
-    val transactionData: List<MeterValue>? = null
+    val transactionData: List<TransactionData>? = null
+)
+
+data class TransactionData(
+    val values: List<MeterValue>? = null
 )

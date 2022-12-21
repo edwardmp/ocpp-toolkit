@@ -66,6 +66,7 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointEr
 import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointStatus
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
+import com.izivia.ocpp.core15.model.stoptransaction.TransactionData
 import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core15.model.unlockconnector.enumeration.UnlockStatus
@@ -198,18 +199,22 @@ class JsonSchemaTest {
                 transactionId = 12,
                 idTag = "Tag1",
                 transactionData = listOf(
-                    MeterValue(
-                        value = listOf(
-                            SampledValue(
-                                value = "123456789",
-                                context = ReadingContext.SamplePeriodic,
-                                format = ValueFormat.Raw,
-                                measurand = Measurand.EnergyActiveImportRegister,
-                                location = Location.Outlet,
-                                unit = UnitOfMeasure.Wh
+                    TransactionData(
+                        values = listOf(
+                            MeterValue(
+                                value = listOf(
+                                    SampledValue(
+                                        value = "123456789",
+                                        context = ReadingContext.SamplePeriodic,
+                                        format = ValueFormat.Raw,
+                                        measurand = Measurand.EnergyActiveImportRegister,
+                                        location = Location.Outlet,
+                                        unit = UnitOfMeasure.Wh
+                                    )
+                                ),
+                                timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
                             )
-                        ),
-                        timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
+                        )
                     )
                 )
             ),

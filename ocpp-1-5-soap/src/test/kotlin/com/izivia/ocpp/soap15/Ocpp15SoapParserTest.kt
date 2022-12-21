@@ -482,6 +482,7 @@ class Ocpp15SoapParserTest {
                             <idTag>AAAAAAAA</idTag>
                             <timestamp>2022-05-05T04:37:15Z</timestamp>
                             <meterStop>19224</meterStop>
+                            <transactionData />
                         </stopTransactionRequest>
                     </SOAP-ENV:Body>
                 </SOAP-ENV:Envelope>
@@ -492,7 +493,10 @@ class Ocpp15SoapParserTest {
             get { timestamp }.isEqualTo(Instant.parse("2022-05-05T04:37:15Z"))
             get { transactionId }.isEqualTo(16696)
             get { idTag }.isEqualTo("AAAAAAAA")
-            get { transactionData }.isNull()
+            // It could be great to have an example with transaction data
+            get { transactionData }.isNotNull().hasSize(1).first().and {
+                get { values }.isNull()
+            }
         }
     }
 
