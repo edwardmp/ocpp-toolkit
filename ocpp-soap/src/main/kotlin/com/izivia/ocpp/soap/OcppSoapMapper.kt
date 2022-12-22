@@ -2,6 +2,7 @@ package com.izivia.ocpp.soap
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
@@ -21,6 +22,7 @@ class OcppSoapMapper : ObjectMapper(
         )
         .registerModule(KotlinxInstantModule())
         .setSerializationInclusion(Include.NON_NULL)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .setDefaultPropertyInclusion(Include.NON_DEFAULT)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 )
