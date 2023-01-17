@@ -20,6 +20,8 @@ import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesResp
+import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionReq
+import com.izivia.ocpp.core16.model.remotestop.RemoteStopTransactionReq
 import com.izivia.ocpp.core16.model.starttransaction.StartTransactionReq
 import com.izivia.ocpp.core16.model.starttransaction.StartTransactionResp
 import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationReq
@@ -35,7 +37,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.*
-import java.util.UUID
+import java.util.*
 
 class ocpp16SoapParserTest {
 
@@ -1492,6 +1494,70 @@ class ocpp16SoapParserTest {
                     get { expiryDate }.isEqualTo(Instant.parse("2022-05-16T15:42:05.128Z"))
                 }
             }
+        }
+    }
+
+    @Test
+    fun `should parse message to RemoteStartTransactionReq`() {
+        val message =
+            """
+                <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
+                            xmlns:o="urn://Ocpp/Cp/2015/10/">
+                    <s:Header>
+                        <a:MessageID>3fd2ec71-dcd4-425a-a226-73b227748ced</a:MessageID>
+                        <a:Action>/RemoteStartTransaction</a:Action>
+                        <o:chargeBoxIdentity>IES20210511714911</o:chargeBoxIdentity>
+                        <a:From>
+                            <a:Address>localhost:8095</a:Address>
+                        </a:From>
+                        <a:To>http://localhost:8102/api/soap/IES20210511714911</a:To>
+                    </s:Header>
+                    <s:Body>
+                        <o:remoteStartTransactionRequest>
+                            <idTag>D236BAA8B8699E</idTag>
+                            <connectorId>4</connectorId>
+                        </o:remoteStartTransactionRequest>
+                    </s:Body>
+                </s:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseRequestFromSoap<RemoteStartTransactionReq>(message).payload
+        ).and {
+            get { connectorId }.isEqualTo(4)
+            get { idTag }.isEqualTo("D236BAA8B8699E")
+        }
+    }
+
+    @Test
+    fun `should parse message to RemoteStopTransactionReq`() {
+        val message =
+            """
+                <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
+                            xmlns:o="urn://Ocpp/Cp/2015/10/">
+                    <s:Header>
+                        <a:MessageID>3fd2ec71-dcd4-425a-a226-73b227748ced</a:MessageID>
+                        <a:Action>/RemoteStartTransaction</a:Action>
+                        <o:chargeBoxIdentity>IES20210511714911</o:chargeBoxIdentity>
+                        <a:From>
+                            <a:Address>localhost:8095</a:Address>
+                        </a:From>
+                        <a:To>http://localhost:8102/api/soap/IES20210511714911</a:To>
+                    </s:Header>
+                    <s:Body>
+                        <o:remoteStopTransactionRequest>
+                            <transactionId>1</transactionId>
+                        </o:remoteStopTransactionRequest>
+                    </s:Body>
+                </s:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseRequestFromSoap<RemoteStopTransactionReq>(message).payload
+        ).and {
+            get { transactionId }.isEqualTo(1)
         }
     }
 

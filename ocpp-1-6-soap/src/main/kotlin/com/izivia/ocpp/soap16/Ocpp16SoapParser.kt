@@ -33,8 +33,10 @@ class Ocpp16SoapParser : OcppSoapParserImpl(
         envelope.body.heartbeatRequest != null -> envelope.body.heartbeatRequest!!
         envelope.body.meterValuesRequest != null -> envelope.body.meterValuesRequest!!
         envelope.body.startTransactionRequest != null -> envelope.body.startTransactionRequest!!
+        envelope.body.remoteStartTransactionRequest != null -> envelope.body.remoteStartTransactionRequest!!
         envelope.body.statusNotificationRequest != null -> envelope.body.statusNotificationRequest!!
         envelope.body.stopTransactionRequest != null -> envelope.body.stopTransactionRequest!!
+        envelope.body.remoteStopTransactionRequest != null -> envelope.body.remoteStopTransactionRequest!!
         envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown request message operation. enveloppe = $envelope")
     }
@@ -50,8 +52,10 @@ class Ocpp16SoapParser : OcppSoapParserImpl(
         envelope.body.heartbeatResponse != null -> envelope.body.heartbeatResponse!!
         envelope.body.meterValuesResponse != null -> envelope.body.meterValuesResponse!!
         envelope.body.startTransactionResponse != null -> envelope.body.startTransactionResponse!!
+        envelope.body.remoteStartTransactionResponse != null -> envelope.body.remoteStartTransactionResponse!!
         envelope.body.statusNotificationResponse != null -> envelope.body.statusNotificationResponse!!
         envelope.body.stopTransactionResponse != null -> envelope.body.stopTransactionResponse!!
+        envelope.body.remoteStopTransactionResponse != null -> envelope.body.remoteStopTransactionResponse!!
         envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown response message operation. enveloppe = $envelope")
     }
