@@ -57,9 +57,7 @@ class OcppSoapClientTransport(
     }
 
     private fun extractAction(payload: String): String =
-        ocppSoapParser
-            .parseAnyRequestFromSoap(payload)
-            .action
+        ocppSoapParser.readToEnvelop(payload).header.action.value
 
     override fun connect() {
         server?.start()
