@@ -93,7 +93,7 @@ class OcppSoapClientTransportTest {
         val time = Instant.parse("2022-05-17T15:42:00.503Z")
         val client = OcppSoapClientTransport(
             SoapClientSettings(
-                path = "/ocpp/soap",
+                path = "",
                 port = 5001,
             ),
             ocppId = "ocppChargePoint",
@@ -108,7 +108,7 @@ class OcppSoapClientTransportTest {
 
         client.connect()
 
-        val request = Request(Method.POST, "http://127.0.0.1:5001/ocpp/soap/HeartBeat")
+        val request = Request(Method.POST, "http://127.0.0.1:5001")
             .body(
                 """
                 <S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">

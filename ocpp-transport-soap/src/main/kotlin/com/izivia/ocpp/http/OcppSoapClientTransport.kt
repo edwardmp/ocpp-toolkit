@@ -5,10 +5,9 @@ import com.izivia.ocpp.transport.ClientTransport
 import com.izivia.ocpp.transport.OcppCallErrorException
 import com.izivia.ocpp.transport.RequestHeaders
 import org.http4k.client.JavaHttpClient
+import org.http4k.contract.bindContract
 import org.http4k.contract.contract
-import org.http4k.contract.div
 import org.http4k.core.*
-import org.http4k.lens.Path
 import org.http4k.server.Http4kServer
 import org.http4k.server.Undertow
 import org.http4k.server.asServer
@@ -35,9 +34,8 @@ class OcppSoapClientTransport(
     private val handlers = mutableListOf<(HttpMessage) -> HttpMessage?>()
 
     init {
-
         val route =
-            clientSettings.path / Path.of("action") bindContract Method.POST to ::routeHandler
+            clientSettings.path bindContract Method.POST to ::routeHandler
         val app = contract {
             routes += route
         }
@@ -45,19 +43,23 @@ class OcppSoapClientTransport(
     }
 
     private val targetRoute = target.removeSuffix("/") + "/" + ocppId
-    private fun routeHandler(action: String): HttpHandler = { request: Request ->
+    private fun routeHandler(): HttpHandler = { request: Request ->
+        val payload = request.bodyString()
+        val action = extractAction(payload)
         val message = HttpMessage(
             ocppId = ocppId,
             action = action,
-            payload = request.bodyString()
+            payload = payload
         )
-        handlers
-            .asSequence()
-            .map { it(message) }
-            .firstOrNull()
+        handlers.firstNotNullOfOrNull { it(message) }
             ?.let { Response(Status.OK).body(it.payload) }
             ?: Response(Status.NOT_FOUND).also { logger.warn("no action handler found for $message") }
     }
+
+    private fun extractAction(payload: String): String =
+        ocppSoapParser
+            .parseAnyRequestFromSoap(payload)
+            .action
 
     override fun connect() {
         server?.start()
