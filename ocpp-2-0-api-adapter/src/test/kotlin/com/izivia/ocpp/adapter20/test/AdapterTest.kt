@@ -8,7 +8,6 @@ import com.izivia.ocpp.api.model.cancelreservation.CancelReservationResp
 import com.izivia.ocpp.api.model.cancelreservation.enumeration.CancelReservationStatusEnumType
 import com.izivia.ocpp.api.model.certificateSigned.CertificateSignedReq
 import com.izivia.ocpp.api.model.certificateSigned.CertificateSignedResp
-import com.izivia.ocpp.api.model.common.MeterValueType
 import com.izivia.ocpp.api.model.changeavailability.ChangeAvailabilityReq
 import com.izivia.ocpp.api.model.changeavailability.ChangeAvailabilityResp
 import com.izivia.ocpp.api.model.changeavailability.enumeration.ChangeAvailabilityStatusEnumType
@@ -18,16 +17,25 @@ import com.izivia.ocpp.api.model.clearcache.enumeration.ClearCacheStatusEnumType
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileResp
 import com.izivia.ocpp.api.model.clearchargingprofile.enumeration.ClearChargingProfileStatusEnumType
-import com.izivia.ocpp.api.model.common.SampledValueType
 import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageReq
-import com.izivia.ocpp.api.model.common.enumeration.GenericDeviceModelStatusEnumType
 import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageResp
 import com.izivia.ocpp.api.model.cleardisplaymessage.enumeration.ClearMessageStatusEnumType
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearMonitoringResultType
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoringReq
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoringResp
-import com.izivia.ocpp.api.model.common.enumeration.ReadingContextEnumType
 import com.izivia.ocpp.api.model.clearvariablemonitoring.enumeration.ClearMonitoringStatusEnumType
+import com.izivia.ocpp.api.model.common.CertificateHashDataType
+import com.izivia.ocpp.api.model.common.ComponentType
+import com.izivia.ocpp.api.model.common.MeterValueType
+import com.izivia.ocpp.api.model.common.SampledValueType
+import com.izivia.ocpp.api.model.common.SignedMeterValueType
+import com.izivia.ocpp.api.model.common.VariableType
+import com.izivia.ocpp.api.model.common.enumeration.GenericDeviceModelStatusEnumType
+import com.izivia.ocpp.api.model.common.enumeration.LocationEnumType
+import com.izivia.ocpp.api.model.common.enumeration.MeasurandEnumType
+import com.izivia.ocpp.api.model.common.enumeration.PhaseEnumType
+import com.izivia.ocpp.api.model.common.enumeration.ReadingContextEnumType
+import com.izivia.ocpp.api.model.common.enumeration.RequestStartStopStatusEnumType
 import com.izivia.ocpp.api.model.costupdated.CostUpdatedReq
 import com.izivia.ocpp.api.model.costupdated.CostUpdatedResp
 import com.izivia.ocpp.api.model.customerinformation.CustomerInformationReq
@@ -50,8 +58,10 @@ import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesReq
 import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesResp
 import com.izivia.ocpp.api.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
+import com.izivia.ocpp.api.model.getinstalledcertificateids.CertificateHashDataChainType
 import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsReq
 import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsResp
+import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetCertificateIdUseEnumType
 import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetInstalledCertificateStatusEnumType
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionReq
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionResp
@@ -62,6 +72,8 @@ import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportReq
 import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportResp
 import com.izivia.ocpp.api.model.getreport.GetReportReq
 import com.izivia.ocpp.api.model.getreport.GetReportResp
+import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusReq
+import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusResp
 import com.izivia.ocpp.api.model.getvariables.GetVariableResultType
 import com.izivia.ocpp.api.model.getvariables.GetVariablesReq
 import com.izivia.ocpp.api.model.getvariables.GetVariablesResp
@@ -76,9 +88,6 @@ import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionReq
 import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionResp
 import com.izivia.ocpp.api.model.remotestop.RequestStopTransactionReq
 import com.izivia.ocpp.api.model.remotestop.RequestStopTransactionResp
-import com.izivia.ocpp.core20.model.reportchargingprofiles.ReportChargingProfilesReq
-import com.izivia.ocpp.core20.model.reportchargingprofiles.ReportChargingProfilesResp
-import com.izivia.ocpp.api.model.reportchargingprofiles.ReportChargingProfilesReq as ReportChargingProfilesReqGen
 import com.izivia.ocpp.api.model.reservenow.ReserveNowReq
 import com.izivia.ocpp.api.model.reservenow.ReserveNowResp
 import com.izivia.ocpp.api.model.reservenow.enumeration.ReserveNowStatusEnumType
@@ -96,14 +105,15 @@ import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageResp
 import com.izivia.ocpp.api.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
 import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseReq
 import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseResp
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelReq
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelResp
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileReq
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileResp
 import com.izivia.ocpp.api.model.setnetworkprofile.enumeration.SetNetworkProfileStatusEnumType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
+import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
 import com.izivia.ocpp.api.model.setvariables.SetVariableResultType
 import com.izivia.ocpp.api.model.setvariables.SetVariablesReq
 import com.izivia.ocpp.api.model.setvariables.SetVariablesResp
@@ -124,7 +134,6 @@ import com.izivia.ocpp.core20.ChargePointOperations
 import com.izivia.ocpp.core20.impl.RealChargePointOperations
 import com.izivia.ocpp.core20.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core20.model.authorize.AuthorizeResp
-import com.izivia.ocpp.core20.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core20.model.bootnotification.ChargingStationType
@@ -132,31 +141,28 @@ import com.izivia.ocpp.core20.model.bootnotification.enumeration.BootReasonEnumT
 import com.izivia.ocpp.core20.model.bootnotification.enumeration.RegistrationStatusEnumType
 import com.izivia.ocpp.core20.model.clearedcharginglimit.ClearedChargingLimitReq
 import com.izivia.ocpp.core20.model.clearedcharginglimit.ClearedChargingLimitResp
-import com.izivia.ocpp.api.model.common.CertificateHashDataType
-import com.izivia.ocpp.api.model.common.ComponentType
-import com.izivia.ocpp.api.model.common.SignedMeterValueType
-import com.izivia.ocpp.api.model.common.VariableType
-import com.izivia.ocpp.api.model.common.enumeration.LocationEnumType
-import com.izivia.ocpp.api.model.common.enumeration.MeasurandEnumType
-import com.izivia.ocpp.api.model.common.enumeration.PhaseEnumType
-import com.izivia.ocpp.api.model.common.enumeration.RequestStartStopStatusEnumType
 import com.izivia.ocpp.core20.model.common.ChargingProfileType
-import com.izivia.ocpp.api.model.common.ChargingProfileType as ChargingProfileTypeGen
 import com.izivia.ocpp.core20.model.common.ChargingSchedulePeriodType
 import com.izivia.ocpp.core20.model.common.ChargingScheduleType
 import com.izivia.ocpp.core20.model.common.EVSEType
 import com.izivia.ocpp.core20.model.common.IdTokenInfoType
 import com.izivia.ocpp.core20.model.common.IdTokenType
 import com.izivia.ocpp.core20.model.common.MessageContentType
+import com.izivia.ocpp.core20.model.common.MessageInfoType
 import com.izivia.ocpp.core20.model.common.OCSPRequestDataType
 import com.izivia.ocpp.core20.model.common.StatusInfoType
 import com.izivia.ocpp.core20.model.common.enumeration.AuthorizationStatusEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.CertificateSigningUseEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.ChargingLimitSourceEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.ChargingProfilePurposeEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.ChargingRateUnitEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.GenericStatusEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.IdTokenEnumType
 import com.izivia.ocpp.core20.model.common.enumeration.MessageFormatEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.MessagePriorityEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.MessageStateEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.MonitorEnumType
 import com.izivia.ocpp.core20.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core20.model.datatransfer.enumeration.DataTransferStatusEnumType
 import com.izivia.ocpp.core20.model.firmwarestatusnotification.FirmwareStatusNotificationReq
@@ -176,11 +182,8 @@ import com.izivia.ocpp.core20.model.notifycharginglimit.NotifyChargingLimitReq
 import com.izivia.ocpp.core20.model.notifycharginglimit.NotifyChargingLimitResp
 import com.izivia.ocpp.core20.model.notifycustomerinformation.NotifyCustomerInformationReq
 import com.izivia.ocpp.core20.model.notifycustomerinformation.NotifyCustomerInformationResp
-import com.izivia.ocpp.core20.model.common.MessageInfoType
 import com.izivia.ocpp.core20.model.notifydisplaymessages.NotifyDisplayMessagesReq
 import com.izivia.ocpp.core20.model.notifydisplaymessages.NotifyDisplayMessagesResp
-import com.izivia.ocpp.core20.model.common.enumeration.MessagePriorityEnumType
-import com.izivia.ocpp.core20.model.common.enumeration.MessageStateEnumType
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.ChargingNeedsType
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.NotifyEVChargingNeedsReq
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.NotifyEVChargingNeedsResp
@@ -192,12 +195,14 @@ import com.izivia.ocpp.core20.model.notifymonitoringreport.MonitoringDataType
 import com.izivia.ocpp.core20.model.notifymonitoringreport.NotifyMonitoringReportReq
 import com.izivia.ocpp.core20.model.notifymonitoringreport.NotifyMonitoringReportResp
 import com.izivia.ocpp.core20.model.notifymonitoringreport.VariableMonitoringType
-import com.izivia.ocpp.core20.model.common.enumeration.MonitorEnumType
 import com.izivia.ocpp.core20.model.notifyreport.NotifyReportReq
 import com.izivia.ocpp.core20.model.notifyreport.NotifyReportResp
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationReq
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationResp
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.enumeration.PublishFirmwareStatusEnumType
+import com.izivia.ocpp.core20.model.remotestart.enumeration.ChargingProfileKindEnumType
+import com.izivia.ocpp.core20.model.reportchargingprofiles.ReportChargingProfilesReq
+import com.izivia.ocpp.core20.model.reportchargingprofiles.ReportChargingProfilesResp
 import com.izivia.ocpp.core20.model.reservationstatusupdate.ReservationStatusUpdateReq
 import com.izivia.ocpp.core20.model.reservationstatusupdate.ReservationStatusUpdateResp
 import com.izivia.ocpp.core20.model.reservationstatusupdate.enumeration.ReservationUpdateStatusEnumType
@@ -205,16 +210,6 @@ import com.izivia.ocpp.core20.model.securityeventnotification.SecurityEventNotif
 import com.izivia.ocpp.core20.model.securityeventnotification.SecurityEventNotificationResp
 import com.izivia.ocpp.core20.model.signcertificate.SignCertificateReq
 import com.izivia.ocpp.core20.model.signcertificate.SignCertificateResp
-import com.izivia.ocpp.api.model.getinstalledcertificateids.CertificateHashDataChainType
-import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetCertificateIdUseEnumType
-import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusReq
-import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusResp
-import com.izivia.ocpp.core20.model.common.enumeration.ChargingProfilePurposeEnumType
-import com.izivia.ocpp.core20.model.remotestart.enumeration.ChargingProfileKindEnumType
-import com.izivia.ocpp.api.model.common.enumeration.ChargingProfilePurposeEnumType as ChargingProfilePurposeEnumTypeGen
-import com.izivia.ocpp.api.model.remotestart.enumeration.ChargingProfileKindEnumType as ChargingProfileKindEnumTypeGen
-import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.CertificateSigningUseEnumType as CertificateSigningUseEnumTypeGen
 import com.izivia.ocpp.core20.model.statusnotification.StatusNotificationReq
 import com.izivia.ocpp.core20.model.statusnotification.StatusNotificationResp
 import com.izivia.ocpp.core20.model.statusnotification.enumeration.ConnectorStatusEnumType
@@ -239,26 +234,33 @@ import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import com.izivia.ocpp.api.model.authorize.AuthorizeReq as AuthorizeReqGen
-import com.izivia.ocpp.api.model.common.enumeration.HashAlgorithmEnumType as HashAlgorithmEnumTypeGen
 import com.izivia.ocpp.api.model.bootnotification.BootNotificationReq as BootNotificationReqGen
 import com.izivia.ocpp.api.model.bootnotification.ChargingStationType as ChargingStationTypeGen
 import com.izivia.ocpp.api.model.bootnotification.enumeration.BootReasonEnumType as BootReasonEnumTypeGen
 import com.izivia.ocpp.api.model.bootnotification.enumeration.RegistrationStatusEnumType as RegistrationStatusEnumTypeGen
 import com.izivia.ocpp.api.model.clearedcharginglimit.ClearedChargingLimitReq as ClearedChargingLimitReqGen
+import com.izivia.ocpp.api.model.common.ChargingProfileType as ChargingProfileTypeGen
 import com.izivia.ocpp.api.model.common.ChargingSchedulePeriodType as ChargingSchedulePeriodTypeGen
 import com.izivia.ocpp.api.model.common.ChargingScheduleType as ChargingScheduleTypeGen
 import com.izivia.ocpp.api.model.common.EVSEType as EVSETypeGen
 import com.izivia.ocpp.api.model.common.IdTokenInfoType as IdTokenInfoTypeGen
 import com.izivia.ocpp.api.model.common.IdTokenType as IdTokenTypeGen
 import com.izivia.ocpp.api.model.common.MessageContentType as MessageContentTypeGen
+import com.izivia.ocpp.api.model.common.MessageInfoType as MessageInfoTypeGen
 import com.izivia.ocpp.api.model.common.OCSPRequestDataType as OCSPRequestDataTypeGen
 import com.izivia.ocpp.api.model.common.StatusInfoType as StatusInfoTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.AuthorizationStatusEnumType as AuthorizationStatusEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.CertificateSigningUseEnumType as CertificateSigningUseEnumTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.ChargingLimitSourceEnumType as ChargingLimitSourceEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.ChargingProfilePurposeEnumType as ChargingProfilePurposeEnumTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.ChargingRateUnitEnumType as ChargingRateUnitEnumTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.GenericStatusEnumType as GenericStatusEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.HashAlgorithmEnumType as HashAlgorithmEnumTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.IdTokenEnumType as IdTokenEnumTypeGen
 import com.izivia.ocpp.api.model.common.enumeration.MessageFormatEnumType as MessageFormatEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.MessagePriorityEnumType as MessagePriorityEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.MessageStateEnumType as MessageStateEnumTypeGen
+import com.izivia.ocpp.api.model.common.enumeration.MonitorEnumType as MonitorEnumTypeGen
 import com.izivia.ocpp.api.model.datatransfer.DataTransferResp as DataTransferRespGen
 import com.izivia.ocpp.api.model.firmwarestatusnotification.FirmwareStatusNotificationReq as FirmwareStatusNotificationReqGen
 import com.izivia.ocpp.api.model.firmwarestatusnotification.enumeration.FirmwareStatusEnumType as FirmwareStatusEnumTypeGen
@@ -270,10 +272,7 @@ import com.izivia.ocpp.api.model.logstatusnotification.enumeration.UploadLogStat
 import com.izivia.ocpp.api.model.notifycharginglimit.ChargingLimitType as ChargingLimitTypeGen
 import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitReq as NotifyChargingLimitReqGen
 import com.izivia.ocpp.api.model.notifycustomerinformation.NotifyCustomerInformationReq as NotifyCustomerInformationReqGen
-import com.izivia.ocpp.api.model.common.MessageInfoType as MessageInfoTypeGen
 import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesReq as NotifyDisplayMessagesReqGen
-import com.izivia.ocpp.api.model.common.enumeration.MessagePriorityEnumType as MessagePriorityEnumTypeGen
-import com.izivia.ocpp.api.model.common.enumeration.MessageStateEnumType as MessageStateEnumTypeGen
 import com.izivia.ocpp.api.model.notifyevchargingneeds.ChargingNeedsType as ChargingNeedsTypeGen
 import com.izivia.ocpp.api.model.notifyevchargingneeds.DCChargingParametersType as DCChargingParametersTypeGen
 import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsReq as NotifyEVChargingNeedsReqGen
@@ -283,10 +282,11 @@ import com.izivia.ocpp.api.model.notifyevchargingschedule.NotifyEVChargingSchedu
 import com.izivia.ocpp.api.model.notifymonitoringreport.MonitoringDataType as MonitoringDataTypeGen
 import com.izivia.ocpp.api.model.notifymonitoringreport.NotifyMonitoringReportReq as NotifyMonitoringReportReqGen
 import com.izivia.ocpp.api.model.notifymonitoringreport.VariableMonitoringType as VariableMonitoringTypeGen
-import com.izivia.ocpp.api.model.common.enumeration.MonitorEnumType as MonitorEnumTypeGen
 import com.izivia.ocpp.api.model.notifyreport.NotifyReportReq as NotifyReportReqGen
 import com.izivia.ocpp.api.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationReq as PublishFirmwareStatusNotificationReqGen
 import com.izivia.ocpp.api.model.publishfirmwarestatusnotification.enumeration.PublishFirmwareStatusEnumType as PublishFirmwareStatusEnumTypeGen
+import com.izivia.ocpp.api.model.remotestart.enumeration.ChargingProfileKindEnumType as ChargingProfileKindEnumTypeGen
+import com.izivia.ocpp.api.model.reportchargingprofiles.ReportChargingProfilesReq as ReportChargingProfilesReqGen
 import com.izivia.ocpp.api.model.reservationstatusupdate.ReservationStatusUpdateReq as ReservationStatusUpdateReqGen
 import com.izivia.ocpp.api.model.reservationstatusupdate.enumeration.ReservationUpdateStatusEnumType as ReservationUpdateStatusEnumTypeGen
 import com.izivia.ocpp.api.model.securityeventnotification.SecurityEventNotificationReq as SecurityEventNotificationReqGen
@@ -305,7 +305,6 @@ class AdapterTest {
     private val csApi: CSApi = object : CSApi {
 
         override fun start() = throw NotImplementedError("ChargePoint can't start a server")
-
 
         override fun stop() = throw NotImplementedError("ChargePoint can't stop a server")
 
@@ -437,7 +436,6 @@ class AdapterTest {
             meta: RequestMetadata,
             req: ClearVariableMonitoringReq
         ): OperationExecution<ClearVariableMonitoringReq, ClearVariableMonitoringResp> {
-
             val response = ClearVariableMonitoringResp(
                 listOf(
                     ClearMonitoringResultType(
@@ -473,18 +471,20 @@ class AdapterTest {
             meta: RequestMetadata,
             req: GetVariablesReq
         ): OperationExecution<GetVariablesReq, GetVariablesResp> {
-            val response = GetVariablesResp(req.getVariableData.map {
-                GetVariableResultType(
-                    attributeStatus = if (it.variable.name == "AllowOfflineTxForUnknownId") {
-                        GetVariableStatusEnumType.Accepted
-                    } else {
-                        GetVariableStatusEnumType.Rejected
-                    },
-                    component = ComponentType(it.component.name),
-                    variable = VariableType(it.variable.name),
-                    readonly = true
-                )
-            })
+            val response = GetVariablesResp(
+                req.getVariableData.map {
+                    GetVariableResultType(
+                        attributeStatus = if (it.variable.name == "AllowOfflineTxForUnknownId") {
+                            GetVariableStatusEnumType.Accepted
+                        } else {
+                            GetVariableStatusEnumType.Rejected
+                        },
+                        component = ComponentType(it.component.name),
+                        variable = VariableType(it.variable.name),
+                        readonly = true
+                    )
+                }
+            )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
@@ -560,100 +560,107 @@ class AdapterTest {
         }
 
         override fun deleteCertificate(
-                meta: RequestMetadata,
-                req: DeleteCertificateReq
+            meta: RequestMetadata,
+            req: DeleteCertificateReq
         ): OperationExecution<DeleteCertificateReq, DeleteCertificateResp> {
             val response = DeleteCertificateResp(DeleteCertificateStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getDisplayMessages(
-                meta: RequestMetadata,
-                req: GetDisplayMessagesReq
+            meta: RequestMetadata,
+            req: GetDisplayMessagesReq
         ): OperationExecution<GetDisplayMessagesReq, GetDisplayMessagesResp> {
             val response = GetDisplayMessagesResp(
-                                status = GetDisplayMessagesStatusEnumType.Accepted,
-                                statusInfo = StatusInfoTypeGen("reason", "additional")
-                            )
+                status = GetDisplayMessagesStatusEnumType.Accepted,
+                statusInfo = StatusInfoTypeGen("reason", "additional")
+            )
 
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun publishFirmware(
-                meta: RequestMetadata,
-                req: PublishFirmwareReq
+            meta: RequestMetadata,
+            req: PublishFirmwareReq
         ): OperationExecution<PublishFirmwareReq, PublishFirmwareResp> {
             val response = PublishFirmwareResp(GenericStatusEnumTypeGen.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getChargingProfiles(
-                meta: RequestMetadata,
-                req: GetChargingProfilesReq
+            meta: RequestMetadata,
+            req: GetChargingProfilesReq
         ): OperationExecution<GetChargingProfilesReq, GetChargingProfilesResp> {
             val response = GetChargingProfilesResp(
-                    GetChargingProfileStatusEnumType.Accepted,
+                GetChargingProfileStatusEnumType.Accepted
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun installCertificate(
-                meta: RequestMetadata,
-                req: InstallCertificateReq
+            meta: RequestMetadata,
+            req: InstallCertificateReq
         ): OperationExecution<InstallCertificateReq, InstallCertificateResp> {
             val response = InstallCertificateResp(
                 InstallCertificateStatusEnumType.Accepted,
-                StatusInfoTypeGen("reason","info")
+                StatusInfoTypeGen("reason", "info")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun customerInformation(
-                meta: RequestMetadata,
-                req: CustomerInformationReq
+            meta: RequestMetadata,
+            req: CustomerInformationReq
         ): OperationExecution<CustomerInformationReq, CustomerInformationResp> {
             val response = CustomerInformationResp(
-                    CustomerInformationStatusEnumType.Accepted
+                CustomerInformationStatusEnumType.Accepted
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getInstalledCertificateIds(
-                meta: RequestMetadata,
-                req: GetInstalledCertificateIdsReq
+            meta: RequestMetadata,
+            req: GetInstalledCertificateIdsReq
         ): OperationExecution<GetInstalledCertificateIdsReq, GetInstalledCertificateIdsResp> {
             val response = GetInstalledCertificateIdsResp(
-                    GetInstalledCertificateStatusEnumType.Accepted,
-                    listOf(
-                            CertificateHashDataChainType(GetCertificateIdUseEnumType.CSMSRootCertificate, CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512,"","",""),listOf(CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512,"","",""), CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512,"","",""))),
-                    ),
-                    StatusInfoTypeGen("reason","info")
+                GetInstalledCertificateStatusEnumType.Accepted,
+                listOf(
+                    CertificateHashDataChainType(
+                        GetCertificateIdUseEnumType.CSMSRootCertificate,
+                        CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512, "", "", ""),
+                        listOf(
+                            CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512, "", "", ""),
+                            CertificateHashDataType(HashAlgorithmEnumTypeGen.SHA512, "", "", "")
+                        )
+                    )
+                ),
+                StatusInfoTypeGen("reason", "info")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun unpublishFirmware(
-                meta: RequestMetadata,
-                req: UnpublishFirmwareReq
+            meta: RequestMetadata,
+            req: UnpublishFirmwareReq
         ): OperationExecution<UnpublishFirmwareReq, UnpublishFirmwareResp> {
             val response = UnpublishFirmwareResp(UnpublishFirmwareStatusEnumType.DownloadOngoing)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setVariableMonitoring(
-                meta: RequestMetadata,
-                req: SetVariableMonitoringReq
+            meta: RequestMetadata,
+            req: SetVariableMonitoringReq
         ): OperationExecution<SetVariableMonitoringReq, SetVariableMonitoringResp> {
             val response = SetVariableMonitoringResp(
                 listOf(
                     SetMonitoringResultType(
-                            type= MonitorEnumTypeGen.Delta,
-                            id=213,
-                            component = ComponentType("name"),
-                            variable=VariableType("name"),
-                            statusInfo=StatusInfoTypeGen("reason","info"),
-                            severity=3,
-                            status = SetMonitoringStatusEnumType.Accepted,
+                        type = MonitorEnumTypeGen.Delta,
+                        id = 213,
+                        component = ComponentType("name"),
+                        variable = VariableType("name"),
+                        statusInfo = StatusInfoTypeGen("reason", "info"),
+                        severity = 3,
+                        status = SetMonitoringStatusEnumType.Accepted
                     )
                 )
             )
@@ -661,57 +668,61 @@ class AdapterTest {
         }
 
         override fun setMonitoringLevel(
-                meta: RequestMetadata,
-                req: SetMonitoringLevelReq
+            meta: RequestMetadata,
+            req: SetMonitoringLevelReq
         ): OperationExecution<SetMonitoringLevelReq, SetMonitoringLevelResp> {
             val response = SetMonitoringLevelResp(GenericStatusEnumTypeGen.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setNetworkProfile(
-                meta: RequestMetadata,
-                req: SetNetworkProfileReq
+            meta: RequestMetadata,
+            req: SetNetworkProfileReq
         ): OperationExecution<SetNetworkProfileReq, SetNetworkProfileResp> {
             val response = SetNetworkProfileResp(
-                    SetNetworkProfileStatusEnumType.Accepted
+                SetNetworkProfileStatusEnumType.Accepted
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
-        override fun getTransactionStatus(meta: RequestMetadata, req: GetTransactionStatusReq): OperationExecution<GetTransactionStatusReq, GetTransactionStatusResp> {
+        override fun getTransactionStatus(
+            meta: RequestMetadata,
+            req: GetTransactionStatusReq
+        ): OperationExecution<GetTransactionStatusReq, GetTransactionStatusResp> {
             val response = GetTransactionStatusResp(
-                    false,true
+                false,
+                true
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setMonitoringBase(
-                meta: RequestMetadata,
-                req: SetMonitoringBaseReq
+            meta: RequestMetadata,
+            req: SetMonitoringBaseReq
         ): OperationExecution<SetMonitoringBaseReq, SetMonitoringBaseResp> {
             val response = SetMonitoringBaseResp(GenericDeviceModelStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setDisplayMessage(
-                meta: RequestMetadata,
-                req: SetDisplayMessageReq
+            meta: RequestMetadata,
+            req: SetDisplayMessageReq
         ): OperationExecution<SetDisplayMessageReq, SetDisplayMessageResp> {
             val response = SetDisplayMessageResp(DisplayMessageStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun costUpdated(
-                meta: RequestMetadata,
-                req: CostUpdatedReq
+            meta: RequestMetadata,
+            req: CostUpdatedReq
         ): OperationExecution<CostUpdatedReq, CostUpdatedResp> {
             val response = CostUpdatedResp()
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getMonitoringReport(
-                meta: RequestMetadata,
-                req: GetMonitoringReportReq
+            meta: RequestMetadata,
+            req: GetMonitoringReportReq
         ): OperationExecution<GetMonitoringReportReq, GetMonitoringReportResp> {
             val response = GetMonitoringReportResp(GenericDeviceModelStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
@@ -794,7 +805,8 @@ class AdapterTest {
             meterValue = listOf(
                 MeterValueType(
                     listOf(
-                        SampledValueType(0.6), SampledValueType(
+                        SampledValueType(0.6),
+                        SampledValueType(
                             value = 2.4,
                             context = ReadingContextEnumType.SampleClock,
                             measurand = MeasurandEnumType.Temperature,
@@ -803,7 +815,7 @@ class AdapterTest {
                             signedMeterValue = SignedMeterValueType("Hello", "Bye", "Welcome", "Nice")
                         )
                     ),
-                    Instant.parse("2022-02-15T00:00:00.000Z"),
+                    Instant.parse("2022-02-15T00:00:00.000Z")
                 )
             ),
             transactionId = null
@@ -842,7 +854,11 @@ class AdapterTest {
                 get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS)
             }
             .and { get { this.response.data }.isEqualTo("Hello") }
-            .and { get { this.response.status }.isEqualTo(com.izivia.ocpp.api.model.datatransfer.enumeration.DataTransferStatusEnumType.Accepted) }
+            .and {
+                get { this.response.status }.isEqualTo(
+                    com.izivia.ocpp.api.model.datatransfer.enumeration.DataTransferStatusEnumType.Accepted
+                )
+            }
             .and { get { this.response.statusInfo }.isEqualTo(StatusInfoTypeGen("reason", "additional")) }
     }
 
@@ -972,7 +988,7 @@ class AdapterTest {
             NotifyReportReq(
                 requestId = 1,
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
-                seqNo = 2,
+                seqNo = 2
             ),
             NotifyReportResp()
         )
@@ -981,7 +997,7 @@ class AdapterTest {
         val request = NotifyReportReqGen(
             requestId = 1,
             generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
-            seqNo = 2,
+            seqNo = 2
         )
         val response = operations.notifyReport(requestMetadata, request)
         expectThat(response)
@@ -1103,7 +1119,7 @@ class AdapterTest {
                     id = 1,
                     chargingRateUnit = ChargingRateUnitEnumType.A,
                     chargingSchedulePeriod = listOf(
-                       ChargingSchedulePeriodType(
+                        ChargingSchedulePeriodType(
                             startPeriod = 0,
                             limit = 1.0
                         )
@@ -1298,7 +1314,7 @@ class AdapterTest {
         )
 
         val operations = Ocpp20Adapter("c1", transport, csApi)
-        val request =  LogStatusNotificationReqGen(
+        val request = LogStatusNotificationReqGen(
             status = UploadLogStatusEnumTypeGen.Uploaded,
             requestId = 1
         )
@@ -1324,7 +1340,7 @@ class AdapterTest {
         )
 
         val operations = Ocpp20Adapter("c1", transport, csApi)
-        var request =  PublishFirmwareStatusNotificationReqGen(
+        var request = PublishFirmwareStatusNotificationReqGen(
             status = PublishFirmwareStatusEnumTypeGen.DownloadFailed,
             requestId = 1
         )
@@ -1335,8 +1351,7 @@ class AdapterTest {
                 get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS)
             }
 
-
-        request =  PublishFirmwareStatusNotificationReqGen(
+        request = PublishFirmwareStatusNotificationReqGen(
             status = PublishFirmwareStatusEnumTypeGen.Published,
             requestId = 1
         )
@@ -1535,58 +1550,60 @@ class AdapterTest {
     fun `reportChargingProfiles request`() {
         val requestMetadata = RequestMetadata("")
         every { chargePointOperations.reportChargingProfiles(any(), any()) } returns OperationExecution(
-                ExecutionMetadata(requestMetadata, RequestStatus.SUCCESS, Clock.System.now(), Clock.System.now()),
-                ReportChargingProfilesReq(
-                        2,
-                        ChargingLimitSourceEnumType.CSO,
-                        2,
-                        listOf(
-                                ChargingProfileType(
-                                        id = 1,
-                                        stackLevel = 1,
-                                        chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
-                                        chargingProfileKind = ChargingProfileKindEnumType.Absolute,
-                                        chargingSchedule = listOf(
-                                                ChargingScheduleType(
-                                                        id = 1,
-                                                        chargingRateUnit = ChargingRateUnitEnumType.A,
-                                                        chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.0)),
-                                                        startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
-                                                )
-                                        )
-                                )
-                        ),
-                    false
+            ExecutionMetadata(requestMetadata, RequestStatus.SUCCESS, Clock.System.now(), Clock.System.now()),
+            ReportChargingProfilesReq(
+                2,
+                ChargingLimitSourceEnumType.CSO,
+                2,
+                listOf(
+                    ChargingProfileType(
+                        id = 1,
+                        stackLevel = 1,
+                        chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
+                        chargingProfileKind = ChargingProfileKindEnumType.Absolute,
+                        chargingSchedule = listOf(
+                            ChargingScheduleType(
+                                id = 1,
+                                chargingRateUnit = ChargingRateUnitEnumType.A,
+                                chargingSchedulePeriod =
+                                listOf(ChargingSchedulePeriodType(1, 1.1)),
+                                startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
+                            )
+                        )
+                    )
                 ),
-                ReportChargingProfilesResp()
+                false
+            ),
+            ReportChargingProfilesResp()
         )
 
         val operations = Ocpp20Adapter("c1", transport, csApi)
         val request = ReportChargingProfilesReqGen(
-                2,
-                ChargingLimitSourceEnumTypeGen.CSO,
-                2,
-                listOf(
-                        ChargingProfileTypeGen(
-                                id = 1,
-                                stackLevel = 1,
-                                chargingProfilePurpose = ChargingProfilePurposeEnumTypeGen.ChargingStationMaxProfile,
-                                chargingProfileKind = ChargingProfileKindEnumTypeGen.Absolute,
-                                chargingSchedule = listOf(
-                                        ChargingScheduleTypeGen(
-                                                id = 1,
-                                                chargingRateUnit = ChargingRateUnitEnumTypeGen.A,
-                                                chargingSchedulePeriod = listOf(ChargingSchedulePeriodTypeGen(1, 1.0)),
-                                                startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
-                                        )
-                                )
+            2,
+            ChargingLimitSourceEnumTypeGen.CSO,
+            2,
+            listOf(
+                ChargingProfileTypeGen(
+                    id = 1,
+                    stackLevel = 1,
+                    chargingProfilePurpose = ChargingProfilePurposeEnumTypeGen.ChargingStationMaxProfile,
+                    chargingProfileKind = ChargingProfileKindEnumTypeGen.Absolute,
+                    chargingSchedule = listOf(
+                        ChargingScheduleTypeGen(
+                            id = 1,
+                            chargingRateUnit = ChargingRateUnitEnumTypeGen.A,
+                            chargingSchedulePeriod =
+                            listOf(ChargingSchedulePeriodTypeGen(1, 1.1)),
+                            startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
                         )
-                ),
-                false
+                    )
+                )
+            ),
+            false
         )
         val response = operations.reportChargingProfiles(requestMetadata, request)
         expectThat(response)
-                .and { get { this.request }.isEqualTo(request) }
-                .and { get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS) }
+            .and { get { this.request }.isEqualTo(request) }
+            .and { get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS) }
     }
 }

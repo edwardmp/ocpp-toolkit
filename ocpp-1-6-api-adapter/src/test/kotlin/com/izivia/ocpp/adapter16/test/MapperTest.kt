@@ -1,5 +1,25 @@
 package com.izivia.ocpp.adapter16.test
 
+import com.izivia.ocpp.adapter16.mapper.CancelReservationMapper
+import com.izivia.ocpp.adapter16.mapper.ChangeAvailabilityMapper
+import com.izivia.ocpp.adapter16.mapper.ChangeConfigurationMapper
+import com.izivia.ocpp.adapter16.mapper.ClearCacheMapper
+import com.izivia.ocpp.adapter16.mapper.ClearChargingProfileMapper
+import com.izivia.ocpp.adapter16.mapper.DataTransferMapper
+import com.izivia.ocpp.adapter16.mapper.DiagnosticsStatusNotificationMapper
+import com.izivia.ocpp.adapter16.mapper.FirmwareStatusNotificationMapper
+import com.izivia.ocpp.adapter16.mapper.GetCompositeScheduleMapper
+import com.izivia.ocpp.adapter16.mapper.GetConfigurationMapper
+import com.izivia.ocpp.adapter16.mapper.GetDiagnosticsMapper
+import com.izivia.ocpp.adapter16.mapper.GetLocalListVersionMapper
+import com.izivia.ocpp.adapter16.mapper.RemoteStartTransactionMapper
+import com.izivia.ocpp.adapter16.mapper.RemoteStopTransactionMapper
+import com.izivia.ocpp.adapter16.mapper.ReserveNowMapper
+import com.izivia.ocpp.adapter16.mapper.SendLocalListMapper
+import com.izivia.ocpp.adapter16.mapper.SetChargingProfileMapper
+import com.izivia.ocpp.adapter16.mapper.TriggerMessageMapper
+import com.izivia.ocpp.adapter16.mapper.UnlockConnectorMapper
+import com.izivia.ocpp.adapter16.mapper.UpdateFirmwareMapper
 import com.izivia.ocpp.api.model.cancelreservation.CancelReservationResp
 import com.izivia.ocpp.api.model.cancelreservation.enumeration.CancelReservationStatusEnumType
 import com.izivia.ocpp.api.model.changeavailability.ChangeAvailabilityResp
@@ -59,26 +79,6 @@ import com.izivia.ocpp.api.model.triggermessage.enumeration.TriggerMessageStatus
 import com.izivia.ocpp.api.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.api.model.unlockconnector.enumeration.UnlockStatusEnumType
 import com.izivia.ocpp.api.model.updatefirmware.FirmwareType
-import com.izivia.ocpp.adapter16.mapper.CancelReservationMapper
-import com.izivia.ocpp.adapter16.mapper.ChangeAvailabilityMapper
-import com.izivia.ocpp.adapter16.mapper.ChangeConfigurationMapper
-import com.izivia.ocpp.adapter16.mapper.ClearCacheMapper
-import com.izivia.ocpp.adapter16.mapper.ClearChargingProfileMapper
-import com.izivia.ocpp.adapter16.mapper.DataTransferMapper
-import com.izivia.ocpp.adapter16.mapper.DiagnosticsStatusNotificationMapper
-import com.izivia.ocpp.adapter16.mapper.FirmwareStatusNotificationMapper
-import com.izivia.ocpp.adapter16.mapper.GetCompositeScheduleMapper
-import com.izivia.ocpp.adapter16.mapper.GetConfigurationMapper
-import com.izivia.ocpp.adapter16.mapper.GetDiagnosticsMapper
-import com.izivia.ocpp.adapter16.mapper.GetLocalListVersionMapper
-import com.izivia.ocpp.adapter16.mapper.RemoteStartTransactionMapper
-import com.izivia.ocpp.adapter16.mapper.RemoteStopTransactionMapper
-import com.izivia.ocpp.adapter16.mapper.ReserveNowMapper
-import com.izivia.ocpp.adapter16.mapper.SendLocalListMapper
-import com.izivia.ocpp.adapter16.mapper.SetChargingProfileMapper
-import com.izivia.ocpp.adapter16.mapper.TriggerMessageMapper
-import com.izivia.ocpp.adapter16.mapper.UnlockConnectorMapper
-import com.izivia.ocpp.adapter16.mapper.UpdateFirmwareMapper
 import com.izivia.ocpp.core16.model.cancelreservation.CancelReservationReq
 import com.izivia.ocpp.core16.model.cancelreservation.enumeration.CancelReservationStatus
 import com.izivia.ocpp.core16.model.changeavailability.ChangeAvailabilityReq
@@ -188,12 +188,17 @@ class MapperTest {
 
         val req = mapper.coreToGenReq(
             RemoteStartTransactionReq(
-                "tag1", 11,
+                "tag1",
+                11,
                 ChargingProfile(
-                    12, 13, ChargingProfilePurposeType.ChargePointMaxProfile, ChargingProfileKindType.Absolute,
-                    ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1.3)))
+                    12,
+                    13,
+                    ChargingProfilePurposeType.ChargePointMaxProfile,
+                    ChargingProfileKindType.Absolute,
+                    ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1)))
                 )
-            ), 10
+            ),
+            10
         )
         expectThat(req)
             .and { get { idToken.idToken }.isEqualTo("tag1") }
@@ -202,14 +207,19 @@ class MapperTest {
             .and { get { evseId }.isEqualTo(11) }
             .and { get { chargingProfile?.id }.isEqualTo(12) }
             .and { get { chargingProfile?.stackLevel }.isEqualTo(13) }
-            .and { get { chargingProfile?.chargingProfilePurpose }.isEqualTo(ChargingProfilePurposeEnumType.ChargingStationMaxProfile) }
+            .and {
+                get { chargingProfile?.chargingProfilePurpose }.isEqualTo(
+                    ChargingProfilePurposeEnumType.ChargingStationMaxProfile
+                )
+            }
             .and { get { chargingProfile?.chargingProfileKind }.isEqualTo(ChargingProfileKindEnumType.Absolute) }
             .and {
                 get { chargingProfile?.chargingSchedule }.isEqualTo(
                     listOf(
                         ChargingScheduleType(
-                            null, ChargingRateUnitEnumType.A,
-                            listOf(ChargingSchedulePeriodType(1, 1.3))
+                            null,
+                            ChargingRateUnitEnumType.A,
+                            listOf(ChargingSchedulePeriodType(1, 1.0))
                         )
                     )
                 )
@@ -247,18 +257,19 @@ class MapperTest {
         expectThat(resp)
             .and { get { status }.isEqualTo(ConfigurationStatus.NotSupported) }
 
-
         expectThrows<IllegalStateException> {
             mapper.genToCoreResp(
                 SetVariablesResp(
                     listOf(
                         SetVariableResultType(
                             SetVariableStatusEnumType.NotSupportedAttributeType,
-                            ComponentType("component"), VariableType("variable")
+                            ComponentType("component"),
+                            VariableType("variable")
                         ),
                         SetVariableResultType(
                             SetVariableStatusEnumType.Accepted,
-                            ComponentType("component"), VariableType("variable")
+                            ComponentType("component"),
+                            VariableType("variable")
                         )
                     )
                 )
@@ -293,7 +304,7 @@ class MapperTest {
                     GetVariableResultType(
                         attributeStatus = GetVariableStatusEnumType.NotSupportedAttributeType,
                         component = ComponentType("global"),
-                        variable = VariableType("variable-2", "instance"),
+                        variable = VariableType("variable-2", "instance")
                     )
                 )
             )
@@ -330,6 +341,7 @@ class MapperTest {
         expectThat(req)
             .and { get { status }.isEqualTo(FirmwareStatus.Idle) }
     }
+
     @Test
     fun clearChargingProfileMapper() {
         val mapper: ClearChargingProfileMapper = Mappers.getMapper(ClearChargingProfileMapper::class.java)
@@ -347,7 +359,11 @@ class MapperTest {
         expectThat(resp)
             .and { get { chargingProfileId }.isEqualTo(1) }
             .and { get { chargingProfileCriteria?.evseId }.isEqualTo(1) }
-            .and { get { chargingProfileCriteria?.chargingProfilePurpose }.isEqualTo(ChargingProfilePurposeEnumType.ChargingStationMaxProfile) }
+            .and {
+                get { chargingProfileCriteria?.chargingProfilePurpose }.isEqualTo(
+                    ChargingProfilePurposeEnumType.ChargingStationMaxProfile
+                )
+            }
             .and { get { chargingProfileCriteria?.stackLevel }.isEqualTo(1) }
     }
 
@@ -362,7 +378,7 @@ class MapperTest {
                     duration = 2,
                     scheduleStart = Instant.parse("2022-02-15T00:00:00.001Z"),
                     chargingRateUnit = ChargingRateUnitEnumType.A,
-                    chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 3.0))
+                    chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.3))
                 ),
                 StatusInfoType("reason", "additional")
             )
@@ -374,7 +390,11 @@ class MapperTest {
             .and { get { chargingSchedule?.duration }.isEqualTo(2) }
             .and { get { chargingSchedule?.startSchedule }.isEqualTo(Instant.parse("2022-02-15T00:00:00.001Z")) }
             .and { get { chargingSchedule?.chargingRateUnit }.isEqualTo(ChargingRateUnitType.A) }
-            .and { get { chargingSchedule?.chargingSchedulePeriod }.isEqualTo(listOf(ChargingSchedulePeriod(1, 3.0))) }
+            .and {
+                get { chargingSchedule?.chargingSchedulePeriod }.isEqualTo(
+                    listOf(ChargingSchedulePeriod(1, 1))
+                )
+            }
 
         val req = mapper.coreToGenReq(GetCompositeScheduleReq(1, 2, ChargingRateUnitType.A))
         expectThat(req)
@@ -392,7 +412,6 @@ class MapperTest {
         val req = mapper.coreToGenReq(com.izivia.ocpp.core16.model.getlocallistversion.GetLocalListVersionReq())
         expectThat(req).and { get { req }.isA<GetLocalListVersionReq>() }
     }
-
 
     @Test
     fun updateFirmwareMapper() {
@@ -453,7 +472,6 @@ class MapperTest {
             }
     }
 
-
     @Test
     fun triggerMessage() {
         val mapper: TriggerMessageMapper = Mappers.getMapper(TriggerMessageMapper::class.java)
@@ -489,12 +507,13 @@ class MapperTest {
 
         val req = mapper.coreToGenReq(
             SetChargingProfileReq(
-                1, ChargingProfile(
+                1,
+                ChargingProfile(
                     chargingProfileId = 1,
                     stackLevel = 2,
                     chargingProfilePurpose = ChargingProfilePurposeType.ChargePointMaxProfile,
                     chargingProfileKind = ChargingProfileKindType.Absolute,
-                    chargingSchedule = ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1.3)))
+                    chargingSchedule = ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1)))
                 )
             )
         )
@@ -502,7 +521,11 @@ class MapperTest {
             .and { get { evseId }.isEqualTo(1) }
             .and { get { chargingProfile.id }.isEqualTo(1) }
             .and { get { chargingProfile.stackLevel }.isEqualTo(2) }
-            .and { get { chargingProfile.chargingProfilePurpose }.isEqualTo(ChargingProfilePurposeEnumType.ChargingStationMaxProfile) }
+            .and {
+                get { chargingProfile.chargingProfilePurpose }.isEqualTo(
+                    ChargingProfilePurposeEnumType.ChargingStationMaxProfile
+                )
+            }
             .and { get { chargingProfile.chargingProfileKind }.isEqualTo(ChargingProfileKindEnumType.Absolute) }
             .and {
                 get { chargingProfile.chargingSchedule }.isEqualTo(
@@ -510,7 +533,7 @@ class MapperTest {
                         ChargingScheduleType(
                             null,
                             ChargingRateUnitEnumType.A,
-                            listOf(ChargingSchedulePeriodType(1, 1.3))
+                            listOf(ChargingSchedulePeriodType(1, 1.0))
                         )
                     )
                 )
@@ -551,7 +574,7 @@ class MapperTest {
             ReserveNowReq(
                 connectorId = 1,
                 expiryDate = Instant.parse("2022-06-29T08:24:00.000Z"),
-                idTag ="1A2B",
+                idTag = "1A2B",
                 parentIdTag = null,
                 reservationId = 8
             )

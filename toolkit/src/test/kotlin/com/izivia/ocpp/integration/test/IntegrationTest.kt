@@ -1,9 +1,7 @@
 package com.izivia.ocpp.integration.test
 
-import com.izivia.ocpp.api.model.common.enumeration.IdTokenEnumType
 import com.izivia.ocpp.api.CSApi
 import com.izivia.ocpp.api.model.authorize.AuthorizeReq
-import com.izivia.ocpp.api.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.api.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.api.model.bootnotification.ChargingStationType
 import com.izivia.ocpp.api.model.bootnotification.enumeration.BootReasonEnumType
@@ -13,7 +11,6 @@ import com.izivia.ocpp.api.model.cancelreservation.CancelReservationResp
 import com.izivia.ocpp.api.model.cancelreservation.enumeration.CancelReservationStatusEnumType
 import com.izivia.ocpp.api.model.certificateSigned.CertificateSignedReq
 import com.izivia.ocpp.api.model.certificateSigned.CertificateSignedResp
-import com.izivia.ocpp.api.model.common.MeterValueType
 import com.izivia.ocpp.api.model.changeavailability.ChangeAvailabilityReq
 import com.izivia.ocpp.api.model.changeavailability.ChangeAvailabilityResp
 import com.izivia.ocpp.api.model.changeavailability.enumeration.ChangeAvailabilityStatusEnumType
@@ -23,14 +20,7 @@ import com.izivia.ocpp.api.model.clearcache.enumeration.ClearCacheStatusEnumType
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.api.model.clearchargingprofile.ClearChargingProfileResp
 import com.izivia.ocpp.api.model.clearchargingprofile.enumeration.ClearChargingProfileStatusEnumType
-import com.izivia.ocpp.api.model.common.SampledValueType
-import com.izivia.ocpp.api.model.common.enumeration.AuthorizationStatusEnumType
 import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageReq
-import com.izivia.ocpp.api.model.common.IdTokenInfoType
-import com.izivia.ocpp.api.model.common.MessageContentType
-import com.izivia.ocpp.api.model.common.StatusInfoType
-import com.izivia.ocpp.api.model.common.enumeration.ChargingRateUnitEnumType
-import com.izivia.ocpp.api.model.common.enumeration.GenericDeviceModelStatusEnumType
 import com.izivia.ocpp.api.model.cleardisplaymessage.ClearDisplayMessageResp
 import com.izivia.ocpp.api.model.clearedcharginglimit.ClearedChargingLimitReq
 import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoringReq
@@ -38,18 +28,48 @@ import com.izivia.ocpp.api.model.clearvariablemonitoring.ClearVariableMonitoring
 import com.izivia.ocpp.api.model.common.CertificateHashDataType
 import com.izivia.ocpp.api.model.common.ChargingProfileType
 import com.izivia.ocpp.api.model.common.ChargingSchedulePeriodType
+import com.izivia.ocpp.api.model.common.ChargingScheduleType
 import com.izivia.ocpp.api.model.common.ComponentType
 import com.izivia.ocpp.api.model.common.EVSEType
+import com.izivia.ocpp.api.model.common.IdTokenInfoType
 import com.izivia.ocpp.api.model.common.IdTokenType
+import com.izivia.ocpp.api.model.common.MessageContentType
+import com.izivia.ocpp.api.model.common.MessageInfoType
+import com.izivia.ocpp.api.model.common.MeterValueType
 import com.izivia.ocpp.api.model.common.OCSPRequestDataType
+import com.izivia.ocpp.api.model.common.SampledValueType
 import com.izivia.ocpp.api.model.common.SignedMeterValueType
+import com.izivia.ocpp.api.model.common.StatusInfoType
 import com.izivia.ocpp.api.model.common.VariableType
+import com.izivia.ocpp.api.model.common.enumeration.AuthorizationStatusEnumType
+import com.izivia.ocpp.api.model.common.enumeration.CertificateSigningUseEnumType
+import com.izivia.ocpp.api.model.common.enumeration.ChargingLimitSourceEnumType
 import com.izivia.ocpp.api.model.common.enumeration.ChargingProfilePurposeEnumType
+import com.izivia.ocpp.api.model.common.enumeration.ChargingRateUnitEnumType
+import com.izivia.ocpp.api.model.common.enumeration.GenericDeviceModelStatusEnumType
+import com.izivia.ocpp.api.model.common.enumeration.GenericStatusEnumType
+import com.izivia.ocpp.api.model.common.enumeration.HashAlgorithmEnumType
+import com.izivia.ocpp.api.model.common.enumeration.IdTokenEnumType
 import com.izivia.ocpp.api.model.common.enumeration.LocationEnumType
+import com.izivia.ocpp.api.model.common.enumeration.MeasurandEnumType
 import com.izivia.ocpp.api.model.common.enumeration.MessageFormatEnumType
+import com.izivia.ocpp.api.model.common.enumeration.MessagePriorityEnumType
+import com.izivia.ocpp.api.model.common.enumeration.MessageStateEnumType
+import com.izivia.ocpp.api.model.common.enumeration.MonitorEnumType
+import com.izivia.ocpp.api.model.common.enumeration.PhaseEnumType
+import com.izivia.ocpp.api.model.common.enumeration.ReadingContextEnumType
+import com.izivia.ocpp.api.model.common.enumeration.RequestStartStopStatusEnumType
+import com.izivia.ocpp.api.model.costupdated.CostUpdatedReq
+import com.izivia.ocpp.api.model.costupdated.CostUpdatedResp
+import com.izivia.ocpp.api.model.customerinformation.CustomerInformationReq
+import com.izivia.ocpp.api.model.customerinformation.CustomerInformationResp
+import com.izivia.ocpp.api.model.customerinformation.enumeration.CustomerInformationStatusEnumType
 import com.izivia.ocpp.api.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.api.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.api.model.datatransfer.enumeration.DataTransferStatusEnumType
+import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateReq
+import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateResp
+import com.izivia.ocpp.api.model.deletecertificate.enumerations.DeleteCertificateStatusEnumType
 import com.izivia.ocpp.api.model.firmwarestatusnotification.FirmwareStatusNotificationReq
 import com.izivia.ocpp.api.model.firmwarestatusnotification.enumeration.FirmwareStatusEnumType
 import com.izivia.ocpp.api.model.getallvariables.GetAllVariablesReq
@@ -59,21 +79,39 @@ import com.izivia.ocpp.api.model.getbasereport.GetBaseReportReq
 import com.izivia.ocpp.api.model.getbasereport.GetBaseReportResp
 import com.izivia.ocpp.api.model.getcertificatestatus.GetCertificateStatusReq
 import com.izivia.ocpp.api.model.getcertificatestatus.enumeration.GetCertificateStatusEnumType
+import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesReq
+import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesResp
+import com.izivia.ocpp.api.model.getchargingprofiles.enumeration.GetChargingProfileStatusEnumType
 import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleReq
 import com.izivia.ocpp.api.model.getcompositeschedule.GetCompositeScheduleResp
+import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesReq
+import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesResp
+import com.izivia.ocpp.api.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
+import com.izivia.ocpp.api.model.getinstalledcertificateids.CertificateHashDataChainType
+import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsReq
+import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsResp
+import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetCertificateIdUseEnumType
+import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetInstalledCertificateStatusEnumType
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionReq
 import com.izivia.ocpp.api.model.getlocallistversion.GetLocalListVersionResp
 import com.izivia.ocpp.api.model.getlog.GetLogReq
 import com.izivia.ocpp.api.model.getlog.GetLogResp
 import com.izivia.ocpp.api.model.getlog.enumeration.LogStatusEnumType
+import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportReq
+import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportResp
 import com.izivia.ocpp.api.model.getreport.GetReportReq
 import com.izivia.ocpp.api.model.getreport.GetReportResp
+import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusReq
+import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusResp
 import com.izivia.ocpp.api.model.getvariables.GetVariableResultType
 import com.izivia.ocpp.api.model.getvariables.GetVariablesReq
 import com.izivia.ocpp.api.model.getvariables.GetVariablesResp
 import com.izivia.ocpp.api.model.getvariables.enumeration.GetVariableStatusEnumType
 import com.izivia.ocpp.api.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.api.model.heartbeat.HeartbeatResp
+import com.izivia.ocpp.api.model.installcertificate.InstallCertificateReq
+import com.izivia.ocpp.api.model.installcertificate.InstallCertificateResp
+import com.izivia.ocpp.api.model.installcertificate.enumeration.InstallCertificateStatusEnumType
 import com.izivia.ocpp.api.model.logstatusnotification.LogStatusNotificationReq
 import com.izivia.ocpp.api.model.logstatusnotification.enumeration.UploadLogStatusEnumType
 import com.izivia.ocpp.api.model.metervalues.MeterValuesReq
@@ -81,9 +119,6 @@ import com.izivia.ocpp.api.model.notifycharginglimit.ChargingLimitType
 import com.izivia.ocpp.api.model.notifycharginglimit.NotifyChargingLimitReq
 import com.izivia.ocpp.api.model.notifycustomerinformation.NotifyCustomerInformationReq
 import com.izivia.ocpp.api.model.notifydisplaymessages.NotifyDisplayMessagesReq
-import com.izivia.ocpp.api.model.common.MessageInfoType
-import com.izivia.ocpp.api.model.common.enumeration.MessagePriorityEnumType
-import com.izivia.ocpp.api.model.common.enumeration.MessageStateEnumType
 import com.izivia.ocpp.api.model.notifyevchargingneeds.ChargingNeedsType
 import com.izivia.ocpp.api.model.notifyevchargingneeds.DCChargingParametersType
 import com.izivia.ocpp.api.model.notifyevchargingneeds.NotifyEVChargingNeedsReq
@@ -102,43 +137,8 @@ import com.izivia.ocpp.api.model.notifyreport.ReportDataType
 import com.izivia.ocpp.api.model.notifyreport.VariableAttributeType
 import com.izivia.ocpp.api.model.notifyreport.VariableCharacteristicsType
 import com.izivia.ocpp.api.model.notifyreport.enumeration.DataEnumType
-import com.izivia.ocpp.api.model.common.ChargingScheduleType
-import com.izivia.ocpp.api.model.common.enumeration.CertificateSigningUseEnumType
-import com.izivia.ocpp.api.model.common.enumeration.ChargingLimitSourceEnumType
-import com.izivia.ocpp.api.model.common.enumeration.GenericStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.MeasurandEnumType
-import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportReq
-import com.izivia.ocpp.api.model.getmonitoringreport.GetMonitoringReportResp
-import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateReq
-import com.izivia.ocpp.api.model.deletecertificate.DeleteCertificateResp
-import com.izivia.ocpp.api.model.deletecertificate.enumerations.DeleteCertificateStatusEnumType
-import com.izivia.ocpp.api.model.costupdated.CostUpdatedReq
-import com.izivia.ocpp.api.model.costupdated.CostUpdatedResp
-import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesReq
-import com.izivia.ocpp.api.model.getdisplaymessages.GetDisplayMessagesResp
-import com.izivia.ocpp.api.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
 import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareReq
 import com.izivia.ocpp.api.model.publishfirmware.PublishFirmwareResp
-import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesReq
-import com.izivia.ocpp.api.model.getchargingprofiles.GetChargingProfilesResp
-import com.izivia.ocpp.api.model.getchargingprofiles.enumeration.GetChargingProfileStatusEnumType
-import com.izivia.ocpp.api.model.getinstalledcertificateids.CertificateHashDataChainType
-import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsReq
-import com.izivia.ocpp.api.model.getinstalledcertificateids.GetInstalledCertificateIdsResp
-import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetCertificateIdUseEnumType
-import com.izivia.ocpp.api.model.getinstalledcertificateids.enumeration.GetInstalledCertificateStatusEnumType
-import com.izivia.ocpp.api.model.customerinformation.CustomerInformationReq
-import com.izivia.ocpp.api.model.customerinformation.CustomerInformationResp
-import com.izivia.ocpp.api.model.customerinformation.enumeration.CustomerInformationStatusEnumType
-import com.izivia.ocpp.api.model.installcertificate.InstallCertificateReq
-import com.izivia.ocpp.api.model.installcertificate.InstallCertificateResp
-import com.izivia.ocpp.api.model.installcertificate.enumeration.InstallCertificateStatusEnumType
-import com.izivia.ocpp.api.model.common.enumeration.MonitorEnumType
-import com.izivia.ocpp.api.model.common.enumeration.PhaseEnumType
-import com.izivia.ocpp.api.model.common.enumeration.ReadingContextEnumType
-import com.izivia.ocpp.api.model.common.enumeration.RequestStartStopStatusEnumType
-import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusReq
-import com.izivia.ocpp.api.model.gettransactionstatus.GetTransactionStatusResp
 import com.izivia.ocpp.api.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationReq
 import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionReq
 import com.izivia.ocpp.api.model.remotestart.RequestStartTransactionResp
@@ -161,19 +161,20 @@ import com.izivia.ocpp.api.model.sendlocallist.enumeration.SendLocalListStatusEn
 import com.izivia.ocpp.api.model.setchargingprofile.SetChargingProfileReq
 import com.izivia.ocpp.api.model.setchargingprofile.SetChargingProfileResp
 import com.izivia.ocpp.api.model.setchargingprofile.enumeration.ChargingProfileStatusEnumType
+import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageReq
+import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageResp
+import com.izivia.ocpp.api.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
 import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseReq
 import com.izivia.ocpp.api.model.setmonitoringbase.SetMonitoringBaseResp
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
-import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelReq
 import com.izivia.ocpp.api.model.setmonitoringlevel.SetMonitoringLevelResp
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileReq
 import com.izivia.ocpp.api.model.setnetworkprofile.SetNetworkProfileResp
 import com.izivia.ocpp.api.model.setnetworkprofile.enumeration.SetNetworkProfileStatusEnumType
-import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageReq
-import com.izivia.ocpp.api.model.setdisplaymessage.SetDisplayMessageResp
-import com.izivia.ocpp.api.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetMonitoringResultType
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringReq
+import com.izivia.ocpp.api.model.setvariablemonitoring.SetVariableMonitoringResp
+import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
 import com.izivia.ocpp.api.model.setvariables.SetVariableResultType
 import com.izivia.ocpp.api.model.setvariables.SetVariablesReq
 import com.izivia.ocpp.api.model.setvariables.SetVariablesResp
@@ -198,8 +199,6 @@ import com.izivia.ocpp.api.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.api.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.api.model.updatefirmware.enumeration.UpdateFirmwareStatusEnumType
 import com.izivia.ocpp.api.send
-import com.izivia.ocpp.api.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
-import com.izivia.ocpp.api.model.publishfirmwarestatusnotification.enumeration.PublishFirmwareStatusEnumType as PublishFirmwareStatusEnumTypeGen
 import com.izivia.ocpp.integration.ApiFactory
 import com.izivia.ocpp.integration.model.Settings
 import com.izivia.ocpp.integration.model.TransportEnum
@@ -207,14 +206,14 @@ import com.izivia.ocpp.operation.information.ExecutionMetadata
 import com.izivia.ocpp.operation.information.OperationExecution
 import com.izivia.ocpp.operation.information.RequestMetadata
 import com.izivia.ocpp.operation.information.RequestStatus
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import com.izivia.ocpp.transport.OcppVersion
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.AfterEach
@@ -224,6 +223,7 @@ import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import java.util.*
+import com.izivia.ocpp.api.model.publishfirmwarestatusnotification.enumeration.PublishFirmwareStatusEnumType as PublishFirmwareStatusEnumTypeGen
 
 class IntegrationTest {
 
@@ -311,7 +311,10 @@ class IntegrationTest {
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
-        override fun updateFirmware(meta: RequestMetadata, req: UpdateFirmwareReq): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
+        override fun updateFirmware(
+            meta: RequestMetadata,
+            req: UpdateFirmwareReq
+        ): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
             val response = UpdateFirmwareResp(
                 status = UpdateFirmwareStatusEnumType.Accepted,
                 statusInfo = StatusInfoType("reason", "additional")
@@ -360,14 +363,16 @@ class IntegrationTest {
             meta: RequestMetadata,
             req: GetVariablesReq
         ): OperationExecution<GetVariablesReq, GetVariablesResp> {
-            val response = GetVariablesResp(req.getVariableData.map {
-                GetVariableResultType(
-                    attributeStatus = GetVariableStatusEnumType.Accepted,
-                    component = ComponentType(it.component.name),
-                    variable = VariableType(it.variable.name),
-                    readonly = true
-                )
-            })
+            val response = GetVariablesResp(
+                req.getVariableData.map {
+                    GetVariableResultType(
+                        attributeStatus = GetVariableStatusEnumType.Accepted,
+                        component = ComponentType(it.component.name),
+                        variable = VariableType(it.variable.name),
+                        readonly = true
+                    )
+                }
+            )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
@@ -457,183 +462,182 @@ class IntegrationTest {
         }
 
         override fun getChargingProfiles(
-                meta: RequestMetadata,
-                req: GetChargingProfilesReq
+            meta: RequestMetadata,
+            req: GetChargingProfilesReq
         ): OperationExecution<GetChargingProfilesReq, GetChargingProfilesResp> {
-            val response = GetChargingProfilesResp (
-                    GetChargingProfileStatusEnumType.Accepted,
-                    StatusInfoType("reason","info")
+            val response = GetChargingProfilesResp(
+                GetChargingProfileStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getInstalledCertificateIds(
-                meta: RequestMetadata,
-                req: GetInstalledCertificateIdsReq
+            meta: RequestMetadata,
+            req: GetInstalledCertificateIdsReq
         ): OperationExecution<GetInstalledCertificateIdsReq, GetInstalledCertificateIdsResp> {
             val response = GetInstalledCertificateIdsResp(
-                    GetInstalledCertificateStatusEnumType.Accepted,
-                    listOf(
-                            CertificateHashDataChainType(
-                                    GetCertificateIdUseEnumType.CSMSRootCertificate,
-                                    CertificateHashDataType(
-                                            HashAlgorithmEnumType.SHA512,
-                                            "",
-                                            "",
-                                            ""
-                                    ),
-                                    listOf(
-                                            CertificateHashDataType(
-                                                    HashAlgorithmEnumType.SHA512,
-                                                    "",
-                                                    "",
-                                                    ""
-                                            ),
-                                            CertificateHashDataType(
-                                                    HashAlgorithmEnumType.SHA512,
-                                                    "",
-                                                    "",
-                                                    ""
-                                            )
-                                    )
+                GetInstalledCertificateStatusEnumType.Accepted,
+                listOf(
+                    CertificateHashDataChainType(
+                        GetCertificateIdUseEnumType.CSMSRootCertificate,
+                        CertificateHashDataType(
+                            HashAlgorithmEnumType.SHA512,
+                            "",
+                            "",
+                            ""
+                        ),
+                        listOf(
+                            CertificateHashDataType(
+                                HashAlgorithmEnumType.SHA512,
+                                "",
+                                "",
+                                ""
                             ),
-                    ),
-                    StatusInfoType("reason", "info")
+                            CertificateHashDataType(
+                                HashAlgorithmEnumType.SHA512,
+                                "",
+                                "",
+                                ""
+                            )
+                        )
+                    )
+                ),
+                StatusInfoType("reason", "info")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun installCertificate(
-                meta: RequestMetadata,
-                req: InstallCertificateReq
+            meta: RequestMetadata,
+            req: InstallCertificateReq
         ): OperationExecution<InstallCertificateReq, InstallCertificateResp> {
             val response = InstallCertificateResp(
-                    InstallCertificateStatusEnumType.Accepted,
-                    StatusInfoType("reason","info")
+                InstallCertificateStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun customerInformation(
-                meta: RequestMetadata,
-                req: CustomerInformationReq
+            meta: RequestMetadata,
+            req: CustomerInformationReq
         ): OperationExecution<CustomerInformationReq, CustomerInformationResp> {
             val response = CustomerInformationResp(
-                    CustomerInformationStatusEnumType.Accepted,
+                CustomerInformationStatusEnumType.Accepted
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun unpublishFirmware(
-                meta: RequestMetadata,
-                req: UnpublishFirmwareReq
+            meta: RequestMetadata,
+            req: UnpublishFirmwareReq
         ): OperationExecution<UnpublishFirmwareReq, UnpublishFirmwareResp> {
             val response = UnpublishFirmwareResp(UnpublishFirmwareStatusEnumType.DownloadOngoing)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun publishFirmware(
-                meta: RequestMetadata,
-                req: PublishFirmwareReq
+            meta: RequestMetadata,
+            req: PublishFirmwareReq
         ): OperationExecution<PublishFirmwareReq, PublishFirmwareResp> {
             val response = PublishFirmwareResp(GenericStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setVariableMonitoring(
-                meta: RequestMetadata,
-                req: SetVariableMonitoringReq
+            meta: RequestMetadata,
+            req: SetVariableMonitoringReq
         ): OperationExecution<SetVariableMonitoringReq, SetVariableMonitoringResp> {
             val response = SetVariableMonitoringResp(
                 listOf(
-                    SetMonitoringResultType (
-                            id = 23,
-                            status = SetMonitoringStatusEnumType.Accepted,
-                            type = MonitorEnumType.Delta,
-                            severity = 3,
-                            component = ComponentType("name"),
-                            variable = VariableType("name"),
-                            statusInfo = StatusInfoType("reason", "info")
+                    SetMonitoringResultType(
+                        id = 23,
+                        status = SetMonitoringStatusEnumType.Accepted,
+                        type = MonitorEnumType.Delta,
+                        severity = 3,
+                        component = ComponentType("name"),
+                        variable = VariableType("name"),
+                        statusInfo = StatusInfoType("reason", "info")
                     )
                 )
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
-
         override fun setMonitoringLevel(
-                meta: RequestMetadata,
-                req: SetMonitoringLevelReq
+            meta: RequestMetadata,
+            req: SetMonitoringLevelReq
         ): OperationExecution<SetMonitoringLevelReq, SetMonitoringLevelResp> {
             val response = SetMonitoringLevelResp(
-                    GenericStatusEnumType.Accepted,
-                    StatusInfoType("reason","additionnal")
+                GenericStatusEnumType.Accepted,
+                StatusInfoType("reason", "additionnal")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setNetworkProfile(
-                meta: RequestMetadata,
-                req: SetNetworkProfileReq
+            meta: RequestMetadata,
+            req: SetNetworkProfileReq
         ): OperationExecution<SetNetworkProfileReq, SetNetworkProfileResp> {
             val response = SetNetworkProfileResp(SetNetworkProfileStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getTransactionStatus(
-                meta: RequestMetadata,
-                req: GetTransactionStatusReq
+            meta: RequestMetadata,
+            req: GetTransactionStatusReq
         ): OperationExecution<GetTransactionStatusReq, GetTransactionStatusResp> {
-            val response = GetTransactionStatusResp(false,true)
+            val response = GetTransactionStatusResp(false, true)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setMonitoringBase(
-                meta: RequestMetadata,
-                req: SetMonitoringBaseReq
+            meta: RequestMetadata,
+            req: SetMonitoringBaseReq
         ): OperationExecution<SetMonitoringBaseReq, SetMonitoringBaseResp> {
             val response = SetMonitoringBaseResp(GenericDeviceModelStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getDisplayMessages(
-                meta: RequestMetadata,
-                req: GetDisplayMessagesReq
+            meta: RequestMetadata,
+            req: GetDisplayMessagesReq
         ): OperationExecution<GetDisplayMessagesReq, GetDisplayMessagesResp> {
             val response = GetDisplayMessagesResp(
                 GetDisplayMessagesStatusEnumType.Accepted,
-                StatusInfoType("reason","more")
+                StatusInfoType("reason", "more")
             )
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun costUpdated(
-                meta: RequestMetadata,
-                req: CostUpdatedReq
+            meta: RequestMetadata,
+            req: CostUpdatedReq
         ): OperationExecution<CostUpdatedReq, CostUpdatedResp> {
             val response = CostUpdatedResp()
-            return OperationExecution(ExecutionMetadata(meta,RequestStatus.SUCCESS),req,response)
+            return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun setDisplayMessage(
-                meta: RequestMetadata,
-                req: SetDisplayMessageReq
+            meta: RequestMetadata,
+            req: SetDisplayMessageReq
         ): OperationExecution<SetDisplayMessageReq, SetDisplayMessageResp> {
             val response = SetDisplayMessageResp(DisplayMessageStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun deleteCertificate(
-                meta: RequestMetadata,
-                req: DeleteCertificateReq
+            meta: RequestMetadata,
+            req: DeleteCertificateReq
         ): OperationExecution<DeleteCertificateReq, DeleteCertificateResp> {
             val response = DeleteCertificateResp(DeleteCertificateStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
         }
 
         override fun getMonitoringReport(
-                meta: RequestMetadata,
-                req: GetMonitoringReportReq
+            meta: RequestMetadata,
+            req: GetMonitoringReportReq
         ): OperationExecution<GetMonitoringReportReq, GetMonitoringReportResp> {
             val response = GetMonitoringReportResp(GenericDeviceModelStatusEnumType.Accepted)
             return OperationExecution(ExecutionMetadata(meta, RequestStatus.SUCCESS), req, response)
@@ -663,13 +667,12 @@ class IntegrationTest {
     }
 
     @AfterEach
-    fun destroy(){
+    fun destroy() {
         unmockkAll()
     }
 
     @Test
     fun `heartbeat request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
@@ -688,7 +691,6 @@ class IntegrationTest {
 
     @Test
     fun `heartbeat request send`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"currentTime\":\"2022-02-15T00:00:00.000Z\"}"
@@ -707,7 +709,6 @@ class IntegrationTest {
 
     @Test
     fun `authorize 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"idTagInfo\":{\"status\" : \"Accepted\", \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"parentIdTag\" : \"Tag2\" }}"
@@ -722,13 +723,16 @@ class IntegrationTest {
         val response = csmsApi.authorize(requestMetadata, request)
         expectThat(response)
             .and { get { this.response.idTokenInfo.status }.isEqualTo(AuthorizationStatusEnumType.Accepted) }
-            .and { get { this.response.idTokenInfo.cacheExpiryDateTime }.isEqualTo(Instant.parse("2022-02-15T00:00:00.000Z")) }
+            .and {
+                get { this.response.idTokenInfo.cacheExpiryDateTime }.isEqualTo(
+                    Instant.parse("2022-02-15T00:00:00.000Z")
+                )
+            }
             .and { get { this.response.idTokenInfo.groupIdToken?.idToken }.isEqualTo("Tag2") }
     }
 
     @Test
     fun `meterValues request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -744,7 +748,8 @@ class IntegrationTest {
             meterValue = listOf(
                 MeterValueType(
                     listOf(
-                        SampledValueType(0.6), SampledValueType(
+                        SampledValueType(0.6),
+                        SampledValueType(
                             2.4,
                             ReadingContextEnumType.SampleClock,
                             MeasurandEnumType.Temperature,
@@ -753,7 +758,7 @@ class IntegrationTest {
                             signedMeterValue = SignedMeterValueType("Hello", "Bye", "Welcome", "Nice")
                         )
                     ),
-                    Instant.parse("2022-02-15T00:00:00.000Z"),
+                    Instant.parse("2022-02-15T00:00:00.000Z")
                 )
             ),
             transactionId = null
@@ -767,7 +772,8 @@ class IntegrationTest {
             meterValue = listOf(
                 MeterValueType(
                     listOf(
-                        SampledValueType(0.6), SampledValueType(
+                        SampledValueType(0.6),
+                        SampledValueType(
                             2.4,
                             ReadingContextEnumType.SampleClock,
                             MeasurandEnumType.EnergyApparentNet,
@@ -776,7 +782,7 @@ class IntegrationTest {
                             signedMeterValue = SignedMeterValueType("Hello", "Bye", "Welcome", "Nice")
                         )
                     ),
-                    Instant.parse("2022-02-15T00:00:00.000Z"),
+                    Instant.parse("2022-02-15T00:00:00.000Z")
                 )
             ),
             transactionId = null
@@ -788,7 +794,6 @@ class IntegrationTest {
 
     @Test
     fun `dataTransfer 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\" : \"Accepted\", \"data\" : \"2022-02-15T00:00:00.000Z\"}"
@@ -810,7 +815,6 @@ class IntegrationTest {
 
     @Test
     fun `bootNotification 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"currentTime\" : \"2022-02-15T00:00:00.000Z\", \"interval\" : 10, \"status\": \"Accepted\"}"
@@ -833,7 +837,6 @@ class IntegrationTest {
 
     @Test
     fun `start transaction 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"idTagInfo\" : { \"expiryDate\" : \"2022-02-15T00:00:00.000Z\", \"status\" : \"Accepted\"}, \"transactionId\" : 100}"
@@ -877,7 +880,6 @@ class IntegrationTest {
 
     @Test
     fun `status notification request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -889,7 +891,10 @@ class IntegrationTest {
 
         val requestMetadata = RequestMetadata(ocppId)
         val request = StatusNotificationReq(
-            1, ConnectorStatusEnumType.Occupied, 1, Instant.parse("2022-02-15T00:00:00.000Z")
+            1,
+            ConnectorStatusEnumType.Occupied,
+            1,
+            Instant.parse("2022-02-15T00:00:00.000Z")
         )
         val response = csmsApi.statusNotification(requestMetadata, request)
         expectThat(response)
@@ -898,7 +903,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyReport 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -912,14 +916,13 @@ class IntegrationTest {
         val request = NotifyReportReq(
             requestId = 1,
             generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
-            seqNo = 2,
+            seqNo = 2
         )
         expectThrows<IllegalStateException> { csmsApi.notifyReport(requestMetadata, request) }
     }
 
     @Test
     fun `notifyReport 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -951,7 +954,6 @@ class IntegrationTest {
 
     @Test
     fun `firmwareStatusNotification 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -972,7 +974,6 @@ class IntegrationTest {
 
     @Test
     fun `firmwareStatusNotification 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -990,9 +991,9 @@ class IntegrationTest {
         expectThat(response)
             .and { get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS) }
     }
+
     @Test
     fun `clearedChargingLimit 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1012,7 +1013,6 @@ class IntegrationTest {
 
     @Test
     fun `clearedChargingLimit 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1034,7 +1034,6 @@ class IntegrationTest {
 
     @Test
     fun `getCertificateStatus 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\"}"
@@ -1053,7 +1052,6 @@ class IntegrationTest {
 
     @Test
     fun `getCertificateStatus 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\"}"
@@ -1075,7 +1073,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyCustomerInformation 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1100,7 +1097,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyCustomerInformation 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1126,7 +1122,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyEvent 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1168,7 +1163,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyEVChargingSchedule 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}"
@@ -1199,7 +1193,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyEVChargingSchedule 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\", \"statusInfo\": {\"reasonCode\": \"123\"}}"
@@ -1231,7 +1224,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyChargingLimit 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1251,7 +1243,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyChargingLimit 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1273,7 +1264,6 @@ class IntegrationTest {
 
     @Test
     fun `logStatusNotification 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1295,7 +1285,6 @@ class IntegrationTest {
 
     @Test
     fun `logStatusNotification 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1317,7 +1306,6 @@ class IntegrationTest {
 
     @Test
     fun `publishFirmwareStatusNotification 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1338,7 +1326,6 @@ class IntegrationTest {
 
     @Test
     fun `publishFirmwareStatusNotification 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1362,7 +1349,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyDisplayMessages 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1405,6 +1391,7 @@ class IntegrationTest {
             get { this.executionMeta.status }.isEqualTo(RequestStatus.SUCCESS)
         }
     }
+
     @Test
     fun `notifyEVChargingNeeds 1-6 request`() {
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
@@ -1426,7 +1413,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyEVChargingNeeds 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\"}"
@@ -1458,10 +1444,8 @@ class IntegrationTest {
         expectThrows<IllegalStateException> { csmsApi.notifyEVChargingNeeds(requestMetadata, request) }
     }
 
-
     @Test
     fun `notifyMonitoringReport 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1482,7 +1466,6 @@ class IntegrationTest {
 
     @Test
     fun `notifyMonitoringReport 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1543,10 +1526,8 @@ class IntegrationTest {
         expectThrows<IllegalStateException> { csmsApi.notifyMonitoringReport(requestMetadata, request) }
     }
 
-
     @Test
     fun `reservationStatusUpdate 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1566,7 +1547,6 @@ class IntegrationTest {
 
     @Test
     fun `reservationStatusUpdate 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1588,7 +1568,6 @@ class IntegrationTest {
 
     @Test
     fun `securityEventNotification 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1609,7 +1588,6 @@ class IntegrationTest {
 
     @Test
     fun `securityEventNotification 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1632,7 +1610,6 @@ class IntegrationTest {
 
     @Test
     fun `signCertificate 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1652,7 +1629,6 @@ class IntegrationTest {
 
     @Test
     fun `signCertificate 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{\"status\": \"Accepted\"}"
@@ -1676,7 +1652,6 @@ class IntegrationTest {
 
     @Test
     fun `reportChargingProfiles 1-6 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
             msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
             payload = "{}"
@@ -1712,13 +1687,11 @@ class IntegrationTest {
         expectThrows<IllegalStateException> { csmsApi.reportChargingProfiles(requestMetadata, request) }
     }
 
-
     @Test
     fun `reportChargingProfiles 2-0 request`() {
-
         every { ocppWampClient.sendBlocking(any()) } returns WampMessage.CallResult(
-                msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
-                payload = "{}"
+            msgId = "a727d144-82bb-497a-a0c7-4ef2295910d4",
+            payload = "{}"
         )
 
         val settings = Settings(OcppVersion.OCPP_2_0, TransportEnum.WEBSOCKET, target = "")
@@ -1727,26 +1700,27 @@ class IntegrationTest {
 
         val requestMetadata = RequestMetadata(ocppId)
         val request = ReportChargingProfilesReq(
-                requestId = 2,
-                chargingLimitSource = ChargingLimitSourceEnumType.CSO,
-                tbc = false,
-                evseId = 2,
-                chargingProfile = listOf(
-                        ChargingProfileType(
-                                id = 1,
-                                stackLevel = 1,
-                                chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
-                                chargingProfileKind = ChargingProfileKindEnumType.Absolute,
-                                chargingSchedule = listOf(
-                                        ChargingScheduleType(
-                                                id = 1,
-                                                chargingRateUnit = ChargingRateUnitEnumType.A,
-                                                chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.0)),
-                                                startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
-                                        )
-                                )
+            requestId = 2,
+            chargingLimitSource = ChargingLimitSourceEnumType.CSO,
+            tbc = false,
+            evseId = 2,
+            chargingProfile = listOf(
+                ChargingProfileType(
+                    id = 1,
+                    stackLevel = 1,
+                    chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
+                    chargingProfileKind = ChargingProfileKindEnumType.Absolute,
+                    chargingSchedule = listOf(
+                        ChargingScheduleType(
+                            id = 1,
+                            chargingRateUnit = ChargingRateUnitEnumType.A,
+                            chargingSchedulePeriod =
+                            listOf(ChargingSchedulePeriodType(1, 1.0)),
+                            startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
                         )
+                    )
                 )
+            )
         )
         val response = csmsApi.reportChargingProfiles(requestMetadata, request)
         expectThat(response)

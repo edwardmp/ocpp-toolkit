@@ -22,9 +22,9 @@ class OcppSoapMapper : ObjectMapper(
             }
         )
         .registerModule(KotlinxInstantModule())
-        .setSerializationInclusion(Include.NON_NULL)
+        .setSerializationInclusion(Include.NON_EMPTY)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .setDefaultPropertyInclusion(Include.NON_DEFAULT)
+        .setDefaultPropertyInclusion(Include.NON_EMPTY)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 )
 

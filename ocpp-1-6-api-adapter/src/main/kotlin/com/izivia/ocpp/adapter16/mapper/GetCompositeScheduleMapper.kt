@@ -37,7 +37,7 @@ abstract class GetCompositeScheduleMapper {
                 chargingSchedulePeriod = schedule.chargingSchedulePeriod.map {
                     ChargingSchedulePeriod(
                         it.startPeriod,
-                        it.limit,
+                        it.limit.toInt(),
                         it.numberPhases
                     )
                 }

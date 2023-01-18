@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap16
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -183,6 +184,7 @@ private abstract class ChargingSchedulePeriodMixin(
     @JacksonXmlProperty(localName = "o:startPeriod")
     val startPeriod: Int,
     @JacksonXmlProperty(localName = "o:limit")
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
     val limit: BigDecimal,
     @JacksonXmlProperty(localName = "o:numberPhases")
     val numberPhases: Int? = null

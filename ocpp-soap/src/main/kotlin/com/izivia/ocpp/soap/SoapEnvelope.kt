@@ -1,6 +1,5 @@
 package com.izivia.ocpp.soap
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -58,6 +57,7 @@ data class SoapHeader(
     val messageId: ValueText,
     @JsonProperty(OcppConstant.ACTION)
     val action: ValueText,
+    @JsonProperty(OcppConstant.CHARGEBOX_IDENTITY)
     val chargeBoxIdentity: ValueText?,
     @JsonProperty(OcppConstant.FROM)
     val from: SoapHeaderFrom = SoapHeaderFrom(OcppConstant.SOAP_ANONYMOUS_VT),

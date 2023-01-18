@@ -10,12 +10,12 @@ import com.izivia.ocpp.core16.model.changeconfiguration.ChangeConfigurationReq
 import com.izivia.ocpp.core16.model.changeconfiguration.ChangeConfigurationResp
 import com.izivia.ocpp.core16.model.clearcache.ClearCacheReq
 import com.izivia.ocpp.core16.model.clearcache.ClearCacheResp
-import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
-import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileResp
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferResp
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationReq
 import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationResp
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsReq
@@ -32,12 +32,12 @@ import com.izivia.ocpp.core16.model.reservenow.ReserveNowReq
 import com.izivia.ocpp.core16.model.reservenow.ReserveNowResp
 import com.izivia.ocpp.core16.model.reset.ResetReq
 import com.izivia.ocpp.core16.model.reset.ResetResp
-import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
-import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageResp
 import com.izivia.ocpp.core16.model.sendlocallist.SendLocalListReq
 import com.izivia.ocpp.core16.model.sendlocallist.SendLocalListResp
 import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileReq
 import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileResp
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageResp
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
@@ -63,12 +63,10 @@ class CoreTest {
         transport = mockk()
         every { transport.receiveMessage<Any, Any>(any(), any()) } returns Unit
         every { transport.receiveMessageClass<Any, Any>(any(), any(), any()) } returns Unit
-
     }
 
     @Test
     fun `heartbeat request`() {
-
         every { transport.sendMessage<HeartbeatReq, HeartbeatResp>(any(), any()) } returns HeartbeatResp(
             currentTime = Instant.parse("2022-02-15T00:00:00.000Z")
         )
@@ -155,7 +153,10 @@ class CoreTest {
                 TODO("Not implemented")
             }
 
-            override fun updateFirmware(meta: RequestMetadata, req: UpdateFirmwareReq): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
+            override fun updateFirmware(
+                meta: RequestMetadata,
+                req: UpdateFirmwareReq
+            ): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
                 TODO("Not implemented")
             }
 
@@ -205,6 +206,10 @@ class CoreTest {
         val operations =
             ChargePointOperations.newChargePointOperations("", transport, csmsOperations)
         val response = operations.heartbeat(RequestMetadata(""), HeartbeatReq())
-        expectThat(response).and { get { this.response.currentTime }.isEqualTo(Instant.parse("2022-02-15T00:00:00.000Z")) }
+        expectThat(response).and {
+            get { this.response.currentTime }.isEqualTo(
+                Instant.parse("2022-02-15T00:00:00.000Z")
+            )
+        }
     }
 }

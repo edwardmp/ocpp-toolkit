@@ -16,5 +16,4 @@ abstract class AuthorizeMapper {
 
     fun coreToGenResp(authorizeResp: AuthorizeResp): AuthorizeRespGen =
         AuthorizeRespGen(CommonMapper.convertIdTagInfo(authorizeResp.idTagInfo))
-
 }
