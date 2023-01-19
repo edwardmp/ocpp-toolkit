@@ -2,8 +2,8 @@ package com.izivia.ocpp.http.test
 
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
-import com.izivia.ocpp.http.SoapClientSettings
 import com.izivia.ocpp.http.OcppSoapClientTransport
+import com.izivia.ocpp.http.SoapClientSettings
 import com.izivia.ocpp.soap16.Ocpp16SoapParser
 import com.izivia.ocpp.transport.OcppCallErrorException
 import com.izivia.ocpp.transport.receiveMessage
@@ -49,7 +49,7 @@ class OcppSoapClientTransportTest {
         val client = OcppSoapClientTransport(
             SoapClientSettings(
                 path = "/ocpp/soap",
-                port = 5001,
+                port = 5001
             ),
             ocppId = "ocppChargePoint",
             target = "http://localhost:5002/api",
@@ -72,7 +72,7 @@ class OcppSoapClientTransportTest {
         val client = OcppSoapClientTransport(
             SoapClientSettings(
                 path = "/ocpp/soap",
-                port = 5001,
+                port = 5001
             ),
             ocppId = "ocppChargePoint",
             target = "http://localhost:5002/api",
@@ -94,7 +94,7 @@ class OcppSoapClientTransportTest {
         val client = OcppSoapClientTransport(
             SoapClientSettings(
                 path = "",
-                port = 5001,
+                port = 5001
             ),
             ocppId = "ocppChargePoint",
             target = "http://localhost:5002/api",
@@ -131,7 +131,7 @@ class OcppSoapClientTransportTest {
                         <heartbeatRequest xmlns="urn://Ocpp/Cs/2015/10/"/>
                     </S:Body>
                 </S:Envelope>
-            """.trimIndent()
+                """.trimIndent()
             )
 
         val result = JavaHttpClient().invoke(request)
@@ -151,7 +151,7 @@ class OcppSoapClientTransportTest {
         val client = OcppSoapClientTransport(
             SoapClientSettings(
                 path = "/ocpp/soap",
-                port = 5001,
+                port = 5001
             ),
             ocppId = "ocppChargePoint",
             target = "http://localhost:5002/api",
@@ -182,7 +182,7 @@ class OcppSoapClientTransportTest {
                         <heartbeatRequest xmlns="urn://Ocpp/Cs/2015/10/"/>
                     </S:Body>
                 </S:Envelope>
-            """.trimIndent()
+                """.trimIndent()
             )
 
         val result = JavaHttpClient().invoke(request)

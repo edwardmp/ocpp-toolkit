@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
 import com.fasterxml.jackson.dataformat.xml.XmlFactory
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import com.izivia.ocpp.utils.KotlinxInstantModule
@@ -21,9 +22,9 @@ class OcppSoapMapper : ObjectMapper(
             }
         )
         .registerModule(KotlinxInstantModule())
-        .setSerializationInclusion(Include.NON_NULL)
+        .setSerializationInclusion(Include.NON_EMPTY)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .setDefaultPropertyInclusion(Include.NON_DEFAULT)
+        .setDefaultPropertyInclusion(Include.NON_EMPTY)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 )
 
@@ -44,4 +45,28 @@ private object CustomXmlModule : JacksonXmlModule() {
 
 abstract class EnumMixin(
     @JsonValue val value: String
+)
+
+abstract class SoapFaultMixin(
+    @JacksonXmlProperty(localName = "s:Code")
+    val code: FaultCode,
+    @JacksonXmlProperty(localName = "s:Reason")
+    val reason: FaultReason
+)
+
+abstract class FaultCodeMixin(
+    @JacksonXmlProperty(localName = "s:Value")
+    val value: FaultCodeValue,
+    @JacksonXmlProperty(localName = "o:Subcode")
+    val subCode: FaultSubCode
+)
+
+abstract class FaultSubCodeMixin(
+    @JacksonXmlProperty(localName = "o:Value")
+    val value: FaultSubCodeValue
+)
+
+abstract class FaultReasonMixin(
+    @JacksonXmlProperty(localName = "s:Text")
+    val text: FaultReasonText
 )

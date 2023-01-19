@@ -3,7 +3,6 @@ package com.izivia.ocpp.soap16
 import com.fasterxml.jackson.core.type.TypeReference
 import com.izivia.ocpp.soap.OcppSoapParserImpl
 import com.izivia.ocpp.soap.SoapEnvelope
-import kotlin.reflect.full.memberProperties
 
 class Ocpp16SoapParser : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2015/10/",
@@ -37,6 +36,8 @@ class Ocpp16SoapParser : OcppSoapParserImpl(
         envelope.body.statusNotificationRequest != null -> envelope.body.statusNotificationRequest!!
         envelope.body.stopTransactionRequest != null -> envelope.body.stopTransactionRequest!!
         envelope.body.remoteStopTransactionRequest != null -> envelope.body.remoteStopTransactionRequest!!
+        envelope.body.getCompositeScheduleRequest != null -> envelope.body.getCompositeScheduleRequest!!
+        envelope.body.setChargingProfileRequest != null -> envelope.body.setChargingProfileRequest!!
         envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown request message operation. enveloppe = $envelope")
     }
@@ -56,6 +57,8 @@ class Ocpp16SoapParser : OcppSoapParserImpl(
         envelope.body.statusNotificationResponse != null -> envelope.body.statusNotificationResponse!!
         envelope.body.stopTransactionResponse != null -> envelope.body.stopTransactionResponse!!
         envelope.body.remoteStopTransactionResponse != null -> envelope.body.remoteStopTransactionResponse!!
+        envelope.body.getCompositeScheduleResponse != null -> envelope.body.getCompositeScheduleResponse!!
+        envelope.body.setChargingProfileResponse != null -> envelope.body.setChargingProfileResponse!!
         envelope.body.fault != null -> envelope.body.fault!!
         else -> throw IllegalArgumentException("Unknown response message operation. enveloppe = $envelope")
     }

@@ -1,8 +1,8 @@
 rootProject.name = "ocpp-toolkit"
 
 plugins {
-    id("com.gradle.enterprise").version("3.7.2")
-    id("de.fayard.refreshVersions") version "0.40.1"
+    id("com.gradle.enterprise").version("3.11.4")
+    id("de.fayard.refreshVersions") version "0.51.0"
 }
 
 gradleEnterprise {

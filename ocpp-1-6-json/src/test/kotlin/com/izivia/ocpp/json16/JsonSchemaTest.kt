@@ -329,7 +329,7 @@ class JsonSchemaTest {
                     chargingProfileKind = ChargingProfileKindType.Absolute,
                     chargingSchedule = ChargingSchedule(
                         chargingRateUnit = ChargingRateUnitType.A,
-                        chargingSchedulePeriod = listOf(ChargingSchedulePeriod(0, 0.1, 2)),
+                        chargingSchedulePeriod = listOf(ChargingSchedulePeriod(0, 1, 2)),
                         duration = 100,
                         startSchedule = Instant.parse("2022-02-15T00:00:00.000Z"),
                         minChargingRate = 0.2
@@ -389,7 +389,7 @@ class JsonSchemaTest {
                     chargingProfileKind = ChargingProfileKindType.Absolute,
                     chargingSchedule = ChargingSchedule(
                         chargingRateUnit = ChargingRateUnitType.A,
-                        chargingSchedulePeriod = listOf(ChargingSchedulePeriod(0, 0.1, 2)),
+                        chargingSchedulePeriod = listOf(ChargingSchedulePeriod(0, 0, 2)),
                         duration = 100,
                         startSchedule = Instant.parse("2022-02-15T00:00:00.000Z"),
                         minChargingRate = 0.2
@@ -842,7 +842,7 @@ class JsonSchemaTest {
                 GetCompositeScheduleStatus.Accepted,
                 1,
                 Instant.parse("2022-02-15T00:00:00.000Z"),
-                ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 10.0)))
+                ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 10)))
             ),
             "GetCompositeScheduleResponse.json"
         )

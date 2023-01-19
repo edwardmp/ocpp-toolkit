@@ -60,7 +60,7 @@ class OcppSoapServerTransportTest {
                         <heartbeatRequest xmlns="urn://Ocpp/Cs/2015/10/"/>
                     </S:Body>
                 </S:Envelope>
-            """.trimIndent()
+                """.trimIndent()
             )
 
         val client: HttpHandler = JavaHttpClient()
@@ -114,7 +114,7 @@ class OcppSoapServerTransportTest {
                         <heartbeatRequest xmlns="urn://Ocpp/Cs/2015/10/"/>
                     </S:Body>
                 </S:Envelope>
-            """.trimIndent()
+                """.trimIndent()
             )
 
         val client: HttpHandler = JavaHttpClient()
@@ -128,5 +128,4 @@ class OcppSoapServerTransportTest {
 
         server.stop()
     }
-
 }

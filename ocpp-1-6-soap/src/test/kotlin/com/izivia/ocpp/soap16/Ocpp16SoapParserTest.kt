@@ -5,23 +5,31 @@ import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core16.model.bootnotification.enumeration.RegistrationStatus
-import com.izivia.ocpp.core16.model.common.IdTagInfo
-import com.izivia.ocpp.core16.model.common.MeterValue
-import com.izivia.ocpp.core16.model.common.SampledValue
+import com.izivia.ocpp.core16.model.common.*
 import com.izivia.ocpp.core16.model.common.enumeration.*
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core16.model.datatransfer.enumeration.DataTransferStatus
 import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationResp
+import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.enumeration.DiagnosticsStatus
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationReq
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationResp
 import com.izivia.ocpp.core16.model.firmwarestatusnotification.enumeration.FirmwareStatus
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
+import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
+import com.izivia.ocpp.core16.model.getcompositeschedule.enumeration.GetCompositeScheduleStatus
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesResp
+import com.izivia.ocpp.core16.model.remotestart.ChargingSchedulePeriod
 import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionReq
+import com.izivia.ocpp.core16.model.remotestart.enumeration.ChargingProfileKindType
 import com.izivia.ocpp.core16.model.remotestop.RemoteStopTransactionReq
+import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileReq
+import com.izivia.ocpp.core16.model.setchargingprofile.SetChargingProfileResp
+import com.izivia.ocpp.core16.model.setchargingprofile.enumeration.ChargingProfileStatus
 import com.izivia.ocpp.core16.model.starttransaction.StartTransactionReq
 import com.izivia.ocpp.core16.model.starttransaction.StartTransactionResp
 import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationReq
@@ -32,7 +40,6 @@ import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
@@ -173,9 +180,28 @@ class ocpp16SoapParserTest {
     }
 
     @Test
-    @Disabled
     fun `should parse message to DiagnosticsStatusNotificationReq`() {
-        // TODO
+        val message = """
+            <ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+             xmlns:ns1="http://www.w3.org/2005/08/addressing"
+             xmlns:ns2="urn://Ocpp/Cp/2015/10/">
+             <ns0:Header>
+                <ns1:From><ns1:Address>http://192.168.153.113:8080</ns1:Address></ns1:From>
+                <ns1:To>http://192.168.153.113:8080</ns1:To>
+                <ns1:ReplyTo><ns1:Address>http://www.w3.org/2005/08/addressing/anonymous</ns1:Address></ns1:ReplyTo>
+                <ns2:chargeBoxIdentity>TEST</ns2:chargeBoxIdentity>
+                <ns1:MessageID>f8465c53A250aA4c53A9feeAd79510d972cf</ns1:MessageID>
+                <ns1:Action>/DiagnosticsStatusNotification</ns1:Action>
+             </ns0:Header>
+             <ns0:Body>
+                <ns2:diagnosticsStatusNotificationRequest>
+                    <ns2:status>Uploaded</ns2:status>
+                    </ns2:diagnosticsStatusNotificationRequest>
+             </ns0:Body></ns0:Envelope>
+        """.trimIndent()
+        expectThat(ocpp16SoapParser.parseRequestFromSoap<DiagnosticsStatusNotificationReq>(message).payload).and {
+            get { status }.isEqualTo(DiagnosticsStatus.Uploaded)
+        }
     }
 
     @Test
@@ -997,16 +1023,60 @@ class ocpp16SoapParserTest {
         }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationReq to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+
+        val request = DiagnosticsStatusNotificationReq(
+            status = DiagnosticsStatus.Uploaded
+        )
+
+        val reqSoap = ocpp16SoapParser.mapRequestToSoap(
+            RequestSoapMessage(
+                messageId = messageId,
+                action = "DiagnosticsStatusNotification",
+                payload = request,
+                from = "source",
+                to = "destination",
+                chargingStationId = "testId"
+            )
+        )
+
+        expectThat(reqSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotification</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+        }
+        expectThat(ocpp16SoapParser.parseAnyRequestFromSoap(reqSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationReq>().and {
+                get { status }.isEqualTo(DiagnosticsStatus.Uploaded)
+            }
+        }
     }
 
-    @Disabled
     @Test
     fun `should map DiagnosticsStatusNotificationResp to soap`() {
-        // TODO
+        val messageId = UUID.randomUUID().toString()
+        val relateTo = UUID.randomUUID().toString()
+        val response = DiagnosticsStatusNotificationResp()
+        val messageSoap = ocpp16SoapParser.mapResponseToSoap(
+            ResponseSoapMessage(
+                messageId = messageId,
+                relatesTo = relateTo,
+                action = "DiagnosticsStatusNotification",
+                payload = response,
+                from = "destination",
+                to = "source"
+            )
+        )
+
+        expectThat(messageSoap) {
+            get { this }.contains("<a:Action>/DiagnosticsStatusNotificationResponse</a:Action>")
+            get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
+            get { this }.contains("<a:RelatesTo>$relateTo</a:RelatesTo>")
+        }
+        expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
+            get { payload }.isA<DiagnosticsStatusNotificationResp>()
+        }
     }
 
     @Test
@@ -1123,7 +1193,7 @@ class ocpp16SoapParserTest {
                     relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     action = "Heartbeat",
                     payload = response,
-                    from = "source",
+                    from = null,
                     to = "destination"
                 )
             )
@@ -1171,7 +1241,7 @@ class ocpp16SoapParserTest {
                     messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     chargingStationId = "CS1",
                     action = "MeterValues",
-                    from = "source",
+                    from = null,
                     to = "destination",
                     payload = response
                 )
@@ -1183,7 +1253,7 @@ class ocpp16SoapParserTest {
             xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID>
 <a:Action>/MeterValues</a:Action><o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
-<a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From><a:To>destination</a:To>
 </s:Header><s:Body><o:meterValuesRequest><o:connectorId>1</o:connectorId>
 <o:meterValue><sampledValue><value>15213716</value><context>Sample.Periodic</context><format>Raw</format>
 <location>Inlet</location><measurand>Energy.Active.Import.Register</measurand><unit>Wh</unit></sampledValue>
@@ -1222,7 +1292,7 @@ class ocpp16SoapParserTest {
                     action = "MeterValues",
                     payload = response,
                     from = "source",
-                    to = "destination"
+                    to = null
                 )
             )
 
@@ -1257,8 +1327,8 @@ class ocpp16SoapParserTest {
                     messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     chargingStationId = "CS1",
                     action = "StartTransaction",
-                    from = "source",
-                    to = "destination",
+                    from = null,
+                    to = null,
                     payload = response
                 )
             )
@@ -1267,7 +1337,9 @@ class ocpp16SoapParserTest {
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/StartTransaction</a:Action>
-<o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
+<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From>
+<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>
 </s:Header><s:Body><o:startTransactionRequest>
 <connectorId>1</connectorId><idTag>AAAAAAAA</idTag><meterStart>18804500</meterStart>
 <timestamp>2022-05-17T15:41:58.351Z</timestamp></o:startTransactionRequest></s:Body></s:Envelope>""".trimSoap()
@@ -1300,8 +1372,8 @@ class ocpp16SoapParserTest {
                     relatesTo = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
                     action = "StartTransaction",
                     payload = response,
-                    from = "source",
-                    to = "destination"
+                    from = null,
+                    to = null
                 )
             )
 
@@ -1314,6 +1386,12 @@ class ocpp16SoapParserTest {
             )
             get { this }.contains(
                 "<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>"
+            )
+            get { this }.contains(
+                "<a:From><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>"
             )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
@@ -1387,8 +1465,8 @@ class ocpp16SoapParserTest {
                     relatesTo = relatesTo,
                     action = action,
                     payload = response,
-                    from = "source",
-                    to = "destination"
+                    from = "",
+                    to = null
                 )
             )
 
@@ -1401,6 +1479,12 @@ class ocpp16SoapParserTest {
             )
             get { this }.contains(
                 "<a:RelatesTo>$relatesTo</a:RelatesTo>"
+            )
+            get { this }.contains(
+                "<a:From><a:Address/></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>http://www.w3.org/2005/08/addressing/anonymous</a:To>"
             )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
@@ -1486,6 +1570,12 @@ class ocpp16SoapParserTest {
             get { this }.contains(
                 "<a:RelatesTo>$relatesTo</a:RelatesTo>"
             )
+            get { this }.contains(
+                "<a:From><a:Address>source</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>destination</a:To>"
+            )
         }
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<StopTransactionResp>().and {
@@ -1562,6 +1652,241 @@ class ocpp16SoapParserTest {
     }
 
     @Test
+    fun `should parse message to GetCompositeScheduleRequest`() {
+        val message = """<ns0:Envelope
+            xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:ns1="http://www.w3.org/2005/08/addressing"
+            xmlns:ns2="urn://Ocpp/Cp/2015/10/"><ns0:Header><ns1:To>http://127.0.0.1:28080</ns1:To>
+            <ns1:From><ns1:Address>http://192.168.3.6:8084/centralSystemService</ns1:Address>
+            </ns1:From><ns2:chargeBoxIdentity>ADP-ocpp-229</ns2:chargeBoxIdentity><ns1:MessageID>31451</ns1:MessageID>
+            <ns1:Action>/GetCompositeSchedule</ns1:Action></ns0:Header><ns0:Body><ns2:getCompositeScheduleRequest>
+            <ns2:connectorId>1</ns2:connectorId><ns2:duration>1800</ns2:duration>
+            <ns2:chargingRateUnit>A</ns2:chargingRateUnit></ns2:getCompositeScheduleRequest>
+            </ns0:Body></ns0:Envelope>
+        """.trimMargin()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseRequestFromSoap<GetCompositeScheduleReq>(message).payload
+        ).and {
+            get { duration }.isEqualTo(1800)
+            get { chargingRateUnit }.isEqualTo(ChargingRateUnitType.A)
+            get { connectorId }.isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun `should parse message to GetCompositeScheduleResp`() {
+        val message = """<ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:ns1="http://www.w3.org/2005/08/addressing"
+            xmlns:ns2="urn://Ocpp/Cp/2015/10/"><ns0:Header>
+            <ns1:To>http://translator.vpn.l40.sodetrel.fr/ocpp/v16s/</ns1:To>
+            <ns1:ReplyTo><ns1:Address>http://www.w3.org/2005/08/addressing/anonymous</ns1:Address>
+            </ns1:ReplyTo><ns2:chargeBoxIdentity>00:90:0B:82:A7:48</ns2:chargeBoxIdentity>
+            <ns1:MessageID>urn:uuid:e2798428-c921-4c5b-be59-b684ab116378</ns1:MessageID>
+            <ns1:RelatesTo>urn:uuid:40c39b9a-dae4-48ca-80e2-9e8f820c5ac3</ns1:RelatesTo>
+            <ns1:Action>/GetCompositeScheduleResponse</ns1:Action></ns0:Header><ns0:Body>
+            <ns2:getCompositeScheduleResponse><ns2:status>Accepted</ns2:status>
+            <ns2:connectorId>1</ns2:connectorId>
+            <ns2:scheduleStart>2023-01-18T13:22:55.768108Z</ns2:scheduleStart>
+            <ns2:chargingSchedule><ns2:duration>6480000</ns2:duration>
+            <ns2:chargingRateUnit>A</ns2:chargingRateUnit><ns2:chargingSchedulePeriod>
+            <ns2:startPeriod>0</ns2:startPeriod><ns2:limit>0</ns2:limit>
+            </ns2:chargingSchedulePeriod></ns2:chargingSchedule></ns2:getCompositeScheduleResponse>
+            </ns0:Body></ns0:Envelope>
+        """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseAnyResponseFromSoap(message).payload
+        )
+            .isA<GetCompositeScheduleResp>()
+            .and {
+                get { connectorId }.isEqualTo(1)
+                get { status }.isEqualTo(GetCompositeScheduleStatus.Accepted)
+                get { scheduleStart }.isEqualTo(Instant.parse("2023-01-18T13:22:55.768108Z"))
+                get { chargingSchedule }
+                    .isNotNull()
+                    .and {
+                        get { duration }.isEqualTo(6480000)
+                        get { chargingRateUnit }.isEqualTo(ChargingRateUnitType.A)
+                        get { chargingSchedulePeriod }
+                            .isNotEmpty()
+                            .first()
+                            .and {
+                                get { limit }.isEqualTo(0)
+                                get { startPeriod }.isEqualTo(0)
+                            }
+                    }
+            }
+    }
+
+    @Test
+    fun `should parse message to SetChargingProfileRequest`() {
+        val message =
+            """<ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+                xmlns:ns1="http://www.w3.org/2005/08/addressing"
+                xmlns:ns2="urn://Ocpp/Cp/2015/10/"><ns0:Header>
+                <ns1:To>http://127.0.0.1:28080</ns1:To><ns1:From>
+                <ns1:Address>http://192.168.3.6:8084/centralSystemService</ns1:Address></ns1:From>
+                <ns2:chargeBoxIdentity>ADP-ocpp-229</ns2:chargeBoxIdentity><ns1:MessageID>2462</ns1:MessageID>
+                <ns1:Action>/SetChargingProfile</ns1:Action></ns0:Header><ns0:Body><ns2:setChargingProfileRequest>
+                <ns2:connectorId>1</ns2:connectorId><ns2:csChargingProfiles>
+                <ns2:chargingProfileId>101</ns2:chargingProfileId><ns2:stackLevel>2</ns2:stackLevel>
+                <ns2:chargingProfilePurpose>TxDefaultProfile</ns2:chargingProfilePurpose>
+                <ns2:chargingProfileKind>Relative</ns2:chargingProfileKind><ns2:chargingSchedule>
+                <ns2:chargingRateUnit>A</ns2:chargingRateUnit><ns2:chargingSchedulePeriod>
+                <ns2:startPeriod>0</ns2:startPeriod><ns2:limit>0</ns2:limit></ns2:chargingSchedulePeriod>
+                </ns2:chargingSchedule></ns2:csChargingProfiles></ns2:setChargingProfileRequest></ns0:Body>
+                </ns0:Envelope>""".trimSoap()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseAnyRequestFromSoap(message).payload
+        )
+            .isA<SetChargingProfileReq>()
+            .and {
+                get { connectorId }.isEqualTo(1)
+                get { csChargingProfiles }
+                    .and {
+                        get { stackLevel }.isEqualTo(2)
+                        get { chargingProfileId }.isEqualTo(101)
+                        get { chargingProfileKind }.isEqualTo(ChargingProfileKindType.Relative)
+                        get { chargingProfilePurpose }.isEqualTo(ChargingProfilePurposeType.TxDefaultProfile)
+                        get { validFrom }.isNull()
+                        get { validTo }.isNull()
+                        get { recurrencyKind }.isNull()
+                        get { chargingSchedule }
+                            .and {
+                                get { startSchedule }.isNull()
+                                get { duration }.isNull()
+                                get { chargingRateUnit }.isEqualTo(ChargingRateUnitType.A)
+                                get { chargingSchedulePeriod }
+                                    .isNotEmpty()
+                                    .first()
+                                    .and {
+                                        get { limit }.isEqualTo(0)
+                                        get { startPeriod }.isEqualTo(0)
+                                    }
+                            }
+                    }
+            }
+    }
+
+    @Test
+    fun `should map SetChargingProfileReq to Soap`() {
+        val action = "SetChargingProfile"
+        val messageId = "test"
+        val request = SetChargingProfileReq(
+            connectorId = 1,
+            csChargingProfiles = ChargingProfile(
+                chargingProfileId = 100,
+                stackLevel = 2,
+                chargingProfilePurpose = ChargingProfilePurposeType.TxDefaultProfile,
+                chargingProfileKind = ChargingProfileKindType.Relative,
+                chargingSchedule = ChargingSchedule(
+                    duration = 1800,
+                    chargingRateUnit = ChargingRateUnitType.A,
+                    chargingSchedulePeriod = listOf(
+                        ChargingSchedulePeriod(
+                            limit = 0,
+                            startPeriod = 0
+                        ),
+                        ChargingSchedulePeriod(
+                            limit = 20,
+                            startPeriod = 800
+                        )
+                    )
+                )
+            )
+        )
+
+        val messageSoap = ocpp16SoapParser
+            .mapRequestToSoap(
+                RequestSoapMessage(
+                    messageId = messageId,
+                    chargingStationId = "ocppid",
+                    action = action,
+                    payload = request,
+                    from = "source",
+                    to = "destination"
+                )
+            )
+
+        expectThat(messageSoap) {
+            get { this }.contains(
+                "<a:Action>/$action</a:Action>"
+            )
+            get { this }.contains(
+                "<a:MessageID>$messageId</a:MessageID>"
+            )
+            get { this }.contains(
+                "<a:From><a:Address>source</a:Address></a:From>"
+            )
+            get { this }.contains(
+                "<a:To>destination</a:To>"
+            )
+            get { this }.contains(
+                """<chargingSchedulePeriod><startPeriod>0</startPeriod><limit>0</limit>
+</chargingSchedulePeriod><chargingSchedulePeriod><startPeriod>800</startPeriod>
+<limit>20</limit></chargingSchedulePeriod>""".trimSoap()
+            )
+        }
+        expectThat(ocpp16SoapParser.parseAnyRequestFromSoap(messageSoap)) {
+            get { payload }.isA<SetChargingProfileReq>().and {
+                get { connectorId }.isEqualTo(1)
+                get { csChargingProfiles }
+                    .and {
+                        get { stackLevel }.isEqualTo(2)
+                        get { chargingProfileId }.isEqualTo(100)
+                        get { chargingProfileKind }.isEqualTo(ChargingProfileKindType.Relative)
+                        get { chargingProfilePurpose }.isEqualTo(ChargingProfilePurposeType.TxDefaultProfile)
+                        get { validFrom }.isNull()
+                        get { validTo }.isNull()
+                        get { recurrencyKind }.isNull()
+                        get { chargingSchedule }
+                            .and {
+                                get { duration }.isEqualTo(1800)
+                                get { startSchedule }.isNull()
+                                get { chargingRateUnit }.isEqualTo(ChargingRateUnitType.A)
+                                get { chargingSchedulePeriod }
+                                    .isNotEmpty()
+                                    .first()
+                                    .and {
+                                        get { limit }.isEqualTo(0)
+                                        get { startPeriod }.isEqualTo(0)
+                                        get { numberPhases }.isNull()
+                                    }
+                            }
+                    }
+            }
+        }
+    }
+
+    @Test
+    fun `should parse message to SetChargingProfileResponse`() {
+        val message = """<ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
+            xmlns:ns1="http://www.w3.org/2005/08/addressing"
+            xmlns:ns2="urn://Ocpp/Cp/2015/10/"><ns0:Header><ns1:From>
+            <ns1:Address>anonymous</ns1:Address></ns1:From><ns1:To>http://0.0.0.0:28080</ns1:To>
+            <ns1:ReplyTo><ns1:Address>http://www.w3.org/2005/08/addressing/anonymous</ns1:Address>
+            </ns1:ReplyTo><ns2:chargeBoxIdentity>ADP-OCPP-229</ns2:chargeBoxIdentity>
+            <ns1:MessageID>1OX17K</ns1:MessageID><ns1:Action>/SetChargingProfileResponse</ns1:Action>
+            <ns1:RelatesTo>2462</ns1:RelatesTo></ns0:Header><ns0:Body><ns2:setChargingProfileResponse>
+            <ns2:status>Accepted</ns2:status></ns2:setChargingProfileResponse></ns0:Body></ns0:Envelope>
+        """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser
+                .parseAnyResponseFromSoap(message).payload
+        )
+            .isA<SetChargingProfileResp>()
+            .and {
+                get { status }.isEqualTo(ChargingProfileStatus.Accepted)
+            }
+    }
+
+    @Test
     fun `should map SoapFault to soap`() {
         val messageId = UUID.randomUUID().toString()
         val relatesTo = UUID.randomUUID().toString()
@@ -1573,24 +1898,26 @@ class ocpp16SoapParserTest {
                 ResponseSoapMessage(
                     messageId = messageId,
                     relatesTo = relatesTo,
-                    action = "StopTransaction",
+                    action = action,
                     payload = response,
                     from = "source",
                     to = "destination"
                 )
             )
 
-        expectThat(messageSoap) {
-            get { this }.contains(
-                "<a:Action>/${action}Response</a:Action>"
-            )
-            get { this }.contains(
-                "<a:MessageID>$messageId</a:MessageID>"
-            )
-            get { this }.contains(
-                "<a:RelatesTo>$relatesTo</a:RelatesTo>"
-            )
-        }
+        val expectedEnvelope = """<s:Envelope
+                xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+                xmlns:a="http://www.w3.org/2005/08/addressing"
+                xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
+<a:MessageID>$messageId</a:MessageID><a:Action>/StopTransactionResponse</a:Action>
+<a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
+<a:RelatesTo>$relatesTo</a:RelatesTo></s:Header><s:Body>
+<s:Fault><s:Code><s:Value>Receiver</s:Value><o:Subcode><o:Value>InternalError</o:Value></o:Subcode>
+</s:Code><s:Reason>
+<s:Text lang="en">An internal error occurred and the receiver is not able to complete the operation.</s:Text>
+</s:Reason></s:Fault></s:Body></s:Envelope>""".trimSoap()
+
+        expectThat(messageSoap).isEqualTo(expectedEnvelope)
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<SoapFault>().and {
                 get { code }.and {

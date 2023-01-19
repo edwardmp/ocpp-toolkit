@@ -13,9 +13,9 @@ class BaseResolver : TypeIdResolverBase() {
         value::class.simpleName!!
             .let { name ->
                 when {
-                    name.endsWith("Resp") -> name.replaceFirstChar { it.lowercase() } + "onse"
-                    name.endsWith("Req") -> name.replaceFirstChar { it.lowercase() } + "uest"
-                    name == "SoapFault" -> "Fault"
+                    name.endsWith("Resp") -> "${name.replaceFirstChar { it.lowercase() }}onse"
+                    name.endsWith("Req") -> "${name.replaceFirstChar { it.lowercase() }}uest"
+                    name == "SoapFault" -> return "s:Fault"
                     else -> name
                 }
             }
