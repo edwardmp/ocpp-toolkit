@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration
 
 class WampLoadTest {
-    private val port = 54003
+    private val port = getFreePort()
 
     @Test
     fun `should handle 1k clients`() {

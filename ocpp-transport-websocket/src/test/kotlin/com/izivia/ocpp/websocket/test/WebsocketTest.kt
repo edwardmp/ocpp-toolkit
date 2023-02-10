@@ -28,6 +28,7 @@ import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
+import java.net.ServerSocket
 import java.util.*
 
 class WebsocketTest {
@@ -36,6 +37,9 @@ class WebsocketTest {
     fun destroy() {
         unmockkAll()
     }
+
+    fun getFreePort(): Int =
+        ServerSocket(0).use { it.localPort }
 
     @Test
     fun `sendMessageClass success`() {
@@ -88,7 +92,7 @@ class WebsocketTest {
 
     @Test
     fun `receiveMessageClass success`() {
-        val port = 54003
+        val port = getFreePort()
 
         val server = OcppWampServer.newServer(port, setOf(OcppVersion.OCPP_1_6, OcppVersion.OCPP_2_0))
         server.register(object : OcppWampServerHandler {
