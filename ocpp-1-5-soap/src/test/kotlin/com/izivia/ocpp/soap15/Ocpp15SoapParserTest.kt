@@ -31,8 +31,9 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.MessageErrorCode
+import com.izivia.ocpp.utils.fault.FaultReq
 import kotlinx.datetime.Instant
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
@@ -96,14 +97,14 @@ class Ocpp15SoapParserTest {
                         <ns1:From>
                             <ns1:Address>http://172.40.94.5:8084/chargePointService/ocpp16soap/</ns1:Address>
                         </ns1:From>
-                        <ns2:chargeBoxIdentity>00:90:0B:9C:79:42</ns2:chargeBoxIdentity>
+                        <ns2:chargeBoxIdentity>XXXXXXXX</ns2:chargeBoxIdentity>
                         <ns1:MessageID>7230</ns1:MessageID>
                         <ns1:Action>/BootNotification</ns1:Action>
                     </ns0:Header>
                     <ns0:Body>
                         <ns2:bootNotificationRequest>
                             <ns2:chargePointVendor>Izivia</ns2:chargePointVendor>
-                            <ns2:chargePointModel>LEC-3030A-SPX1</ns2:chargePointModel>
+                            <ns2:chargePointModel>XXXXXXXX</ns2:chargePointModel>
                             <ns2:chargePointSerialNumber>5aa469fd41344fe5a575368cd</ns2:chargePointSerialNumber>
                             <ns2:firmwareVersion>1.5.1.d723fd5</ns2:firmwareVersion>
                         </ns2:bootNotificationRequest>
@@ -112,7 +113,7 @@ class Ocpp15SoapParserTest {
             """.trimIndent()
 
         expectThat(ocpp15SoapParser.parseRequestFromSoap<BootNotificationReq>(message).payload).and {
-            get { chargePointModel }.isEqualTo("LEC-3030A-SPX1")
+            get { chargePointModel }.isEqualTo("XXXXXXXX")
             get { chargePointVendor }.isEqualTo("Izivia")
             get { chargePointSerialNumber }.isEqualTo("5aa469fd41344fe5a575368cd")
             get { chargeBoxSerialNumber }.isNull()
@@ -132,7 +133,7 @@ class Ocpp15SoapParserTest {
                                    xmlns:wsa5="http://www.w3.org/2005/08/addressing"
                 >
                     <SOAP-ENV:Header>
-                        <cs:chargeBoxIdentity>00:80:F4:42:77:AB</cs:chargeBoxIdentity>
+                        <cs:chargeBoxIdentity>XXXXXXXX</cs:chargeBoxIdentity>
                         <wsa5:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</wsa5:MessageID>
                         <wsa5:From>
                             <wsa5:Address>http://:8082/</wsa5:Address>
@@ -145,7 +146,7 @@ class Ocpp15SoapParserTest {
                     </SOAP-ENV:Header>
                     <SOAP-ENV:Body>
                         <cs:dataTransferRequest>
-                            <cs:vendorId>Schneider Electric</cs:vendorId>
+                            <cs:vendorId>XXXXXXXX</cs:vendorId>
                             <cs:messageId>Detection loop</cs:messageId>
                             <cs:data>{"connectorId":10,"name":"Vehicle","state":"1","timestamp":"2022-05-17T15:42:03Z:"}</cs:data>
                         </cs:dataTransferRequest>
@@ -154,7 +155,7 @@ class Ocpp15SoapParserTest {
             """.trimIndent()
 
         expectThat(ocpp15SoapParser.parseRequestFromSoap<DataTransferReq>(message).payload).and {
-            get { vendorId }.isEqualTo("Schneider Electric")
+            get { vendorId }.isEqualTo("XXXXXXXX")
             get { messageId }.isEqualTo("Detection loop")
             get { data }.isEqualTo(
                 "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\",\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
@@ -169,8 +170,8 @@ class Ocpp15SoapParserTest {
              xmlns:ns1="http://www.w3.org/2005/08/addressing"
              xmlns:ns2="urn://Ocpp/Cp/2012/06/">
              <ns0:Header>
-                <ns1:From><ns1:Address>http://192.168.153.113:8080</ns1:Address></ns1:From>
-                <ns1:To>http://192.168.153.113:8080</ns1:To>
+                <ns1:From><ns1:Address>http://XXX.YYY.153.113:8080</ns1:Address></ns1:From>
+                <ns1:To>http://XXX.YYY.153.113:8080</ns1:To>
                 <ns1:ReplyTo><ns1:Address>http://www.w3.org/2005/08/addressing/anonymous</ns1:Address></ns1:ReplyTo>
                 <ns2:chargeBoxIdentity>TEST</ns2:chargeBoxIdentity>
                 <ns1:MessageID>f8465c53A250aA4c53A9feeAd79510d972cf</ns1:MessageID>
@@ -195,9 +196,9 @@ class Ocpp15SoapParserTest {
                                xmlns:wsa5="http://www.w3.org/2005/08/addressing"
                 >
                     <s:Header>
-                        <cs:chargeBoxIdentity s:mustUnderstand="true">IES20210511714911</cs:chargeBoxIdentity>
+                        <cs:chargeBoxIdentity s:mustUnderstand="true">XXXXXXXX</cs:chargeBoxIdentity>
                         <wsa5:From>
-                            <wsa5:Address>http://10.66.9.194:8085</wsa5:Address>
+                            <wsa5:Address>http://XXXXXXXX:8085</wsa5:Address>
                         </wsa5:From>
                         <wsa5:MessageID>urn:uuid:8fe7ef88-0f2e-47f3-911d-dbd36b32f366</wsa5:MessageID>
                         <wsa5:ReplyTo s:mustUnderstand="true">
@@ -227,7 +228,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -264,9 +265,9 @@ class Ocpp15SoapParserTest {
                     <SOAP-ENV:Header>
                         <cs:chargeBoxIdentity>TEST</cs:chargeBoxIdentity>
                         <wsa5:MessageID>789456</wsa5:MessageID>
-                        <wsa5:From><wsa5:Address>http://192.168.153.200:8080</wsa5:Address></wsa5:From>
+                        <wsa5:From><wsa5:Address>http://XXX.YYY.153.200:8080</wsa5:Address></wsa5:From>
                         <wsa5:ReplyTo><wsa5:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa5:Address></wsa5:ReplyTo>
-                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://192.168.154.177:8084/centralSystemService/ocpp15soap</wsa5:To>
+                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://XXX.YYY.154.177:8084/centralSystemService/ocpp15soap</wsa5:To>
                         <wsa5:Action SOAP-ENV:mustUnderstand="true">/MeterValues</wsa5:Action>
                     </SOAP-ENV:Header>
                     <SOAP-ENV:Body>
@@ -340,9 +341,9 @@ class Ocpp15SoapParserTest {
                     <SOAP-ENV:Header>
                         <cs:chargeBoxIdentity>TEST</cs:chargeBoxIdentity>
                         <wsa5:MessageID>789456</wsa5:MessageID>
-                        <wsa5:From><wsa5:Address>http://192.168.153.200:8080</wsa5:Address></wsa5:From>
+                        <wsa5:From><wsa5:Address>http://XXX.YYY.153.200:8080</wsa5:Address></wsa5:From>
                         <wsa5:ReplyTo><wsa5:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa5:Address></wsa5:ReplyTo>
-                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://192.168.154.177:8084/centralSystemService/ocpp15soap</wsa5:To>
+                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://XXX.YYY.154.177:8084/centralSystemService/ocpp15soap</wsa5:To>
                         <wsa5:Action SOAP-ENV:mustUnderstand="true">/MeterValues</wsa5:Action>
                     </SOAP-ENV:Header>
                     <SOAP-ENV:Body>
@@ -384,11 +385,11 @@ class Ocpp15SoapParserTest {
                 <v:Envelope xmlns:v="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
                             xmlns:o="urn://Ocpp/Cs/2012/06/">
                     <v:Header>
-                        <o:chargeBoxIdentity>CU-35251-001-1</o:chargeBoxIdentity>
+                        <o:chargeBoxIdentity>XXXXXXXX</o:chargeBoxIdentity>
                         <a:Action v:mustUnderstand="true">/StartTransaction</a:Action>
                         <a:MessageID>urn:uuid:0aa92653-5cd8-465f-89d0-eca833aec4c2</a:MessageID>
                         <a:From>
-                            <a:Address>http://10.93.252.224/ocpp</a:Address>
+                            <a:Address>http://XXXXXXXX/ocpp</a:Address>
                         </a:From>
                         <a:To v:mustUnderstand="true">http://example.fr/ocpp/v16s/</a:To>
                         <a:ReplyTo v:mustUnderstand="true">
@@ -425,7 +426,7 @@ class Ocpp15SoapParserTest {
                     <s:Header>
                         <cs:chargeBoxIdentity s:mustUnderstand="true">IES20210510592612</cs:chargeBoxIdentity>
                         <wsa5:From>
-                            <wsa5:Address>http://10.66.5.160:8085</wsa5:Address>
+                            <wsa5:Address>http://X.X.X.X:8085</wsa5:Address>
                         </wsa5:From>
                         <wsa5:MessageID>urn:uuid:70c76024-1281-471f-8578-ad51a2a88134</wsa5:MessageID>
                         <wsa5:ReplyTo s:mustUnderstand="true">
@@ -472,7 +473,7 @@ class Ocpp15SoapParserTest {
                             <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
                         </ReplyTo>
                         <From xmlns="http://www.w3.org/2005/08/addressing">
-                            <Address>http://192.168.0.102:8080</Address>
+                            <Address>http://XXX.YYY.0.102:8080</Address>
                         </From>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                     </SOAP-ENV:Header>
@@ -508,7 +509,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -539,7 +540,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -570,7 +571,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -601,7 +602,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -632,7 +633,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -665,7 +666,7 @@ class Ocpp15SoapParserTest {
                     <s:Header>
                         <cs:chargeBoxIdentity s:mustUnderstand="true">IES20210511714911</cs:chargeBoxIdentity>
                         <wsa5:From>
-                            <wsa5:Address>http://10.66.9.194:8085</wsa5:Address>
+                            <wsa5:Address>http://X.X.X.X:8085</wsa5:Address>
                         </wsa5:From>
                         <wsa5:MessageID>urn:uuid:8fe7ef88-0f2e-47f3-911d-dbd36b32f366</wsa5:MessageID>
                         <wsa5:ReplyTo s:mustUnderstand="true">
@@ -695,7 +696,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -726,7 +727,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -757,7 +758,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -788,7 +789,7 @@ class Ocpp15SoapParserTest {
                     <S:Header>
                         <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2012/06/">CS1</chargeBoxIdentity>
                         <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
-                            <wsa:Address>http://192.168.0.3:12800/ws</wsa:Address>
+                            <wsa:Address>http://XXX.YYY.0.3:12800/ws</wsa:Address>
                         </wsa:From>
                         <To xmlns="http://www.w3.org/2005/08/addressing">http://example.fr/ocpp/v16s/</To>
                         <Action xmlns="http://www.w3.org/2005/08/addressing">/Heartbeat</Action>
@@ -895,8 +896,8 @@ class Ocpp15SoapParserTest {
     @Test
     fun `should map BootNotificationReq to soap`() {
         val request = BootNotificationReq(
-            chargePointVendor = "Izivia",
-            chargePointModel = "LEC-3030A-SPX1",
+            chargePointVendor = "YYYYYYYY",
+            chargePointModel = "XXXXXXXX",
             chargePointSerialNumber = "5aa469fd41344fe5a575368cd",
             firmwareVersion = "1.5.1.d723fd5"
         )
@@ -920,16 +921,16 @@ class Ocpp15SoapParserTest {
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
 <a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To></s:Header><s:Body><o:bootNotificationRequest>
-<o:chargePointModel>LEC-3030A-SPX1</o:chargePointModel>
+<o:chargePointModel>XXXXXXXX</o:chargePointModel>
 <o:chargePointSerialNumber>5aa469fd41344fe5a575368cd</o:chargePointSerialNumber>
-<o:chargePointVendor>Izivia</o:chargePointVendor><o:firmwareVersion>1.5.1.d723fd5</o:firmwareVersion>
+<o:chargePointVendor>YYYYYYYY</o:chargePointVendor><o:firmwareVersion>1.5.1.d723fd5</o:firmwareVersion>
 </o:bootNotificationRequest></s:Body></s:Envelope>""".trimSoap()
 
         expectThat(messageSoap).isEqualTo(expectedEnvelope)
         expectThat(ocpp15SoapParser.parseAnyRequestFromSoap(messageSoap)) {
             get { payload }.isA<BootNotificationReq>().and {
-                get { chargePointVendor }.isEqualTo("Izivia")
-                get { chargePointModel }.isEqualTo("LEC-3030A-SPX1")
+                get { chargePointVendor }.isEqualTo("YYYYYYYY")
+                get { chargePointModel }.isEqualTo("XXXXXXXX")
                 get { chargePointSerialNumber }.isEqualTo("5aa469fd41344fe5a575368cd")
                 get { firmwareVersion }.isEqualTo("1.5.1.d723fd5")
             }
@@ -973,7 +974,7 @@ class Ocpp15SoapParserTest {
     fun `should map DataTransferReq to soap`() {
         val msgId = UUID.randomUUID().toString()
         val request = DataTransferReq(
-            vendorId = "Schneider Electric",
+            vendorId = "XXXXXXXX",
             messageId = "Detection loop",
             data = "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\",\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
         )
@@ -996,7 +997,7 @@ class Ocpp15SoapParserTest {
 <a:MessageID>$msgId</a:MessageID><a:Action>/DataTransfer</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To></s:Header><s:Body><o:dataTransferRequest>
-<o:vendorId>Schneider Electric</o:vendorId><o:messageId>Detection loop</o:messageId>
+<o:vendorId>XXXXXXXX</o:vendorId><o:messageId>Detection loop</o:messageId>
 <o:data>{"connectorId":10,"name":"Vehicle","state":"1","timestamp":"2022-05-17T15:42:03Z:"}</o:data>
 </o:dataTransferRequest></s:Body></s:Envelope>""".trimSoap()
 
@@ -1005,7 +1006,7 @@ class Ocpp15SoapParserTest {
             get { payload }
                 .isA<DataTransferReq>()
                 .and {
-                    get { vendorId }.isEqualTo("Schneider Electric")
+                    get { vendorId }.isEqualTo("XXXXXXXX")
                     get { messageId }.isEqualTo("Detection loop")
                     get { data }
                         .isEqualTo(
@@ -1574,6 +1575,69 @@ class Ocpp15SoapParserTest {
                     "An internal error occurred and the receiver is not able to complete the operation."
                 )
             }
+        }
+    }
+
+    @Test
+    fun `should map undeclared namespace to SoapFault`() {
+        val request =
+            """<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
+               xmlns="urn://Ocpp/Cs/2012/06/">
+    <soap:Header>
+        <chargeBoxIdentity>XXXXXXXX</chargeBoxIdentity>
+        <a:Action>/StopTransaction</a:Action>
+        <a:MessageID>urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321</a:MessageID>
+        <a:From>
+            <a:Address>http://XX.XX.XX.XX:80/</a:Address>
+        </a:From>
+        <a:To>http://xxxxx.fr/ocpp/v15s/</a:To>
+    </soap:Header>
+    <soap:Body>
+        <stopTransactionRequest xmlns="urn://Ocpp/Cs/2012/06/">
+            <transactionId xsi:nil="true"></transactionId>
+            <idTag>AAAAAAAA</idTag>
+            <timestamp>2022-09-20T19:02:11.000Z</timestamp>
+            <meterStop>59</meterStop>
+        </stopTransactionRequest>
+    </soap:Body>
+</soap:Envelope>""".trimSoap()
+
+        expectThat(ocpp15SoapParser.parseAnyRequestFromSoap(request)) {
+            get { chargingStationId }.isEqualTo("XXXXXXXX")
+            get { messageId }.isEqualTo("urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321")
+            get { action }.isEqualTo("Fault")
+            get { payload }.isA<FaultReq>()
+                .and {
+                    get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
+                    get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)
+                    get { errorDetails }.hasSize(4)
+                        .and {
+                            get { get(0) }
+                                .and {
+                                    get { code }.isEqualTo("ProtocolError")
+                                    get { detail }.isEqualTo(
+                                        "Sender's message does not comply with protocol specification."
+                                    )
+                                }
+                            get { get(1) }
+                                .and {
+                                    get { code }.isEqualTo("stackTrace")
+                                    get { detail }.contains(
+                                        "JsonMappingException: Undeclared namespace prefix"
+                                    )
+                                }
+                            get { get(2) }
+                                .and {
+                                    get { code }.isEqualTo("message")
+                                    get { detail }.isEqualTo(request)
+                                }
+                            get { get(3) }
+                                .and {
+                                    get { code }.isEqualTo("action")
+                                    get { detail }.isEqualTo("/StopTransaction")
+                                }
+                        }
+                }
         }
     }
 }

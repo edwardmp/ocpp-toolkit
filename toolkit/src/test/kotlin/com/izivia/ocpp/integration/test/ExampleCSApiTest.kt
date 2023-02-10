@@ -105,7 +105,7 @@ class ExampleCSApiTest {
 
     @Test
     fun `csms api with 2 ocpp version on 1 websocket`() {
-        val port = 12345
+        val port = 54003
         val idTag = "Tag2"
 
         // Create and start the CSMS server

@@ -1,7 +1,7 @@
 package com.izivia.ocpp.websocket
 
 import com.izivia.ocpp.CSOcppId
-import com.izivia.ocpp.json.JsonMessageErrorCode
+import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.operation.information.ChargingStationConfig
 import com.izivia.ocpp.operation.information.RequestMetadata
 import com.izivia.ocpp.transport.OcppCallErrorException
@@ -78,7 +78,7 @@ class WebsocketServer(
                         logger.error(e.message)
                         WampMessage.CallError(
                             msgId = msg.msgId,
-                            errorCode = JsonMessageErrorCode.INTERNAL_ERROR,
+                            errorCode = MessageErrorCode.INTERNAL_ERROR,
                             errorDescription = "",
                             payload = OcppCallErrorPayload(e.message).toJson(parser)
                         )

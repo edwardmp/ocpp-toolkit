@@ -97,8 +97,6 @@ import java.math.BigDecimal
 
 internal object Ocpp16SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
         .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)

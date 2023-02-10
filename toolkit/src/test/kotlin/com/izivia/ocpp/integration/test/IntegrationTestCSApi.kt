@@ -128,7 +128,7 @@ import com.izivia.ocpp.api.model.updatefirmware.enumeration.UpdateFirmwareStatus
 import com.izivia.ocpp.integration.ApiFactory
 import com.izivia.ocpp.integration.model.Settings
 import com.izivia.ocpp.integration.model.TransportEnum
-import com.izivia.ocpp.json.JsonMessageErrorCode.INTERNAL_ERROR
+import com.izivia.ocpp.utils.MessageErrorCode.INTERNAL_ERROR
 import com.izivia.ocpp.operation.information.ExecutionMetadata
 import com.izivia.ocpp.operation.information.OperationExecution
 import com.izivia.ocpp.operation.information.RequestMetadata
@@ -151,7 +151,7 @@ import com.izivia.ocpp.transport.OcppVersion as OcppVersionTransport
 class IntegrationTestCSApi {
 
     private lateinit var server: OcppWampServer
-    private val port = 12345
+    private val port = 54003
     private lateinit var csApi: CSApi
 
     @BeforeEach

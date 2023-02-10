@@ -1,19 +1,23 @@
 package com.izivia.ocpp.soap16
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.izivia.ocpp.soap.OcppSoapParserImpl
-import com.izivia.ocpp.soap.SoapEnvelope
+import com.izivia.ocpp.soap.*
 
 class Ocpp16SoapParser : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2015/10/",
     soapMapperInput = Ocpp16SoapMapperIn,
     soapMapperOutput = Ocpp16SoapMapper
 ) {
-    override fun readToEnvelop(soap: String): SoapEnvelope<*> {
-        return soapMapperInput
-            .readerFor(object : TypeReference<SoapEnvelope<Ocpp16SoapBody>>() {})
-            .readValue<SoapEnvelope<Ocpp16SoapBody>?>(soap)
-    }
+    override fun readToEnvelop(soap: String): SoapEnvelope<*> =
+        try {
+            soapMapperInput
+                .readerFor(object : TypeReference<SoapEnvelope<Ocpp16SoapBody>>() {})
+                .readValue(soap)
+        } catch (e: Exception) {
+            parseSoapFaulted(soap, e) {
+                Ocpp16SoapBody(fault = it)
+            } as SoapEnvelope<Ocpp16SoapBody>
+        }
 
     override fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any =
         getRealRequestBodyContent(envelope as SoapEnvelope<Ocpp16SoapBody>)
@@ -38,7 +42,7 @@ class Ocpp16SoapParser : OcppSoapParserImpl(
         envelope.body.remoteStopTransactionRequest != null -> envelope.body.remoteStopTransactionRequest!!
         envelope.body.getCompositeScheduleRequest != null -> envelope.body.getCompositeScheduleRequest!!
         envelope.body.setChargingProfileRequest != null -> envelope.body.setChargingProfileRequest!!
-        envelope.body.fault != null -> envelope.body.fault!!
+        envelope.body.fault != null -> envelope.body.fault!!.toFaultReq()
         else -> throw IllegalArgumentException("Unknown request message operation. enveloppe = $envelope")
     }
 

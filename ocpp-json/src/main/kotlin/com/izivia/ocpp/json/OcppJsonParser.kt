@@ -1,62 +1,226 @@
 package com.izivia.ocpp.json
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.izivia.ocpp.json.JsonMessageType.*
+import com.izivia.ocpp.utils.*
+import com.izivia.ocpp.utils.fault.*
+import com.networknt.schema.ValidationMessage
 import kotlin.reflect.KClass
 
-abstract class OcppJsonParser(private val mapper: ObjectMapper) {
+abstract class OcppJsonParser(
+    private val mapper: ObjectMapper,
+    open val ignoreValidationCodes: List<String> = emptyList()
+) {
 
-    protected abstract fun getRequestPayloadClass(action: String, context: String): Class<out Any>
+    protected abstract val ocppJsonValidator: OcppJsonValidator
 
-    fun parseAnyRequestFromJson(messageStr: String): JsonMessage<Any> {
-        val parsed = parseAsStringPayloadFromJson(messageStr)
-            ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
+    protected abstract fun getRequestPayloadClass(
+        action: String,
+        errorHandler: (e: Exception) -> Throwable
+    ): Class<out Any>
 
-        if (parsed.action == null) {
-            throw IllegalArgumentException("The message action must not be null. message = $messageStr")
+    protected abstract fun getResponseActionFromClass(className: String): String
+
+    protected abstract fun validateJson(
+        jsonMessage: JsonMessage<JsonNode>,
+        errorsHandler: (errors: List<ValidationMessage>) -> Unit
+    )
+
+    fun <T : Any> parseAnyFromString(messageStr: String, useClazz: Class<out Any>? = null): JsonMessage<Any> {
+        try {
+            var parsed = parseNodePayload(parseStringToJsonNode(messageStr))
+
+            var clazz = useClazz
+            when (parsed.msgType) {
+                CALL -> clazz = getRequestPayloadClass(parsed.action!!) {
+                    ActionRequestNullOrUnknownException(
+                        message = it.message!!,
+                        messageId = parsed.msgId,
+                        errorDetails = listOf(
+                            ErrorDetail(
+                                code = ErrorDetailCode.MESSAGE.value,
+                                detail = messageStr
+                            ),
+                            ErrorDetail(
+                                code = ErrorDetailCode.ACTION.value,
+                                detail = parsed.action ?: FAULT
+                            )
+                        )
+                    )
+                }
+
+                CALL_RESULT -> useClazz?.let {
+                    parsed = parsed.copy(action = getResponseActionFromClass(it::class.simpleName!!))
+                    clazz = useClazz
+                }
+
+                else -> clazz = FaultReq::class.java
+            }
+
+            validateJson(jsonMessage = parsed) {
+                throw ValidationException(
+                    message = "Validation error",
+                    messageId = parsed.msgId,
+                    errorDetails = listOf(
+                        ErrorDetail(
+                            code = ErrorDetailCode.ACTION.value,
+                            detail = parsed.action ?: FAULT
+                        ),
+                        ErrorDetail(
+                            code = ErrorDetailCode.MESSAGE.value,
+                            detail = messageStr
+                        )
+                    ).plus(
+                        it.map {
+                            ErrorDetail(
+                                code = it.code,
+                                detail = "Validations error : message=${it.message}, details=${it.details}"
+                            )
+                        }
+                    )
+                )
+            }
+
+            return JsonMessage(
+                msgType = parsed.msgType,
+                msgId = parsed.msgId,
+                action = parsed.action,
+                payload = mapJsonNodeToObject(parsed, clazz!!)
+            )
+        } catch (e: OcppParserException) {
+            return jsonMessage(
+                msgId = e.messageId,
+                msgType = CALL_ERROR,
+                error = e.errorCode,
+                detail = e.stackTraceToString(),
+                action = FAULT,
+                payload = e.errorDetails?.let {
+                    FaultReq(
+                        errorCode = e.errorCode.errorCode,
+                        errorDescription = e.errorCode.description,
+                        errorDetails = it
+                    )
+                }
+            )
+        } catch (e: Exception) {
+            return jsonMessage(
+                msgId = null,
+                msgType = CALL_ERROR,
+                action = FAULT,
+                error = MessageErrorCode.INTERNAL_ERROR,
+                detail = e.stackTraceToString(),
+                payload = FaultReq(
+                    errorCode = MessageErrorCode.INTERNAL_ERROR.errorCode,
+                    errorDescription = MessageErrorCode.INTERNAL_ERROR.description,
+                    errorDetails = listOf(
+                        ErrorDetail(code = ErrorDetailCode.STACKTRACE.value, detail = e.stackTraceToString()),
+                        ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = messageStr)
+                    )
+                )
+            )
+        }
+    }
+
+    private fun jsonMessage(
+        msgType: JsonMessageType,
+        msgId: String?,
+        action: String,
+        error: MessageErrorCode,
+        payload: Any?,
+        detail: String?
+    ) = JsonMessage(
+        msgType = msgType,
+        msgId = msgId ?: "Unknown",
+        action = action,
+        errorCode = error,
+        errorDescription = error.description,
+        payload = payload ?: FaultReq(
+            errorCode = error.errorCode,
+            errorDescription = error.description,
+            errorDetails = listOf(
+                ErrorDetail(
+                    code = error.errorCode,
+                    detail = detail!!
+                )
+            )
+        )
+    )
+
+    private fun mapJsonNodeToObject(jsonMessage: JsonMessage<JsonNode>, clazz: Class<out Any>): Any =
+        try {
+            mapper.treeToValue(jsonMessage.payload, clazz)
+        } catch (e: Exception) {
+            throw ActionRequestNullOrUnknownException(
+                message = "Cannot parse jsonMessage=$jsonMessage to class $clazz",
+                messageId = jsonMessage.msgId,
+                errorDetails = listOf(
+                    ErrorDetail(
+                        code = "request",
+                        detail = "${jsonMessage.payload}"
+                    )
+                )
+            )
         }
 
-        val clazz = getRequestPayloadClass(parsed.action, messageStr)
+    fun parseStringToJsonNode(mesageString: String): JsonNode =
+        try {
+            mapper.readTree(mesageString)
+        } catch (e: Exception) {
+            throw MalformedOcppMessageException(
+                message = "Cannot parse OCPP message to JsonNode",
+                messageId = null,
+                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = mesageString))
+            )
+        }
 
-        return JsonMessage(
-            msgType = parsed.msgType,
-            msgId = parsed.msgId,
-            action = parsed.action,
-            payload = mapper.readValue(parsed.payload, clazz)
-        )
-    }
+    fun <T : Any> parseFromJson(messageStr: String, clazz: KClass<T>): JsonMessage<Any> =
+        parseAnyFromString<T>(messageStr = messageStr, useClazz = clazz.java)
 
-    fun <T : Any> parseFromJson(messageStr: String, clazz: KClass<T>): JsonMessage<T> {
-        val parsed = parseAsStringPayloadFromJson(messageStr)
-            ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
+    fun <T : Any> parseAnyFromJson(messageStr: String, expectedClass: KClass<T>): JsonMessage<Any> =
+        parseAnyFromString<T>(messageStr = messageStr, useClazz = expectedClass.java)
 
-        // Cannot use .copy() because of class cast error between JsonMessage<T> and JsonMessage<String>
-        return JsonMessage(
-            msgType = parsed.msgType,
-            msgId = parsed.msgId,
-            action = parsed.action,
-            errorCode = parsed.errorCode,
-            errorDescription = parsed.errorDescription,
-            payload = mapper.readValue(parsed.payload, clazz.java)
-        )
-    }
+    fun parseNodePayload(jsonNode: JsonNode): JsonMessage<JsonNode> {
+        var msgId: String? = null
+        try {
+            msgId = jsonNode[1].asText()
+            jsonNode[0].asInt()
+        } catch (e: Exception) {
+            throw FormatViolationException(
+                message = "Malformed messageType in json=$jsonNode",
+                messageId = msgId,
+                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = jsonNode.toString()))
+            )
+        }.let {
+            return when (it) {
+                CALL.id -> JsonMessage.Call(
+                    msgId = jsonNode[1].asText(),
+                    action = jsonNode[2].asText(),
+                    payload = jsonNode[3]
+                )
 
-    fun <T : Any> parseAnyFromJson(messageStr: String, expectedClass: KClass<T>): JsonMessage<Any> {
-        val parsed = parseAsStringPayloadFromJson(messageStr)
-            ?: throw IllegalArgumentException("Impossible parsing of message. message = $messageStr")
+                CALL_RESULT.id ->
+                    JsonMessage.CallResult(msgId = jsonNode[1].asText(), payload = jsonNode[2])
 
-        // Cannot use .copy() because of class cast error between JsonMessage<T> and JsonMessage<String>
-        return JsonMessage(
-            msgType = parsed.msgType,
-            msgId = parsed.msgId,
-            action = parsed.action,
-            errorCode = parsed.errorCode,
-            errorDescription = parsed.errorDescription,
-            payload = when (parsed.msgType) {
-                CALL, CALL_RESULT -> mapper.readValue(parsed.payload, expectedClass.java)
-                CALL_ERROR -> parsed.payload
+                CALL_ERROR.id -> JsonMessage.CallError(
+                    msgId = jsonNode[1].asText(),
+                    errorCode = MessageErrorCode.fromValue(jsonNode[2].asText()),
+                    errorDescription = jsonNode[3].asText(),
+                    payload = jsonNode[4]
+                )
+
+                else -> throw MessageTypeException(
+                    message = "Unknown messageType in json=$jsonNode",
+                    messageId = msgId,
+                    errorDetails = listOf(
+                        ErrorDetail(
+                            code = ErrorDetailCode.MESSAGE.value,
+                            detail = jsonNode.toString()
+                        )
+                    )
+                )
             }
-        )
+        }
     }
 
     fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
@@ -75,7 +239,7 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
                     CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
                         JsonMessage.CallError(
                             msgId,
-                            JsonMessageErrorCode.fromValue(errorCode),
+                            MessageErrorCode.fromValue(errorCode),
                             errorDescription,
                             payload
                         )
@@ -117,7 +281,7 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
                     CALL_ERROR -> listOf(
                         message.msgType.id,
                         message.msgId,
-                        message.errorCode!!.value,
+                        message.errorCode!!.errorCode,
                         message.errorDescription,
                         payload
                     )
@@ -132,8 +296,8 @@ abstract class OcppJsonParser(private val mapper: ObjectMapper) {
     }
 }
 
-inline fun <reified T : Any> OcppJsonParser.parseFromJson(messageStr: String): JsonMessage<T> =
-    parseFromJson(messageStr, T::class)
+inline fun <reified T : Any> OcppJsonParser.parseFromJson(messageStr: String): JsonMessage<Any> =
+    parseAnyFromString<T>(messageStr, T::class.java)
 
 inline fun <reified T : Any> OcppJsonParser.parseAnyFromJson(messageStr: String): JsonMessage<Any> =
-    parseAnyFromJson(messageStr, T::class)
+    parseAnyFromString<T>(messageStr, T::class.java)
