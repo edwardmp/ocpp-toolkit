@@ -20,9 +20,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import strikt.assertions.isLessThan
 import strikt.assertions.isSuccess
-import java.net.ServerSocket
 import kotlin.system.measureTimeMillis
-
 
 class WampIntegrationTest {
     private val port = getFreePort()

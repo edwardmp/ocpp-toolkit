@@ -670,7 +670,7 @@ class JsonSchemaTest {
         expectThat(
             parser.parseAnyFromString<Unit>(
                 parser.mapPayloadToString(
-                    FirmwareStatusNotificationReq(FirmwareStatus.Downloaded)
+                    instance
                 )
             )
         ).isA<JsonMessage<T>>()

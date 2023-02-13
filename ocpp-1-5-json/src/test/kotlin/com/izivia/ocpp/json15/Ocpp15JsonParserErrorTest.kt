@@ -1,13 +1,14 @@
 package com.izivia.ocpp.json15
 
 import com.izivia.ocpp.utils.MessageErrorCode
-import com.izivia.ocpp.utils.fault.FaultReq
+import com.izivia.ocpp.utils.fault.Fault
+import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.contains
-import strikt.assertions.hasSize
-import strikt.assertions.isA
-import strikt.assertions.isEqualTo
+import strikt.assertions.*
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 class Ocpp15JsonParserErrorTest {
 
@@ -34,7 +35,7 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("Fault")
                 get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR)
-                get { payload }.isA<FaultReq>()
+                get { payload }.isA<Fault>()
                     .and {
                         get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
                         get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)
@@ -69,7 +70,7 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("Fault")
                 get { errorCode }.isEqualTo(MessageErrorCode.MESSAGE_TYPE_NOT_SUPPORTED)
-                get { payload }.isA<FaultReq>()
+                get { payload }.isA<Fault>()
                     .and {
                         get { errorCode }.isEqualTo(MessageErrorCode.MESSAGE_TYPE_NOT_SUPPORTED.errorCode)
                         get { errorDescription }.isEqualTo(MessageErrorCode.MESSAGE_TYPE_NOT_SUPPORTED.description)
@@ -94,7 +95,7 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("Fault")
                 get { errorCode }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED)
-                get { payload }.isA<FaultReq>()
+                get { payload }.isA<Fault>()
                     .and {
                         get { errorCode }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED.errorCode)
                         get { errorDescription }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED.description)
@@ -124,7 +125,7 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("Fault")
                 get { errorCode }.isEqualTo(MessageErrorCode.FORMAT_VIOLATION)
-                get { payload }.isA<FaultReq>()
+                get { payload }.isA<Fault>()
                     .and {
                         get { errorCode }.isEqualTo(MessageErrorCode.FORMAT_VIOLATION.errorCode)
                         get { errorDescription }.isEqualTo(MessageErrorCode.FORMAT_VIOLATION.description)
@@ -152,7 +153,7 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("Fault")
                 get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR)
-                get { payload }.isA<FaultReq>()
+                get { payload }.isA<Fault>()
                     .and {
                         get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
                         get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)
@@ -180,7 +181,7 @@ class Ocpp15JsonParserErrorTest {
 
     @Test
     fun `should parse to BootNotification on ignoring 1013 inconsistent request`() {
-        val ocppIgnore1013 = Ocpp15JsonParser(ignoreValidationCodes = listOf("1013"))
+        val ocppIgnore1013 = Ocpp15JsonParser(ignoreValidationCodes = listOf(ValidatorTypeCode.MAX_LENGTH))
 
         val request = """[2,"messageId","BootNotification",
             {"chargePointModel": "testModel", "chargePointVendor": "testVendor",
@@ -192,5 +193,66 @@ class Ocpp15JsonParserErrorTest {
             .and {
                 get { action }.isEqualTo("BootNotification")
             }
+    }
+
+    @Test
+    fun `should parse to BootNotification on ignoring additional properties request`() {
+        val ocppIgnore = Ocpp15JsonParser(ignoreValidationCodes = listOf(ValidatorTypeCode.ADDITIONAL_PROPERTIES))
+
+        val request = """[2,"messageId","BootNotification",
+            {"chargePointModel": "testModel", "chargePointVendor": "testVendor",
+            "chargePointSerialNumber":"12345678910", "additional": "Properties"}]
+        """.trimMargin()
+
+        val req = ocppIgnore.parseAnyFromString<Unit>(request)
+        expectThat(req)
+            .and {
+                get { action }.isEqualTo("BootNotification")
+            }
+    }
+
+    @Test
+    fun `perf with and without validation`() {
+        val request1 = """[2,"messageId","Heartbeat",{}]"""
+        val request2 = """[15,"messageId","Heartbeat",{}]""".trimMargin()
+        val request3 = """[2,"messageId","BootNotification",
+            {"chargePointModel": "testModel", "chargePointVendor": "testVendor",
+            "chargePointSerialNumber":"1234567891011121314151617181920"}]
+        """.trimMargin()
+        val request4 = """[2,"messageId","NotAnAction",{}]""".trimMargin()
+        val request5 = """{"Json": "Ok", "Ocpp": "not}""".trimMargin()
+
+        val requestList = listOf(request1, request2, request3, request4, request5)
+
+        val parserWithoutValidation = Ocpp15JsonParser(enableValidation = false)
+        val parserWithValidation = Ocpp15JsonParser()
+
+        // warn up JIT
+        timeit(requestList, parserWithoutValidation)
+        timeit(requestList, parserWithValidation)
+
+        // measure time
+        val elapsedWithoutValidation = timeit(requestList, parserWithoutValidation)
+
+        // measure time
+        val elapsedWithValidation = timeit(requestList, parserWithValidation)
+
+        val percent = 100 - ((elapsedWithoutValidation / elapsedWithValidation) * 100)
+
+        println(
+            "elapsed time : with validation $elapsedWithValidation, " +
+                "without validation $elapsedWithoutValidation, $percent % faster without validation"
+        )
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun timeit(requestList: List<String>, parser: Ocpp15JsonParser): Duration {
+        return measureTime {
+            for (i in 1..10000) {
+                parser.parseAnyFromString<Unit>(
+                    requestList.get(i % requestList.size).replace("messageId", i.toString())
+                )
+            }
+        }
     }
 }

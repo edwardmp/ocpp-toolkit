@@ -9,19 +9,22 @@ import com.izivia.ocpp.json.OcppJsonValidator
 import com.izivia.ocpp.utils.MessageTypeException
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
+import com.networknt.schema.ValidatorTypeCode
 
-class Ocpp16JsonParser(override val ignoreValidationCodes: List<String> = emptyList()) :
-    OcppJsonParser(Ocpp16JsonObjectMapper) {
-
-    override val ocppJsonValidator = OcppJsonValidator(ignoreValidationCodes, SpecVersion.VersionFlag.V4)
+class Ocpp16JsonParser(
+    val ignoreValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    enableValidation: Boolean = true
+) :
+    OcppJsonParser(
+        mapper = Ocpp16JsonObjectMapper,
+        ocppJsonValidator = if (enableValidation) {
+            OcppJsonValidator(ignoreValidationCodes, SpecVersion.VersionFlag.V4)
+        } else null
+    ) {
 
     override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
         try {
-            Actions.valueOf(action.uppercase()).let {
-                javaClass.classLoader.loadClass(
-                    "com.izivia.ocpp.core16.model.${it.lowercase()}.${it.camelCaseRequest()}"
-                )
-            }
+            Actions.valueOf(action.uppercase()).classRequest
         } catch (e: Exception) {
             throw errorHandler(e)
         }
@@ -33,7 +36,7 @@ class Ocpp16JsonParser(override val ignoreValidationCodes: List<String> = emptyL
         jsonMessage: JsonMessage<JsonNode>,
         errorsHandler: (errors: List<ValidationMessage>) -> Unit
     ) {
-        ocppJsonValidator.isValidObject(
+        ocppJsonValidator?.isValidObject(
             action = when (jsonMessage.msgType) {
                 JsonMessageType.CALL -> "${jsonMessage.action}Request"
                 JsonMessageType.CALL_RESULT -> "${jsonMessage.action}Response"

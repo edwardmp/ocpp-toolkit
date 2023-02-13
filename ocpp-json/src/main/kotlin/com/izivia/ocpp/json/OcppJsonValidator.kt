@@ -5,15 +5,16 @@ import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
+import com.networknt.schema.ValidatorTypeCode
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 
 class OcppJsonValidator(
-    private val ignoreValidationCodes: List<String> = emptyList(),
-    val specVersion: SpecVersion.VersionFlag
+    private val ignoreValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    private val specVersion: SpecVersion.VersionFlag
 ) {
     private val logger = LoggerFactory.getLogger(OcppJsonValidator::class.java)
-    private val jsonValidators = mutableMapOf<String, JsonSchema>()
+    private val jsonSchemas = mutableMapOf<String, JsonSchema>()
 
     private fun getJsonSchema(file: String): JsonSchema {
         val factory: JsonSchemaFactory = JsonSchemaFactory.getInstance(specVersion)
@@ -26,10 +27,10 @@ class OcppJsonValidator(
      * json schema
      */
     fun isValidObject(action: String, payload: JsonNode): List<ValidationMessage>? =
-        (jsonValidators[action] ?: getJsonSchema("$action.json").also { jsonValidators[action] = it })
+        (jsonSchemas[action] ?: getJsonSchema("$action.json").also { jsonSchemas[action] = it })
             .validate(payload)
             .mapNotNull {
-                if (ignoreValidationCodes.contains(it.code)) {
+                if (ignoreValidationCodes.contains(ValidatorTypeCode.fromValue(it.type))) {
                     logger.warn("Ignoring validation code ${it.code} : ${it.message}")
                     null
                 } else {

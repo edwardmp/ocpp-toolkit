@@ -32,7 +32,7 @@ import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
 import com.izivia.ocpp.utils.MessageErrorCode
-import com.izivia.ocpp.utils.fault.FaultReq
+import com.izivia.ocpp.utils.fault.Fault
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -1606,7 +1606,7 @@ class Ocpp15SoapParserTest {
             get { chargingStationId }.isEqualTo("XXXXXXXX")
             get { messageId }.isEqualTo("urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321")
             get { action }.isEqualTo("Fault")
-            get { payload }.isA<FaultReq>()
+            get { payload }.isA<Fault>()
                 .and {
                     get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
                     get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)

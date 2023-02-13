@@ -3,7 +3,7 @@ package com.izivia.ocpp.soap
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.FAULT
-import com.izivia.ocpp.utils.fault.FaultReq
+import com.izivia.ocpp.utils.fault.Fault
 import kotlin.reflect.KClass
 
 interface OcppSoapParser {
@@ -148,7 +148,7 @@ abstract class OcppSoapParserImpl(
 
 fun SoapFault.toFaultReq() =
     MessageErrorCode.fromValue(this.code.subCode.value.value).let { error ->
-        FaultReq(
+        Fault(
             errorCode = error.errorCode,
             errorDescription = error.description, // reason.text.value.value,
             errorDetails = listOf(

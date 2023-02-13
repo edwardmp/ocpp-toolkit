@@ -4,7 +4,7 @@ import com.izivia.ocpp.utils.ErrorDetail
 
 const val FAULT = "Fault"
 
-data class FaultReq(
+data class Fault(
     val errorCode: String,
     val errorDescription: String,
     val errorDetails: List<ErrorDetail>

@@ -10,10 +10,8 @@ import kotlin.reflect.KClass
 
 abstract class OcppJsonParser(
     private val mapper: ObjectMapper,
-    open val ignoreValidationCodes: List<String> = emptyList()
+    protected val ocppJsonValidator: OcppJsonValidator?
 ) {
-
-    protected abstract val ocppJsonValidator: OcppJsonValidator
 
     protected abstract fun getRequestPayloadClass(
         action: String,
@@ -55,7 +53,7 @@ abstract class OcppJsonParser(
                     clazz = useClazz
                 }
 
-                else -> clazz = FaultReq::class.java
+                else -> clazz = Fault::class.java
             }
 
             validateJson(jsonMessage = parsed) {
@@ -96,7 +94,7 @@ abstract class OcppJsonParser(
                 detail = e.stackTraceToString(),
                 action = FAULT,
                 payload = e.errorDetails?.let {
-                    FaultReq(
+                    Fault(
                         errorCode = e.errorCode.errorCode,
                         errorDescription = e.errorCode.description,
                         errorDetails = it
@@ -110,7 +108,7 @@ abstract class OcppJsonParser(
                 action = FAULT,
                 error = MessageErrorCode.INTERNAL_ERROR,
                 detail = e.stackTraceToString(),
-                payload = FaultReq(
+                payload = Fault(
                     errorCode = MessageErrorCode.INTERNAL_ERROR.errorCode,
                     errorDescription = MessageErrorCode.INTERNAL_ERROR.description,
                     errorDetails = listOf(
@@ -135,7 +133,7 @@ abstract class OcppJsonParser(
         action = action,
         errorCode = error,
         errorDescription = error.description,
-        payload = payload ?: FaultReq(
+        payload = payload ?: Fault(
             errorCode = error.errorCode,
             errorDescription = error.description,
             errorDetails = listOf(
