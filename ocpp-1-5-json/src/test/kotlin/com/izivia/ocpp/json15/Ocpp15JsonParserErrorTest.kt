@@ -243,6 +243,9 @@ class Ocpp15JsonParserErrorTest {
             "elapsed time : with validation $elapsedWithValidation, " +
                 "without validation $elapsedWithoutValidation, $percent % faster without validation"
         )
+
+        // disabled because running tests in parallel can overload CPU and lead to unexpected behavior and failed
+        // expectThat(percent).isGreaterThan(0.0)
     }
 
     @OptIn(ExperimentalTime::class)

@@ -53,5 +53,7 @@ enum class Actions(val value: String, val classRequest: Class<*>) {
 
     fun lowercase() = value.lowercase()
 
-    fun camelCaseRequest() = "${value.replaceFirstChar { it.uppercase() }}Req"
+    fun camelCase() = value.replaceFirstChar { it.uppercase() }
+
+    fun camelCaseRequest() = "${camelCase()}Req"
 }
