@@ -27,6 +27,7 @@ class OcppJsonValidator(
      * json schema
      */
     fun isValidObject(action: String, payload: JsonNode): List<ValidationMessage>? =
+        // Info :  loading JsonSchema is not thread safe. Can affect performance during the first instanciation
         (jsonSchemas[action] ?: getJsonSchema("$action.json").also { jsonSchemas[action] = it })
             .validate(payload)
             .mapNotNull {
