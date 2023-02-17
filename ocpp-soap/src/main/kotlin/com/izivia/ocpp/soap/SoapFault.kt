@@ -14,7 +14,9 @@ data class SoapFault(
     @JacksonXmlProperty(localName = "Code")
     val code: FaultCode,
     @JacksonXmlProperty(localName = "Reason")
-    val reason: FaultReason
+    val reason: FaultReason,
+    @JacksonXmlProperty(localName = "Value")
+    val value: FaultValue? = null
 ) {
     companion object {
         fun securityError() = create(SENDER, SECURITY_ERROR, FaultReasonTextValue.SECURITY_ERROR)
@@ -40,6 +42,13 @@ data class SoapFault(
     }
 }
 
+data class FaultValue(
+    @JacksonXmlProperty(localName = "errorDescription")
+    val errorDescription: ValueText,
+    @JacksonXmlProperty(localName = "errorDetails")
+    val errorDetails: Map<ValueText, ValueText>
+)
+
 data class FaultCode(
     @JacksonXmlProperty(localName = "Value")
     val value: FaultCodeValue,
@@ -57,7 +66,11 @@ data class FaultSubCode(
     val value: FaultSubCodeValue
 )
 
-enum class FaultSubCodeValue(@JsonValue val value: String) {
+enum class FaultSubCodeValue(
+    @JsonValue
+    @JacksonXmlProperty(localName = "Value")
+    val value: String
+) {
     SECURITY_ERROR("SecurityError"),
     IDENTITY_MISMATCH("IdentityMismatch"),
     PROTOCOL_ERROR("ProtocolError"),
@@ -78,7 +91,11 @@ data class FaultReasonText(
     val lang: String = "en"
 )
 
-enum class FaultReasonTextValue(@JsonValue val value: String) {
+enum class FaultReasonTextValue(
+    @JsonValue
+    @JacksonXmlProperty(localName = "Value")
+    val value: String
+) {
     SECURITY_ERROR("Sender failed authentication or is not authorized to use the requested operation."),
     IDENTITY_MISMATCH("Sender sent the wrong identity value."),
     PROTOCOL_ERROR("Sender's message does not comply with protocol specification."),

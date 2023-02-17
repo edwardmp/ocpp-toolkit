@@ -1,58 +1,55 @@
 package com.izivia.ocpp.json15
 
-import com.izivia.ocpp.core15.model.authorize.AuthorizeReq
-import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
-import com.izivia.ocpp.core15.model.cancelreservation.CancelReservationReq
-import com.izivia.ocpp.core15.model.changeavailability.ChangeAvailabilityReq
-import com.izivia.ocpp.core15.model.changeconfiguration.ChangeConfigurationReq
-import com.izivia.ocpp.core15.model.clearcache.ClearCacheReq
-import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
-import com.izivia.ocpp.core15.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
-import com.izivia.ocpp.core15.model.firmwarestatusnotification.FirmwareStatusNotificationReq
-import com.izivia.ocpp.core15.model.getconfiguration.GetConfigurationReq
-import com.izivia.ocpp.core15.model.getdiagnostics.GetDiagnosticsReq
-import com.izivia.ocpp.core15.model.getlocallistversion.GetLocalListVersionReq
-import com.izivia.ocpp.core15.model.heartbeat.HeartbeatReq
-import com.izivia.ocpp.core15.model.metervalues.MeterValuesReq
-import com.izivia.ocpp.core15.model.remotestart.RemoteStartTransactionReq
-import com.izivia.ocpp.core15.model.remotestop.RemoteStopTransactionReq
-import com.izivia.ocpp.core15.model.reservenow.ReserveNowReq
-import com.izivia.ocpp.core15.model.reset.ResetReq
-import com.izivia.ocpp.core15.model.sendlocallist.SendLocalListReq
-import com.izivia.ocpp.core15.model.starttransaction.StartTransactionReq
-import com.izivia.ocpp.core15.model.statusnotification.StatusNotificationReq
-import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
-import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorReq
-import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
+import com.fasterxml.jackson.databind.JsonNode
+import com.izivia.ocpp.core15.model.common.enumeration.Actions
+import com.izivia.ocpp.json.JsonMessage
+import com.izivia.ocpp.json.JsonMessageType
 import com.izivia.ocpp.json.OcppJsonParser
+import com.izivia.ocpp.json.OcppJsonValidator
+import com.izivia.ocpp.utils.MessageTypeException
+import com.networknt.schema.SpecVersion
+import com.networknt.schema.ValidationMessage
+import com.networknt.schema.ValidatorTypeCode
 
-class Ocpp15JsonParser : OcppJsonParser(Ocpp15JsonObjectMapper) {
+class Ocpp15JsonParser(
+    val ignoreValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    enableValidation: Boolean = true
+) :
+    OcppJsonParser(
+        mapper = Ocpp15JsonObjectMapper,
+        ocppJsonValidator = if (enableValidation) {
+            OcppJsonValidator(ignoreValidationCodes, SpecVersion.VersionFlag.V4)
+        } else null
+    ) {
 
-    override fun getRequestPayloadClass(action: String, context: String) = when (action.lowercase()) {
-        "authorize" -> AuthorizeReq::class.java
-        "bootnotification" -> BootNotificationReq::class.java
-        "cancelreservation" -> CancelReservationReq::class.java
-        "changeavailability" -> ChangeAvailabilityReq::class.java
-        "changeconfiguration" -> ChangeConfigurationReq::class.java
-        "clearcache" -> ClearCacheReq::class.java
-        "datatransfer" -> DataTransferReq::class.java
-        "diagnosticsstatusnotification" -> DiagnosticsStatusNotificationReq::class.java
-        "firmwarestatusnotification" -> FirmwareStatusNotificationReq::class.java
-        "getconfiguration" -> GetConfigurationReq::class.java
-        "getdiagnostics" -> GetDiagnosticsReq::class.java
-        "getlocallistversion" -> GetLocalListVersionReq::class.java
-        "heartbeat" -> HeartbeatReq::class.java
-        "metervalues" -> MeterValuesReq::class.java
-        "remotestarttransaction" -> RemoteStartTransactionReq::class.java
-        "remotestoptransaction" -> RemoteStopTransactionReq::class.java
-        "reservenow" -> ReserveNowReq::class.java
-        "reset" -> ResetReq::class.java
-        "sendlocallist" -> SendLocalListReq::class.java
-        "starttransaction" -> StartTransactionReq::class.java
-        "statusnotification" -> StatusNotificationReq::class.java
-        "stoptransaction" -> StopTransactionReq::class.java
-        "unlockconnector" -> UnlockConnectorReq::class.java
-        "updatefirmware" -> UpdateFirmwareReq::class.java
-        else -> throw IllegalArgumentException("Action not recognized. action = ${action}. message = $context")
+    override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
+        try {
+            Actions.valueOf(action.uppercase()).classRequest
+        } catch (e: Exception) {
+            throw errorHandler(e)
+        }
+
+    override fun getResponseActionFromClass(className: String): String =
+        Actions.valueOf(className.replace("[Resp|Req]$", "").uppercase()).value
+
+    override fun validateJson(
+        jsonMessage: JsonMessage<JsonNode>,
+        errorsHandler: (errors: List<ValidationMessage>) -> Unit
+    ) {
+        ocppJsonValidator?.isValidObject(
+            action = when (jsonMessage.msgType) {
+                JsonMessageType.CALL -> jsonMessage.action!!
+                JsonMessageType.CALL_RESULT -> "${jsonMessage.action}Response"
+                JsonMessageType.CALL_ERROR -> return
+                else -> throw MessageTypeException(
+                    message = "MessageType not supported ${jsonMessage.msgType}",
+                    messageId = jsonMessage.msgId
+                )
+            },
+            payload = jsonMessage.payload
+        )
+            ?.let {
+                errorsHandler(it)
+            }
     }
 }

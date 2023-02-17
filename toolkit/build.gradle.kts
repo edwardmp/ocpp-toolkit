@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":ocpp-transport-soap"))
     implementation(project(":ocpp-2-0-api-adapter"))
     implementation(project(":ocpp-2-0-core"))
+    implementation(project(":utils"))
     implementation(project(":ocpp-transport"))
     implementation(project(":operation-information"))
 

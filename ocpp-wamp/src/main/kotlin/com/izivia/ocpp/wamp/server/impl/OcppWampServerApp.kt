@@ -2,7 +2,7 @@ package com.izivia.ocpp.wamp.server.impl
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
-import com.izivia.ocpp.json.JsonMessageErrorCode
+import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.core.WampCallManager
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
@@ -81,7 +81,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                                 WsMessage(
                                     WampMessage.CallError(
                                         msg.msgId,
-                                        JsonMessageErrorCode.INTERNAL_ERROR,
+                                        MessageErrorCode.INTERNAL_ERROR,
                                         "Rejected call - shutting down",
                                         "{}"
                                     ).toJson()
@@ -103,7 +103,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                             .firstOrNull()
                             ?: WampMessage.CallError(
                                 msg.msgId,
-                                JsonMessageErrorCode.INTERNAL_ERROR,
+                                MessageErrorCode.INTERNAL_ERROR,
                                 "No action handler found",
                                 """{"message":"$msg"}"""
                             ).also { logger.warn("no action handler found for $msg") }

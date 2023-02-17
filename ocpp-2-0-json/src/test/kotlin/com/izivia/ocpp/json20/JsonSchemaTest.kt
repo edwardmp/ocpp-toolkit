@@ -3,7 +3,6 @@ package com.izivia.ocpp.json20
 import com.izivia.ocpp.core20.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core20.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core20.model.authorize.enumeration.AuthorizeCertificateStatusEnumType
-import com.izivia.ocpp.core20.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core20.model.bootnotification.ChargingStationType
@@ -25,20 +24,21 @@ import com.izivia.ocpp.core20.model.clearcache.ClearCacheResp
 import com.izivia.ocpp.core20.model.clearcache.enumeration.ClearCacheStatusEnumType
 import com.izivia.ocpp.core20.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.core20.model.clearchargingprofile.ClearChargingProfileResp
-import com.izivia.ocpp.core20.model.clearchargingprofile.ClearChargingProfileType
 import com.izivia.ocpp.core20.model.clearchargingprofile.enumeration.ClearChargingProfileEnumType
 import com.izivia.ocpp.core20.model.cleardisplaymessage.ClearDisplayMessageReq
 import com.izivia.ocpp.core20.model.cleardisplaymessage.ClearDisplayMessageResp
 import com.izivia.ocpp.core20.model.cleardisplaymessage.enumeration.ClearMessageStatusEnumType
 import com.izivia.ocpp.core20.model.clearedcharginglimit.ClearedChargingLimitReq
-import com.izivia.ocpp.core20.model.clearedcharginglimit.ClearedChargingLimitResp
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearMonitoringResultType
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearVariableMonitoringReq
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearVariableMonitoringResp
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.enumeration.ClearMonitoringStatusEnumType
 import com.izivia.ocpp.core20.model.common.*
+import com.izivia.ocpp.core20.model.common.ComponentVariableType
 import com.izivia.ocpp.core20.model.common.enumeration.*
-import com.izivia.ocpp.core20.model.common.enumeration.GenericStatusEnumType
+import com.izivia.ocpp.core20.model.common.enumeration.HashAlgorithmEnumType
+import com.izivia.ocpp.core20.model.costupdated.CostUpdatedReq
+import com.izivia.ocpp.core20.model.costupdated.CostUpdatedResp
 import com.izivia.ocpp.core20.model.customerinformation.CustomerInformationReq
 import com.izivia.ocpp.core20.model.customerinformation.CustomerInformationResp
 import com.izivia.ocpp.core20.model.customerinformation.enumeration.CustomerInformationStatusEnumType
@@ -63,8 +63,8 @@ import com.izivia.ocpp.core20.model.getchargingprofiles.enumeration.GetChargingP
 import com.izivia.ocpp.core20.model.getcompositeschedule.CompositeScheduleType
 import com.izivia.ocpp.core20.model.getcompositeschedule.GetCompositeScheduleReq
 import com.izivia.ocpp.core20.model.getcompositeschedule.GetCompositeScheduleResp
-import com.izivia.ocpp.core20.model.costupdated.CostUpdatedReq
-import com.izivia.ocpp.core20.model.costupdated.CostUpdatedResp
+import com.izivia.ocpp.core20.model.getdisplaymessages.GetDisplayMessagesReq
+import com.izivia.ocpp.core20.model.getdisplaymessages.GetDisplayMessagesResp
 import com.izivia.ocpp.core20.model.getdisplaymessages.enumeration.GetDisplayMessagesStatusEnumType
 import com.izivia.ocpp.core20.model.getinstalledcertificateids.CertificateHashDataChainType
 import com.izivia.ocpp.core20.model.getinstalledcertificateids.GetInstalledCertificateIdsReq
@@ -81,10 +81,11 @@ import com.izivia.ocpp.core20.model.getlog.enumeration.LogStatusEnumType
 import com.izivia.ocpp.core20.model.getmonitoringreport.GetMonitoringReportReq
 import com.izivia.ocpp.core20.model.getmonitoringreport.GetMonitoringReportResp
 import com.izivia.ocpp.core20.model.getmonitoringreport.enumeration.MonitoringCriterionEnumType
-import com.izivia.ocpp.core20.model.common.ComponentVariableType
 import com.izivia.ocpp.core20.model.getreport.GetReportReq
 import com.izivia.ocpp.core20.model.getreport.GetReportResp
 import com.izivia.ocpp.core20.model.getreport.enumeration.ComponentCriterionEnumType
+import com.izivia.ocpp.core20.model.gettransactionstatus.GetTransactionStatusReq
+import com.izivia.ocpp.core20.model.gettransactionstatus.GetTransactionStatusResp
 import com.izivia.ocpp.core20.model.getvariables.GetVariableDataType
 import com.izivia.ocpp.core20.model.getvariables.GetVariableResultType
 import com.izivia.ocpp.core20.model.getvariables.GetVariablesReq
@@ -105,13 +106,8 @@ import com.izivia.ocpp.core20.model.notifycharginglimit.ChargingLimitType
 import com.izivia.ocpp.core20.model.notifycharginglimit.NotifyChargingLimitReq
 import com.izivia.ocpp.core20.model.notifycharginglimit.NotifyChargingLimitResp
 import com.izivia.ocpp.core20.model.notifycustomerinformation.NotifyCustomerInformationReq
-import com.izivia.ocpp.core20.model.common.MessageInfoType
 import com.izivia.ocpp.core20.model.notifydisplaymessages.NotifyDisplayMessagesReq
 import com.izivia.ocpp.core20.model.notifydisplaymessages.NotifyDisplayMessagesResp
-import com.izivia.ocpp.core20.model.common.enumeration.MessagePriorityEnumType
-import com.izivia.ocpp.core20.model.common.enumeration.MessageStateEnumType
-import com.izivia.ocpp.core20.model.getdisplaymessages.GetDisplayMessagesReq
-import com.izivia.ocpp.core20.model.getdisplaymessages.GetDisplayMessagesResp
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.*
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.enumeration.EnergyTransferModeEnumType
 import com.izivia.ocpp.core20.model.notifyevchargingneeds.enumeration.NotifyEVChargingNeedsStatusEnumType
@@ -126,9 +122,6 @@ import com.izivia.ocpp.core20.model.notifymonitoringreport.MonitoringDataType
 import com.izivia.ocpp.core20.model.notifymonitoringreport.NotifyMonitoringReportReq
 import com.izivia.ocpp.core20.model.notifymonitoringreport.NotifyMonitoringReportResp
 import com.izivia.ocpp.core20.model.notifymonitoringreport.VariableMonitoringType
-import com.izivia.ocpp.core20.model.common.enumeration.MonitorEnumType
-import com.izivia.ocpp.core20.model.gettransactionstatus.GetTransactionStatusReq
-import com.izivia.ocpp.core20.model.gettransactionstatus.GetTransactionStatusResp
 import com.izivia.ocpp.core20.model.notifyreport.*
 import com.izivia.ocpp.core20.model.notifyreport.enumeration.DataEnumType
 import com.izivia.ocpp.core20.model.notifyreport.enumeration.MutabilityEnumType
@@ -137,10 +130,7 @@ import com.izivia.ocpp.core20.model.publishfirmware.PublishFirmwareResp
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationReq
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.PublishFirmwareStatusNotificationResp
 import com.izivia.ocpp.core20.model.publishfirmwarestatusnotification.enumeration.PublishFirmwareStatusEnumType
-import com.izivia.ocpp.core20.model.remotestart.RelativeTimeIntervalType
-import com.izivia.ocpp.core20.model.remotestart.RequestStartTransactionReq
-import com.izivia.ocpp.core20.model.remotestart.SalesTariffEntryType
-import com.izivia.ocpp.core20.model.remotestart.SalesTariffType
+import com.izivia.ocpp.core20.model.remotestart.*
 import com.izivia.ocpp.core20.model.remotestart.enumeration.ChargingProfileKindEnumType
 import com.izivia.ocpp.core20.model.remotestart.enumeration.RecurrencyKindEnumType
 import com.izivia.ocpp.core20.model.remotestop.RequestStopTransactionReq
@@ -154,6 +144,10 @@ import com.izivia.ocpp.core20.model.reservenow.ReserveNowReq
 import com.izivia.ocpp.core20.model.reservenow.ReserveNowResp
 import com.izivia.ocpp.core20.model.reservenow.enumeration.ConnectorEnumType
 import com.izivia.ocpp.core20.model.reservenow.enumeration.ReserveNowStatusEnumType
+import com.izivia.ocpp.core20.model.reset.ResetReq
+import com.izivia.ocpp.core20.model.reset.ResetResp
+import com.izivia.ocpp.core20.model.reset.enumeration.ResetEnumType
+import com.izivia.ocpp.core20.model.reset.enumeration.ResetStatusEnumType
 import com.izivia.ocpp.core20.model.securityeventnotification.SecurityEventNotificationReq
 import com.izivia.ocpp.core20.model.securityeventnotification.SecurityEventNotificationResp
 import com.izivia.ocpp.core20.model.sendlocallist.AuthorizationData
@@ -167,18 +161,18 @@ import com.izivia.ocpp.core20.model.setchargingprofile.enumeration.ChargingProfi
 import com.izivia.ocpp.core20.model.setdisplaymessage.SetDisplayMessageReq
 import com.izivia.ocpp.core20.model.setdisplaymessage.SetDisplayMessageResp
 import com.izivia.ocpp.core20.model.setdisplaymessage.enumeration.DisplayMessageStatusEnumType
+import com.izivia.ocpp.core20.model.setmonitoringbase.SetMonitoringBaseReq
+import com.izivia.ocpp.core20.model.setmonitoringbase.SetMonitoringBaseResp
+import com.izivia.ocpp.core20.model.setmonitoringbase.enumeration.MonitoringBaseEnumType
+import com.izivia.ocpp.core20.model.setmonitoringlevel.SetMonitoringLevelReq
+import com.izivia.ocpp.core20.model.setmonitoringlevel.SetMonitoringLevelResp
+import com.izivia.ocpp.core20.model.setnetworkprofile.*
+import com.izivia.ocpp.core20.model.setnetworkprofile.enumeration.*
 import com.izivia.ocpp.core20.model.setvariablemonitoring.SetMonitoringDataType
 import com.izivia.ocpp.core20.model.setvariablemonitoring.SetMonitoringResultType
 import com.izivia.ocpp.core20.model.setvariablemonitoring.SetVariableMonitoringReq
 import com.izivia.ocpp.core20.model.setvariablemonitoring.SetVariableMonitoringResp
 import com.izivia.ocpp.core20.model.setvariablemonitoring.enumeration.SetMonitoringStatusEnumType
-import com.izivia.ocpp.core20.model.setmonitoringlevel.SetMonitoringLevelReq
-import com.izivia.ocpp.core20.model.setmonitoringlevel.SetMonitoringLevelResp
-import com.izivia.ocpp.core20.model.setnetworkprofile.*
-import com.izivia.ocpp.core20.model.setnetworkprofile.enumeration.*
-import com.izivia.ocpp.core20.model.setmonitoringbase.SetMonitoringBaseReq
-import com.izivia.ocpp.core20.model.setmonitoringbase.SetMonitoringBaseResp
-import com.izivia.ocpp.core20.model.setmonitoringbase.enumeration.MonitoringBaseEnumType
 import com.izivia.ocpp.core20.model.setvariables.SetVariableDataType
 import com.izivia.ocpp.core20.model.setvariables.SetVariableResultType
 import com.izivia.ocpp.core20.model.setvariables.SetVariablesReq
@@ -208,48 +202,49 @@ import com.izivia.ocpp.core20.model.updatefirmware.FirmwareType
 import com.izivia.ocpp.core20.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core20.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.core20.model.updatefirmware.enumeration.UpdateFirmwareStatusEnumType
+import com.izivia.ocpp.json.JsonMessage
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import strikt.assertions.isA
 
 class JsonSchemaTest {
 
+    companion object {
+        private val parser = Ocpp20JsonParser()
+    }
+
     @Test
     fun `heartbeat request format`() {
-        val errors = JsonSchemaValidator.isValidObject(HeartbeatReq(), "HeartbeatRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        val result = parser.parseAnyFromString<Unit>(
+            parser.mapPayloadToString(HeartbeatReq())
+        )
+        expectThat(result).isA<JsonMessage<HeartbeatReq>>()
     }
 
     @Test
     fun `authorize request format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             AuthorizeReq(
                 idToken = IdTokenType("Tag1", IdTokenEnumType.Local)
-            ), "AuthorizeRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             AuthorizeReq(
                 idToken = IdTokenType("Tag1", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
                 certificate = "certificate1",
                 iso15118CertificateHashData = listOf(OCSPRequestDataType(HashAlgorithmEnumType.SHA256, "", "", "", ""))
-            ), "AuthorizeRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `meterValues request format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             MeterValuesReq(
                 evseId = 1,
                 meterValue = listOf(
@@ -258,13 +253,11 @@ class JsonSchemaTest {
                         Instant.parse("2022-02-15T00:00:00.000Z")
                     )
                 )
-            ), "MeterValuesRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
         /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             MeterValuesReq(
                 evseId = 1,
                 meterValue = listOf(
@@ -276,30 +269,27 @@ class JsonSchemaTest {
                                 signedMeterValue = SignedMeterValueType("", "", "", ""),
                                 unitOfMeasure = UnitOfMeasure("", 2)
                             )
-                        ), Instant.parse("2022-02-15T00:00:00.000Z")
+                        ),
+                        Instant.parse("2022-02-15T00:00:00.000Z")
                     )
                 )
-            ), "MeterValuesRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `transactionEvent request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TransactionEventReq(
                 TransactionEventEnumType.Started,
                 Instant.parse("2022-02-15T00:00:00.000Z"),
                 TriggerReasonEnumType.Authorized,
                 1,
                 TransactionType("")
-            ), "TransactionEventRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TransactionEventReq(
                 TransactionEventEnumType.Started,
                 Instant.parse("2022-02-15T00:00:00.000Z"),
@@ -309,67 +299,55 @@ class JsonSchemaTest {
                 1,
                 EVSEType(1, 2),
                 IdTokenType(
-                    "", IdTokenEnumType.Central,
+                    "",
+                    IdTokenEnumType.Central,
                     listOf(AdditionalInfoType("", ""))
                 ),
                 listOf(MeterValueType(listOf(SampledValueType(10.9)), Instant.parse("2022-02-15T00:00:00.000Z"))),
                 3,
                 true,
                 100
-            ), "TransactionEventRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `statusNotification request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
+        /* Required field only */
+        validateObject(
             StatusNotificationReq(
                 connectorId = 2,
                 connectorStatus = ConnectorStatusEnumType.Available,
                 evseId = 12,
                 timestamp = Instant.parse("2022-02-15T00:00:00.000Z")
-            ), "StatusNotificationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `dataTransfer request format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
-            DataTransferReq("vendor1"),
-            "DataTransferRequest.json"
+        validateObject(
+            DataTransferReq("vendor1")
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
-            DataTransferReq(vendorId = "vendor1", messageId = "message1", data = "data1"),
-            "DataTransferRequest.json"
+        validateObject(
+            DataTransferReq(vendorId = "vendor1", messageId = "message1", data = "data1")
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `bootNotification request format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             BootNotificationReq(
                 chargingStation = ChargingStationType(model = "model", vendorName = "vendor"),
                 reason = BootReasonEnumType.ApplicationReset
-            ),
-            "BootNotificationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
         /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             BootNotificationReq(
                 chargingStation = ChargingStationType(
                     model = "model",
@@ -377,64 +355,45 @@ class JsonSchemaTest {
                     firmwareVersion = "version",
                     modem = ModemType("", ""),
                     serialNumber = "0"
-                ), reason = BootReasonEnumType.ApplicationReset
-            ),
-            "BootNotificationRequest.json"
+                ),
+                reason = BootReasonEnumType.ApplicationReset
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `changeAvailability request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ChangeAvailabilityReq(OperationalStatusEnumType.Operative),
-            "ChangeAvailabilityRequest.json"
+        validateObject(
+            ChangeAvailabilityReq(OperationalStatusEnumType.Operative)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            ChangeAvailabilityReq(OperationalStatusEnumType.Operative, EVSEType(1, 1)),
-            "ChangeAvailabilityRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(ChangeAvailabilityReq(OperationalStatusEnumType.Operative, EVSEType(1, 1)))
     }
 
     @Test
     fun `clearCache request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            ClearCacheReq(),
-            "ClearCacheRequest.json"
+        validateObject(
+            ClearCacheReq()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `unlockConnector request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            UnlockConnectorReq(1, 2),
-            "UnlockConnectorRequest.json"
+        validateObject(
+            UnlockConnectorReq(1, 2)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `requestStartTransaction request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             RequestStartTransactionReq(
                 remoteStartId = 1,
                 idToken = IdTokenType("token", IdTokenEnumType.Central)
-            ),
-            "RequestStartTransactionRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             RequestStartTransactionReq(
                 remoteStartId = 1,
                 idToken = IdTokenType("token", IdTokenEnumType.Central),
@@ -453,13 +412,10 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "RequestStartTransactionRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             RequestStartTransactionReq(
                 remoteStartId = 1,
                 idToken = IdTokenType("token", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
@@ -485,33 +441,24 @@ class JsonSchemaTest {
                     validTo = Instant.parse("2022-02-15T00:00:00.000Z"),
                     transactionId = ""
                 )
-            ),
-            "RequestStartTransactionRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `requestStopTransaction request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            RequestStopTransactionReq("tag1"),
-            "RequestStopTransactionRequest.json"
+        validateObject(
+            RequestStopTransactionReq("tag1")
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getVariables request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetVariablesReq(listOf(GetVariableDataType(ComponentType("component"), VariableType("variable")))),
-            "GetVariablesRequest.json"
+        validateObject(
+            GetVariablesReq(listOf(GetVariableDataType(ComponentType("component"), VariableType("variable"))))
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetVariablesReq(
                 listOf(
                     GetVariableDataType(
@@ -520,16 +467,13 @@ class JsonSchemaTest {
                         attributeType = AttributeEnumType.Target
                     )
                 )
-            ),
-            "GetVariablesRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setVariables request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetVariablesReq(
                 listOf(
                     SetVariableDataType(
@@ -538,13 +482,10 @@ class JsonSchemaTest {
                         variable = VariableType("variable")
                     )
                 )
-            ),
-            "SetVariablesRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetVariablesReq(
                 listOf(
                     SetVariableDataType(
@@ -554,44 +495,38 @@ class JsonSchemaTest {
                         attributeType = AttributeEnumType.Target
                     )
                 )
-            ),
-            "SetVariablesRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getReport request format`() {
-        var errors = JsonSchemaValidator.isValidObject(GetReportReq(1), "GetReportRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            GetReportReq(
-                1, listOf(ComponentCriterionEnumType.Active),
-                listOf(ComponentVariableType(ComponentType("component")))
-            ), "GetReportRequest.json"
+        validateObject(
+            GetReportReq(1)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+
+        validateObject(
+            GetReportReq(
+                1,
+                listOf(ComponentCriterionEnumType.Active),
+                listOf(ComponentVariableType(ComponentType("component")))
+            )
+        )
     }
 
     @Test
     fun `getBaseReport request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            GetBaseReportReq(1, ReportBaseEnumType.ConfigurationInventory),
-            "GetBaseReportRequest.json"
+        validateObject(
+            GetBaseReportReq(1, ReportBaseEnumType.ConfigurationInventory)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setChargingProfile request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetChargingProfileReq(
-                1, ChargingProfileType(
+                1,
+                ChargingProfileType(
                     id = 1,
                     stackLevel = 1,
                     chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
@@ -605,63 +540,69 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "SetChargingProfileRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `sendLocalList request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            SendLocalListReq(1, UpdateEnumType.Full), "SendLocalListRequest.json"
+    fun `getLocalListVersion request format`() {
+        validateObject(
+            GetLocalListVersionReq()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            SendLocalListReq(
-                1, UpdateEnumType.Full, listOf(
-                    AuthorizationData(
-                        IdTokenType("", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
-                        IdTokenInfoType(
-                            AuthorizationStatusEnumType.Accepted,
-                            Instant.parse("2022-02-15T00:00:00.000Z"),
-                            9,
-                            "",
-                            listOf(2, 4),
-                            "",
-                            IdTokenType(
-                                "", IdTokenEnumType.Central,
-                                listOf(AdditionalInfoType("", ""))
-                            ), MessageContentType(MessageFormatEnumType.ASCII, "", "")
-                        )
-                    )
-                )
-            ), "SendLocalListRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `updatefirmware request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+    fun `cancelReservation request format`() {
+        validateObject(
+            CancelReservationReq(3)
+        )
+    }
+
+    @Test
+    fun `firmwareStatusNotification request format`() {
+        validateObject(
+            FirmwareStatusNotificationReq(FirmwareStatusEnumType.Downloaded)
+        )
+    }
+
+    @Test
+    fun `clearChargingProfile request format`() {
+        validateObject(
+            ClearChargingProfileReq()
+        )
+
+        validateObject(
+            ClearChargingProfileResp(
+                ClearChargingProfileEnumType.Accepted,
+                StatusInfoType("reason", "additional")
+            )
+        )
+    }
+
+    @Test
+    fun `getCompositeSchedule request format`() {
+        validateObject(
+            GetCompositeScheduleReq(1, 3)
+        )
+
+        validateObject(
+            GetCompositeScheduleReq(1, 2, ChargingRateUnitEnumType.A)
+        )
+    }
+
+    @Test
+    fun `updateFirmware request format`() {
+        validateObject(
             UpdateFirmwareReq(
                 requestId = 2,
                 firmware = FirmwareType(
                     location = "http://www.ietf.org/rfc/rfc2396.txt", // URI
                     retrieveDateTime = Instant.parse("2022-02-15T00:00:00.000Z")
                 )
-            ),
-            "UpdateFirmwareRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             UpdateFirmwareReq(
                 retries = 3,
                 retryInterval = 1,
@@ -673,132 +614,81 @@ class JsonSchemaTest {
                     signingCertificate = "signingCertificate",
                     signature = "signature"
                 )
-            ),
-            "UpdateFirmwareRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `clearedChargingLimit request format`() {
-
-        var errors = JsonSchemaValidator.isValidObject(
-            ClearedChargingLimitReq(ChargingLimitSourceEnumType.CSO),
-            "ClearedChargingLimitRequest.json"
+        validateObject(
+            ClearedChargingLimitReq(ChargingLimitSourceEnumType.CSO)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            ClearedChargingLimitReq(ChargingLimitSourceEnumType.EMS, 1),
-            "ClearedChargingLimitRequest.json"
+        validateObject(
+            ClearedChargingLimitReq(ChargingLimitSourceEnumType.EMS, 1)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `cancelReservation request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            CancelReservationReq(3), "CancelReservationRequest.json"
+    fun `sendLocalList request format`() {
+        validateObject(
+            SendLocalListReq(1, UpdateEnumType.Full)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
 
-    @Test
-    fun `firmwareStatusNotification request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            FirmwareStatusNotificationReq(FirmwareStatusEnumType.Downloaded),
-            "FirmwareStatusNotificationRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `clearChargingProfile request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ClearChargingProfileReq(), "ClearChargingProfileRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            ClearChargingProfileReq(
+        validateObject(
+            SendLocalListReq(
                 1,
-                ClearChargingProfileType(
-                    1,
-                    ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
-                    1
+                UpdateEnumType.Full,
+                listOf(
+                    AuthorizationData(
+                        IdTokenType("", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
+                        IdTokenInfoType(
+                            AuthorizationStatusEnumType.Accepted,
+                            Instant.parse("2022-02-15T00:00:00.000Z"),
+                            9,
+                            "",
+                            listOf(2, 4),
+                            "",
+                            IdTokenType(
+                                "",
+                                IdTokenEnumType.Central,
+                                listOf(AdditionalInfoType("", ""))
+                            ),
+                            MessageContentType(MessageFormatEnumType.ASCII, "", "")
+                        )
+                    )
                 )
-            ), "ClearChargingProfileRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `getCompositeSchedule request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetCompositeScheduleReq(1, 2), "GetCompositeScheduleRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            GetCompositeScheduleReq(1, 2, ChargingRateUnitEnumType.A), "GetCompositeScheduleRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `getLocalListVersion request format`() {
-        val errors = JsonSchemaValidator.isValidObject(GetLocalListVersionReq(), "GetLocalListVersionRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `triggerMessage request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TriggerMessageReq(
                 MessageTriggerEnumType.BootNotification
-            ),
-            "TriggerMessageRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TriggerMessageReq(
                 MessageTriggerEnumType.Heartbeat,
                 EVSEType(1, 1)
-            ),
-            "TriggerMessageRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notifyChargingLimit request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            NotifyChargingLimitReq(ChargingLimitType(ChargingLimitSourceEnumType.CSO)),
-            "NotifyChargingLimitRequest.json"
+        validateObject(
+            NotifyChargingLimitReq(ChargingLimitType(ChargingLimitSourceEnumType.CSO))
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyChargingLimitReq(
-                ChargingLimitType(ChargingLimitSourceEnumType.CSO, true), 1, listOf(
+                ChargingLimitType(ChargingLimitSourceEnumType.CSO, true),
+                1,
+                listOf(
                     ChargingScheduleType(
                         id = 1,
                         chargingRateUnit = ChargingRateUnitEnumType.A,
@@ -806,38 +696,36 @@ class JsonSchemaTest {
                         startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
                     )
                 )
-            ), "NotifyChargingLimitRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `getCertificateStatus request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            GetCertificateStatusReq(OCSPRequestDataType(HashAlgorithmEnumType.SHA256, "", "", "", "")),
-            "GetCertificateStatusRequest.json"
+        validateObject(
+            GetCertificateStatusReq(
+                OCSPRequestDataType(
+                    HashAlgorithmEnumType.SHA256,
+                    "",
+                    "",
+                    "",
+                    ""
+                )
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `reserveNow request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ReserveNowReq(
                 id = 1,
                 expiryDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
                 idToken = IdTokenType("token", IdTokenEnumType.Central)
-            ), "ReserveNowRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ReserveNowReq(
                 id = 1,
                 expiryDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
@@ -845,55 +733,41 @@ class JsonSchemaTest {
                 evseId = 2,
                 idToken = IdTokenType("token1", IdTokenEnumType.Central),
                 groupIdToken = IdTokenType("token2", IdTokenEnumType.Central)
-            ), "ReserveNowRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notifyCustomerInformation request format`() {
-
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyCustomerInformationReq(
                 data = "Some data",
                 seqNo = 0,
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
                 requestId = 1
-            ),
-            "NotifyCustomerInformationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyCustomerInformationReq(
                 data = "Some data",
                 tbc = true,
                 seqNo = 0,
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
                 requestId = 1
-            ),
-            "NotifyCustomerInformationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `notifyDisplayMessage request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyDisplayMessagesReq(
                 requestId = 1
-            ),
-            "NotifyDisplayMessagesRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyDisplayMessagesReq(
                 requestId = 1,
                 tbc = false,
@@ -920,102 +794,105 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "NotifyDisplayMessagesRequest.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notifyEVChargingNeeds request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            NotifyEVChargingNeedsReq(1, ChargingNeedsType(EnergyTransferModeEnumType.AC_single_phase)),
-            "NotifyEVChargingNeedsRequest.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyEVChargingNeedsReq(
-                1, ChargingNeedsType(
+                1,
+                ChargingNeedsType(EnergyTransferModeEnumType.AC_single_phase)
+            )
+        )
+
+        validateObject(
+            NotifyEVChargingNeedsReq(
+                1,
+                ChargingNeedsType(
                     requestedEnergyTransfer = EnergyTransferModeEnumType.AC_single_phase,
                     departureTime = Instant.parse("2022-02-15T00:00:00.000Z"),
                     ACChargingParametersType(2, 3, 4, 5),
-                    DCChargingParametersType(2, 3, 4, 5, 6, 7, 8, 9)
-                ), 1
-            ), "NotifyEVChargingNeedsRequest.json"
+                    DCChargingParametersType(
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9
+                    )
+                ),
+                1
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notify request response format`() {
-        var errors =
-            JsonSchemaValidator.isValidObject(
-                NotifyReportReq(
-                    requestId = 1,
-                    generatedAt = Clock.System.now(),
-                    seqNo = 1
-                ), "NotifyReportRequest.json"
+        validateObject(
+            NotifyReportReq(
+                requestId = 1,
+                generatedAt = Clock.System.now(),
+                seqNo = 1
             )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        )
 
-        errors =
-            JsonSchemaValidator.isValidObject(
-                NotifyReportReq(
-                    requestId = 1,
-                    generatedAt = Clock.System.now(),
-                    seqNo = 1,
-                    tbc = true,
-                    reportData = listOf(
-                        ReportDataType(
-                            ComponentType("component"), VariableType("variable"), listOf(VariableAttributeType()),
-                            VariableCharacteristicsType(DataEnumType.DECIMAL, true)
+        validateObject(
+            NotifyReportReq(
+                requestId = 1,
+                generatedAt = Clock.System.now(),
+                seqNo = 1,
+                tbc = true,
+                reportData = listOf(
+                    ReportDataType(
+                        ComponentType("component"),
+                        VariableType("variable"),
+                        listOf(VariableAttributeType()),
+                        VariableCharacteristicsType(DataEnumType.DECIMAL, true)
+                    )
+                )
+            )
+        )
+
+        validateObject(
+            NotifyReportReq(
+                requestId = 1,
+                generatedAt = Clock.System.now(),
+                seqNo = 1,
+                tbc = true,
+                reportData = listOf(
+                    ReportDataType(
+                        ComponentType("component"),
+                        VariableType("variable"),
+                        listOf(
+                            VariableAttributeType(
+                                "value",
+                                AttributeEnumType.Actual,
+                                true,
+                                MutabilityEnumType.ReadWrite,
+                                true
+                            )
+                        ),
+                        VariableCharacteristicsType(
+                            DataEnumType.DECIMAL,
+                            true,
+                            "unit",
+                            10.0,
+                            20.0,
+                            "valuesList"
                         )
                     )
-                ), "NotifyReportRequest.json"
+                )
             )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors =
-            JsonSchemaValidator.isValidObject(
-                NotifyReportReq(
-                    requestId = 1,
-                    generatedAt = Clock.System.now(),
-                    seqNo = 1,
-                    tbc = true,
-                    reportData = listOf(
-                        ReportDataType(
-                            ComponentType("component"),
-                            VariableType("variable"),
-                            listOf(
-                                VariableAttributeType(
-                                    "value",
-                                    AttributeEnumType.Actual,
-                                    true,
-                                    MutabilityEnumType.ReadWrite,
-                                    true
-                                )
-                            ),
-                            VariableCharacteristicsType(DataEnumType.DECIMAL, true, "unit", 10.0, 20.0, "valuesList")
-                        )
-                    )
-                ), "NotifyReportRequest.json"
-            )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        )
     }
 
     @Test
     fun `notifyEvent request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyEventReq(
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
                 seqNo = 0,
@@ -1030,12 +907,9 @@ class JsonSchemaTest {
                         variable = VariableType("name")
                     )
                 )
-            ), "NotifyEventRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyEventReq(
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
                 seqNo = 0,
@@ -1057,15 +931,13 @@ class JsonSchemaTest {
                     )
                 ),
                 tbc = true
-            ), "NotifyEventRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `notifyEVChargingSchedule request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyEVChargingScheduleReq(
                 timeBase = Instant.parse("2022-02-15T00:00:00.000Z"),
                 evseId = 123,
@@ -1079,75 +951,67 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "NotifyEVChargingScheduleRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+    }
+
+    @Test
+    fun `notifyEVChargingSchedule response format`() {
+        validateObject(
+            NotifyEVChargingScheduleResp(
+                status = GenericStatusEnumType.Accepted,
+                statusInfo = StatusInfoType("123")
+            )
+        )
     }
 
     @Test
     fun `securityEventNotification request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            SecurityEventNotificationReq("type", Instant.parse("2022-02-15T00:00:00.000Z")),
-            "SecurityEventNotificationRequest.json"
+        validateObject(
+            SecurityEventNotificationReq("type", Instant.parse("2022-02-15T00:00:00.000Z"))
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SecurityEventNotificationReq(
                 type = "type",
                 timestamp = Instant.parse("2022-02-15T00:00:00.000Z"),
                 techInfo = "techInfo"
-            ),
-            "SecurityEventNotificationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `logStatusNotification request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            LogStatusNotificationReq(
-                status = UploadLogStatusEnumType.Uploaded,
-                requestId = 1
-            ),
-            "LogStatusNotificationRequest.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `publishFirmwareStatusNotification request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             PublishFirmwareStatusNotificationReq(
                 status = PublishFirmwareStatusEnumType.Published,
                 location = listOf("location"),
                 requestId = 1
-            ),
-            "PublishFirmwareStatusNotificationRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+    }
+
+    @Test
+    fun `logStatusNotification request format`() {
+        validateObject(
+            LogStatusNotificationReq(
+                status = UploadLogStatusEnumType.Uploaded,
+                requestId = 1
+            )
+        )
     }
 
     @Test
     fun `notifyMonitoringReport request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyMonitoringReportReq(
                 requestId = 1,
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
                 seqNo = 2
-            ),
-            "NotifyMonitoringReportRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             NotifyMonitoringReportReq(
                 requestId = 1,
                 generatedAt = Instant.parse("2022-02-15T00:00:00.000Z"),
@@ -1168,263 +1032,205 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "NotifyMonitoringReportRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `reservationStatusUpdate request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            ReservationStatusUpdateReq(1, ReservationUpdateStatusEnumType.Expired),
-            "ReservationStatusUpdateRequest.json"
+        validateObject(
+            ReservationStatusUpdateReq(1, ReservationUpdateStatusEnumType.Expired)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `clearDisplayMessage request format`() {
-        val errors = JsonSchemaValidator.isValidObject(ClearDisplayMessageReq(1), "ClearDisplayMessageRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(ClearDisplayMessageReq(1))
     }
 
     @Test
     fun `certificateSigned request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            CertificateSignedReq("certificateChain"), "CertificateSignedRequest.json"
+        validateObject(
+            CertificateSignedReq("certificateChain")
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            CertificateSignedReq("certificateChain", CertificateSigningUseEnumType.V2GCertificate),
-            "CertificateSignedRequest.json"
+        validateObject(
+            CertificateSignedReq("certificateChain", CertificateSigningUseEnumType.V2GCertificate)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `signCertificate request format`() {
-        var errors = JsonSchemaValidator.isValidObject(SignCertificateReq("csr"), "SignCertificateRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(SignCertificateReq("csr"))
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SignCertificateReq(
                 "csr",
                 CertificateSigningUseEnumType.ChargingStationCertificate
-            ), "SignCertificateRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `clearVariableMonitoring request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ClearVariableMonitoringReq(
                 ids = listOf(1, 2)
-            ),
-            "ClearVariableMonitoringRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getMonitoringReport request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetMonitoringReportReq(
-                        243432,
-                        listOf(MonitoringCriterionEnumType.DeltaMonitoring),
-                        listOf(ComponentVariableType(
-                                ComponentType(
-                                        "typename",
-                                        "instance"
-                                )
-                        ))
-                ),
-                "GetMonitoringReportRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetMonitoringReportReq(
-                        243432
-                ),
-                "GetMonitoringReportRequest.json"
+        validateObject(
+            GetMonitoringReportReq(
+                243432,
+                listOf(MonitoringCriterionEnumType.DeltaMonitoring),
+                listOf(
+                    ComponentVariableType(
+                        ComponentType(
+                            "typename",
+                            "instance"
+                        )
+                    )
+                )
+            )
         )
 
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            GetMonitoringReportReq(
+                243432
+            )
+        )
     }
 
     @Test
     fun `deleteCertificate request format`() {
         val certif = CertificateHashDataType(
-                HashAlgorithmEnumType.SHA512,
-                "3041edbcdd46190c0acc504ed195f8a90129efcab173a7b9ac4646b92d04cc80005acaa3554f4b1df839eacadc2491cb623bf3aa6f9eb44f6ea8ca005821d25d",
-                "1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
-                "7683246784"
+            HashAlgorithmEnumType.SHA512,
+            "3041edbcdd46190c0acc504ed195f8a90129efcab173a7b9ac4646b92d04cc80005acaa3554f4b1df839eacadc2491cb623bf3aa6f9eb44f6ea8ca005821d25d",
+            "1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
+            "7683246784"
         )
-        val errors = JsonSchemaValidator.isValidObject(
-                DeleteCertificateReq(
-                        certif
-                ),
-                "DeleteCertificateRequest.json"
+        validateObject(
+            DeleteCertificateReq(
+                certif
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
-
 
     @Test
     fun `setDisplayMessage request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetDisplayMessageReq(
-                        MessageInfoType(
-                                id = 2,
-                                priority = MessagePriorityEnumType.InFront,
-                                state = MessageStateEnumType.Charging,
-                                startDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
-                                endDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
-                                transactionId = "2",
-                                message = MessageContentType(
-                                        format = MessageFormatEnumType.URI,
-                                        language = "language",
-                                        content = "Message content"
-                                ),
-                                display = ComponentType(
-                                        name = "name",
-                                        instance = "instance",
-                                        evse = EVSEType(
-                                                id = 1,
-                                                connectorId = 2
-                                        )
-                                )
+        validateObject(
+            SetDisplayMessageReq(
+                MessageInfoType(
+                    id = 2,
+                    priority = MessagePriorityEnumType.InFront,
+                    state = MessageStateEnumType.Charging,
+                    startDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
+                    endDateTime = Instant.parse("2022-02-15T00:00:00.000Z"),
+                    transactionId = "2",
+                    message = MessageContentType(
+                        format = MessageFormatEnumType.URI,
+                        language = "language",
+                        content = "Message content"
+                    ),
+                    display = ComponentType(
+                        name = "name",
+                        instance = "instance",
+                        evse = EVSEType(
+                            id = 1,
+                            connectorId = 2
                         )
-                ),
-                "SetDisplayMessageRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+                    )
+                )
+            )
+        )
 
-        errors = JsonSchemaValidator.isValidObject(
-                SetDisplayMessageReq(
-                        MessageInfoType(
-                                id = 2,
-                                priority = MessagePriorityEnumType.InFront,
-                                message = MessageContentType(
-                                        format = MessageFormatEnumType.URI,
-                                        language = "language",
-                                        content = "Message content"
-                                )
-                        )
-                ),
-                "SetDisplayMessageRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            SetDisplayMessageReq(
+                MessageInfoType(
+                    id = 2,
+                    priority = MessagePriorityEnumType.InFront,
+                    message = MessageContentType(
+                        format = MessageFormatEnumType.URI,
+                        language = "language",
+                        content = "Message content"
+                    )
+                )
+            )
+        )
     }
 
     @Test
     fun `costUpdated request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                CostUpdatedReq(5465.2, "45465"),
-                "CostUpdatedRequest.json"
+        validateObject(
+            CostUpdatedReq(5465.2, "45465")
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getDisplayMessages request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetDisplayMessagesReq(
-                        id=listOf(32,23),
-                        requestId=2,
-                        priority = MessagePriorityEnumType.AlwaysFront,
-                        state = MessageStateEnumType.Charging
-                ),
-                "GetDisplayMessagesRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetDisplayMessagesReq(
-                        requestId=2
-                ),
-                "GetDisplayMessagesRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            GetDisplayMessagesReq(
+                id = listOf(32, 23),
+                requestId = 2,
+                priority = MessagePriorityEnumType.AlwaysFront,
+                state = MessageStateEnumType.Charging
+            )
+        )
+        validateObject(
+            GetDisplayMessagesReq(
+                requestId = 2
+            )
+        )
     }
 
     @Test
     fun `getChargingProfiles request format`() {
-        //without optionnal parameters
-        var errors = JsonSchemaValidator.isValidObject(
-                GetChargingProfilesReq(
-                        78687,
-                        chargingProfile = ChargingProfileCriterionType()
-                ),
-                "GetChargingProfilesRequest.json"
-        )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        //with all parameters
-        errors = JsonSchemaValidator.isValidObject(
-                GetChargingProfilesReq(
-                        78687,
-                        ChargingProfileCriterionType(
-                            ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
-                            675,
-                            listOf(768),
-                            listOf(ChargingLimitSourceEnumType.CSO)
-                        ),
-                        6778
-                ),
-                "GetChargingProfilesRequest.json"
+        // without optionnal parameters
+        validateObject(
+            GetChargingProfilesReq(
+                78687,
+                chargingProfile = ChargingProfileCriterionType()
+            )
         )
 
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+        // with all parameters
+        validateObject(
+            GetChargingProfilesReq(
+                78687,
+                ChargingProfileCriterionType(
+                    ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
+                    675,
+                    listOf(768),
+                    listOf(ChargingLimitSourceEnumType.CSO)
+                ),
+                6778
+            )
+        )
     }
 
     @Test
     fun `unpublishFirmware request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                UnpublishFirmwareReq("checksum"),
-                "UnpublishFirmwareRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
+        validateObject(UnpublishFirmwareReq("checksum"))
     }
 
     @Test
     fun `getInstalledCertificateIds request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetInstalledCertificateIdsReq(
-                        listOf(GetCertificateIdUseEnumType.CSMSRootCertificate)
-                ),
-                "GetInstalledCertificateIdsRequest.json"
+        validateObject(
+            GetInstalledCertificateIdsReq(
+                listOf(GetCertificateIdUseEnumType.CSMSRootCertificate)
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetInstalledCertificateIdsReq(
-                ),
-                "GetInstalledCertificateIdsRequest.json"
+        validateObject(
+            GetInstalledCertificateIdsReq()
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+    }
 
-        errors = JsonSchemaValidator.isValidObject(
+    @Test
+    fun `SetNetworkProfile request format`() {
+        validateObject(
             SetNetworkProfileReq(
                 2,
                 NetworkConnectionProfileType(
@@ -1435,114 +1241,119 @@ class JsonSchemaTest {
                     123,
                     OCPPInterfaceEnumType.Wired0
                 )
-            ),
-            "SetNetworkProfileRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+
+        validateObject(
+            SetNetworkProfileReq(
+                2,
+                NetworkConnectionProfileType(
+                    OCPPVersionEnumType.OCPP12,
+                    OCPPTransportEnumType.JSON,
+                    "url",
+                    312,
+                    123,
+                    OCPPInterfaceEnumType.Wired0,
+                    VPNType(
+                        "server",
+                        "user",
+                        "pass",
+                        "key",
+                        VPNEnumType.IKEv2,
+                        "group"
+                    ),
+                    APNType(
+                        "APN",
+                        APNAuthenticationEnumType.AUTO,
+                        "userName",
+                        "pass",
+                        3,
+                        "pref",
+                        false
+                    )
+                )
+            )
+        )
+
+        validateObject(
+            SetNetworkProfileReq(
+                2,
+                NetworkConnectionProfileType(
+                    OCPPVersionEnumType.OCPP12,
+                    OCPPTransportEnumType.JSON,
+                    "url",
+                    312,
+                    123,
+                    OCPPInterfaceEnumType.Wired0
+                )
+            )
+        )
     }
 
     @Test
     fun `installCertificate request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                InstallCertificateReq(
-                        InstallCertificateUseEnumType.CSMSRootCertificate,
-                        "certificate"
-                ),
-                "InstallCertificateRequest.json"
+        validateObject(
+            InstallCertificateReq(
+                InstallCertificateUseEnumType.CSMSRootCertificate,
+                "certificate"
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
     }
-
 
     @Test
     fun `customerInformation request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                CustomerInformationReq(
-                        requestId = 3,
-                        report = false,
-                        clear =true,
-                        customerIdentifier ="identifier",
-                        idToken = IdTokenType(
-                                idToken = "idToken",
-                                type = IdTokenEnumType.Central,
-                                additionalInfo = listOf(
-                                        AdditionalInfoType(
-                                                "add",
-                                                "value"
-                                        ),
-                                        AdditionalInfoType(
-                                                "add",
-                                                "value"
-                                        ),
-                                        AdditionalInfoType(
-                                                "add",
-                                                "value"
-                                        )
-                                )
+        validateObject(
+            CustomerInformationReq(
+                requestId = 3,
+                report = false,
+                clear = true,
+                customerIdentifier = "identifier",
+                idToken = IdTokenType(
+                    idToken = "idToken",
+                    type = IdTokenEnumType.Central,
+                    additionalInfo = listOf(
+                        AdditionalInfoType(
+                            "add",
+                            "value"
                         ),
-                        customerCertificate = CertificateHashDataType(
-                                hashAlgorithm= HashAlgorithmEnumType.SHA512,
-                                issuerNameHash="issuerNameHash",
-                                issuerKeyHash="issuerKeyHash",
-                                serialNumber="serial"
+                        AdditionalInfoType(
+                            "add",
+                            "value"
                         ),
+                        AdditionalInfoType(
+                            "add",
+                            "value"
+                        )
+                    )
                 ),
-                "CustomerInformationRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+                customerCertificate = CertificateHashDataType(
+                    hashAlgorithm = HashAlgorithmEnumType.SHA512,
+                    issuerNameHash = "issuerNameHash",
+                    issuerKeyHash = "issuerKeyHash",
+                    serialNumber = "serial"
+                )
+            )
+        )
 
-        errors = JsonSchemaValidator.isValidObject(
-                CustomerInformationReq(
-                        requestId = 3,
-                        report = false,
-                        clear =true,
-                        customerIdentifier ="identifier",
-                ),
-                "CustomerInformationRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
+        validateObject(
+            CustomerInformationReq(
+                requestId = 3,
+                report = false,
+                clear = true,
+                customerIdentifier = "identifier"
+            )
+        )
     }
-
 
     @Test
     fun `reportChargingProfiles request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                 ReportChargingProfilesReq(
-                         requestId = 2,
-                         chargingLimitSource = ChargingLimitSourceEnumType.CSO,
-                         tbc = false,
-                         evseId = 2,
-                         chargingProfile =  listOf(
-                             ChargingProfileType(
-                                     id = 1,
-                                     stackLevel = 1,
-                                     chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
-                                     chargingProfileKind = ChargingProfileKindEnumType.Absolute,
-                                     chargingSchedule = listOf(
-                                             ChargingScheduleType(
-                                                     id = 1,
-                                                     chargingRateUnit = ChargingRateUnitEnumType.A,
-                                                     chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.0)),
-                                                     startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
-                                             )
-                                     )
-                             )
-                         )
-                 ),
-                "ReportChargingProfilesRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ReportChargingProfilesReq(
                 requestId = 2,
                 chargingLimitSource = ChargingLimitSourceEnumType.CSO,
+                tbc = false,
                 evseId = 2,
-                chargingProfile =  listOf(
+                chargingProfile = listOf(
                     ChargingProfileType(
                         id = 1,
                         stackLevel = 1,
@@ -1558,83 +1369,37 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "ReportChargingProfilesRequest.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
+            )
+        )
 
-
-    @Test
-    fun `setNetworkProfile request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetNetworkProfileReq(
-                        2,
-                        NetworkConnectionProfileType(
-                                OCPPVersionEnumType.OCPP12,
-                                OCPPTransportEnumType.JSON,
-                                "url",
-                                312,
-                                123,
-                                OCPPInterfaceEnumType.Wired0,
-                                VPNType(
-                                    "server",
-                                    "user",
-                                    "pass",
-                                    "key",
-                                    VPNEnumType.IKEv2,
-                                    "group"
-                                ),
-                                APNType(
-                                    "APN",
-                                    APNAuthenticationEnumType.AUTO,
-                                    "userName",
-                                    "pass",
-                                    3,
-                                    "pref",
-                                    false
-                                )
+        validateObject(
+            ReportChargingProfilesReq(
+                requestId = 2,
+                chargingLimitSource = ChargingLimitSourceEnumType.CSO,
+                evseId = 2,
+                chargingProfile = listOf(
+                    ChargingProfileType(
+                        id = 1,
+                        stackLevel = 1,
+                        chargingProfilePurpose = ChargingProfilePurposeEnumType.ChargingStationMaxProfile,
+                        chargingProfileKind = ChargingProfileKindEnumType.Absolute,
+                        chargingSchedule = listOf(
+                            ChargingScheduleType(
+                                id = 1,
+                                chargingRateUnit = ChargingRateUnitEnumType.A,
+                                chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.0)),
+                                startSchedule = Instant.parse("2022-02-15T00:00:00.000Z")
+                            )
                         )
-                ),
-                "SetNetworkProfileRequest.json"
-        )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            SetNetworkProfileReq(
-                2,
-                NetworkConnectionProfileType(
-                    OCPPVersionEnumType.OCPP12,
-                    OCPPTransportEnumType.JSON,
-                    "url",
-                    312,
-                    123,
-                    OCPPInterfaceEnumType.Wired0
+                    )
                 )
-            ),
-            "SetNetworkProfileRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `notifyEVChargingSchedule response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            NotifyEVChargingScheduleResp(
-                status = GenericStatusEnumType.Accepted,
-                statusInfo = StatusInfoType("123")
-            ),
-            "NotifyEVChargingScheduleResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getLog request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetLogReq(
                 requestId = 1,
                 logType = LogEnumType.DiagnosticsLog,
@@ -1643,13 +1408,10 @@ class JsonSchemaTest {
                     oldestTimestamp = Instant.parse("2022-02-15T00:00:00.000Z"),
                     latestTimestamp = Instant.parse("2022-02-15T00:00:00.000Z")
                 )
-            ),
-            "GetLogRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetLogReq(
                 requestId = 1,
                 logType = LogEnumType.DiagnosticsLog,
@@ -1660,155 +1422,160 @@ class JsonSchemaTest {
                 ),
                 retries = 3,
                 retryInterval = 5
-            ),
-            "GetLogRequest.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setMonitoringLevel request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringLevelReq(2),
-                "SetMonitoringLevelRequest.json"
+        validateObject(
+            SetMonitoringLevelReq(2)
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setVariableMonitoring request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetVariableMonitoringReq(
-                        listOf (
-                                SetMonitoringDataType(
-                                    id=0,
-                                    transaction = false,
-                                    value = 432.4,
-                                    type = MonitorEnumType.Periodic,
-                                    severity =3,
-                                    component= ComponentType("name"),
-                                    variable = VariableType("name")
+        validateObject(
+            SetVariableMonitoringReq(
+                listOf(
+                    SetMonitoringDataType(
+                        id = 0,
+                        transaction = false,
+                        value = 432.4,
+                        type = MonitorEnumType.Periodic,
+                        severity = 3,
+                        component = ComponentType("name"),
+                        variable = VariableType("name")
 
-                                )
-                        )
-                ),
-                "SetVariableMonitoringRequest.json"
+                    )
+                )
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                SetVariableMonitoringReq(
-                        listOf(
-                            SetMonitoringDataType(
-                                    value = 432.4,
-                                    type = MonitorEnumType.Periodic,
-                                    severity =3,
-                                    component=ComponentType("name"),
-                                    variable = VariableType("name")
-                            )
-                        )
-                ),
-                "SetVariableMonitoringRequest.json"
+        validateObject(
+            SetVariableMonitoringReq(
+                listOf(
+                    SetMonitoringDataType(
+                        value = 432.4,
+                        type = MonitorEnumType.Periodic,
+                        severity = 3,
+                        component = ComponentType("name"),
+                        variable = VariableType("name")
+                    )
+                )
+            )
         )
-
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `publishFirmware request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             PublishFirmwareReq(
-                    "location",
-                    "identifier string",
-                    43,
-                    24243,
-                    23443
-            ),
-            "PublishFirmwareRequest.json"
+                "location",
+                "identifier string",
+                43,
+                24243,
+                23443
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                PublishFirmwareReq(
-                        location="location",
-                        checksum="identifier string",
-                        requestId=24243,
-                ),
-                "PublishFirmwareRequest.json"
+        validateObject(
+            PublishFirmwareReq(
+                location = "location",
+                checksum = "identifier string",
+                requestId = 24243
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setMonitoringBase request format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringBaseReq(
-                        MonitoringBaseEnumType.All
-                ),
-                "SetMonitoringBaseRequest.json")
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            SetMonitoringBaseReq(
+                MonitoringBaseEnumType.All
+            )
+        )
+    }
+
+    @Test
+    fun `notifyChargingLimit response format`() {
+        validateObject(
+            NotifyChargingLimitResp()
+        )
+    }
+
+    @Test
+    fun `getCertificateStatus response format`() {
+        validateObject(
+            GetCertificateStatusResp(GetCertificateStatusEnumType.Accepted)
+        )
+
+        validateObject(
+            GetCertificateStatusResp(
+                GetCertificateStatusEnumType.Accepted,
+                "",
+                StatusInfoType("reason", "additional")
+            )
+        )
+    }
+
+    @Test
+    fun `notifyEVChargingNeeds response format`() {
+        validateObject(
+            NotifyEVChargingNeedsResp(NotifyEVChargingNeedsStatusEnumType.Accepted)
+        )
+        validateObject(
+            NotifyEVChargingNeedsResp(
+                NotifyEVChargingNeedsStatusEnumType.Accepted,
+                StatusInfoType("reason", "additional")
+            )
+        )
     }
 
     @Test
     fun `heartbeat response format`() {
-        val heartbeatResp = HeartbeatResp(
-            currentTime = Instant.parse("2022-02-15T00:00:00.000Z")
+        validateObject(
+            HeartbeatResp(
+                currentTime = Instant.parse("2022-02-15T00:00:00.000Z")
+            )
         )
-        val errors = JsonSchemaValidator.isValidObject(heartbeatResp, "HeartbeatResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
-
 
     @Test
     fun `authorize response format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             AuthorizeResp(
                 idTokenInfo = IdTokenInfoType(AuthorizationStatusEnumType.Accepted)
-            ), "AuthorizeResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
         /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             AuthorizeResp(
                 idTokenInfo = IdTokenInfoType(AuthorizationStatusEnumType.Blocked),
                 certificateStatus = AuthorizeCertificateStatusEnumType.CertificateExpired
-            ), "AuthorizeResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `meterValues response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            MeterValuesResp(), "MeterValuesResponse.json"
+        validateObject(
+            MeterValuesResp()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `transactionEvent response format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(TransactionEventResp(), "TransactionEventResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            TransactionEventResp()
+        )
 
         /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TransactionEventResp(
-                200.0, 9,
+                200.0,
+                9,
                 IdTokenInfoType(
                     AuthorizationStatusEnumType.Accepted,
                     Instant.parse("2022-02-15T00:00:00.000Z"),
@@ -1817,145 +1584,116 @@ class JsonSchemaTest {
                     listOf(2, 4),
                     "",
                     IdTokenType(
-                        "", IdTokenEnumType.Central,
+                        "",
+                        IdTokenEnumType.Central,
                         listOf(AdditionalInfoType("", ""))
-                    ), MessageContentType(MessageFormatEnumType.ASCII, "", "")
-                ), MessageContentType(MessageFormatEnumType.ASCII, "", "")
-            ), "TransactionEventResponse.json"
+                    ),
+                    MessageContentType(MessageFormatEnumType.ASCII, "", "")
+                ),
+                MessageContentType(MessageFormatEnumType.ASCII, "", "")
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `statusNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(StatusNotificationResp(), "StatusNotificationResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(StatusNotificationResp())
     }
 
     @Test
     fun `dataTransfer response format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
-            DataTransferResp(DataTransferStatusEnumType.Accepted),
-            "DataTransferResponse.json"
+        validateObject(
+            DataTransferResp(DataTransferStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
         /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             DataTransferResp(
                 status = DataTransferStatusEnumType.Accepted,
                 data = "data1",
                 statusInfo = StatusInfoType("", "")
-            ),
-            "DataTransferResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `bootNotification response format`() {
         /* Required field only */
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             BootNotificationResp(
                 currentTime = Instant.parse("2022-02-15T00:00:00.000Z"),
                 interval = 10,
                 status = RegistrationStatusEnumType.Accepted
-            ),
-            "BootNotificationResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        /* Every field */
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             BootNotificationResp(
                 currentTime = Instant.parse("2022-02-15T00:00:00.000Z"),
                 interval = 10,
                 status = RegistrationStatusEnumType.Accepted,
                 statusInfo = StatusInfoType("", "")
-            ),
-            "BootNotificationResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `changeAvailability response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ChangeAvailabilityResp(ChangeAvailabilityStatusEnumType.Accepted),
-            "ChangeAvailabilityResponse.json"
+        validateObject(
+            ChangeAvailabilityResp(ChangeAvailabilityStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            ChangeAvailabilityResp(ChangeAvailabilityStatusEnumType.Accepted, StatusInfoType("", "")),
-            "ChangeAvailabilityResponse.json"
+        validateObject(
+            ChangeAvailabilityResp(
+                ChangeAvailabilityStatusEnumType.Accepted,
+                StatusInfoType("", "")
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `clearCache response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ClearCacheResp(ClearCacheStatusEnumType.Accepted),
-            "ClearCacheResponse.json"
+        validateObject(
+            ClearCacheResp(ClearCacheStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            ClearCacheResp(ClearCacheStatusEnumType.Accepted, StatusInfoType("", "")),
-            "ClearCacheResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(ClearCacheResp(ClearCacheStatusEnumType.Accepted, StatusInfoType("", "")))
     }
 
     @Test
     fun `unlockConnector response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            UnlockConnectorResp(UnlockStatusEnumType.Unlocked),
-            "UnlockConnectorResponse.json"
+        validateObject(
+            UnlockConnectorResp(UnlockStatusEnumType.Unlocked)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            UnlockConnectorResp(UnlockStatusEnumType.Unlocked, StatusInfoType("", "")),
-            "UnlockConnectorResponse.json"
+        validateObject(UnlockConnectorResp(UnlockStatusEnumType.Unlocked, StatusInfoType("", "")))
+    }
+
+    @Test
+    fun `remoteStartTransaction response format`() {
+        validateObject(
+            RequestStartTransactionResp(RequestStartStopStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `requestStopTransaction response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            RequestStopTransactionResp(RequestStartStopStatusEnumType.Accepted),
-            "RequestStopTransactionResponse.json"
+        validateObject(
+            RequestStopTransactionResp(RequestStartStopStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            RequestStopTransactionResp(RequestStartStopStatusEnumType.Accepted, StatusInfoType("reason", "additional")),
-            "RequestStopTransactionResponse.json"
+        validateObject(
+            RequestStopTransactionResp(
+                RequestStartStopStatusEnumType.Accepted,
+                StatusInfoType("reason", "additional")
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getVariables response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetVariablesResp(
                 listOf(
                     GetVariableResultType(
@@ -1964,13 +1702,10 @@ class JsonSchemaTest {
                         variable = VariableType("variable")
                     )
                 )
-            ),
-            "GetVariablesResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetVariablesResp(
                 listOf(
                     GetVariableResultType(
@@ -1982,16 +1717,13 @@ class JsonSchemaTest {
                         attributeStatusInfo = StatusInfoType("reason")
                     )
                 )
-            ),
-            "GetVariablesResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setVariables response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetVariablesResp(
                 listOf(
                     SetVariableResultType(
@@ -2000,13 +1732,10 @@ class JsonSchemaTest {
                         variable = VariableType("variable")
                     )
                 )
-            ),
-            "SetVariablesResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetVariablesResp(
                 listOf(
                     SetVariableResultType(
@@ -2017,161 +1746,92 @@ class JsonSchemaTest {
                         StatusInfoType("reason", "additional")
                     )
                 )
-            ),
-            "SetVariablesResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getReport response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetReportResp(GenericDeviceModelStatusEnumType.Accepted),
-            "GetReportResponse.json"
+        validateObject(
+            GetReportResp(GenericDeviceModelStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetReportResp(
                 GenericDeviceModelStatusEnumType.EmptyResultSet,
                 StatusInfoType("reason", "additional")
-            ),
-            "GetReportResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getBaseReport response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetBaseReportResp(GenericDeviceModelStatusEnumType.Rejected),
-            "GetBaseReportResponse.json"
+        validateObject(
+            GetBaseReportResp(GenericDeviceModelStatusEnumType.Rejected)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetBaseReportResp(
                 GenericDeviceModelStatusEnumType.Rejected,
                 StatusInfoType("reason", "additional")
-            ),
-            "GetBaseReportResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `notify report response format`() {
-        val errors = JsonSchemaValidator.isValidObject(NotifyReportResp(), "NotifyReportResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            NotifyReportResp()
+        )
     }
 
     @Test
     fun `setChargingProfile response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            SetChargingProfileResp(ChargingProfileStatusEnumType.Accepted), "SetChargingProfileResponse.json"
+        validateObject(
+            SetChargingProfileResp(ChargingProfileStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SetChargingProfileResp(
                 ChargingProfileStatusEnumType.Accepted,
                 StatusInfoType("reason", "additional")
-            ),
-            "SetChargingProfileResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `sendLocalList response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            SendLocalListResp(SendLocalListStatusEnumType.Accepted),
-            "SendLocalListResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            SendLocalListResp(SendLocalListStatusEnumType.Accepted, StatusInfoType("reason", "additional")),
-            "SendLocalListResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `cancelReservation response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            CancelReservationResp(CancelReservationStatusEnumType.Rejected), "CancelReservationResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            CancelReservationResp(
-                CancelReservationStatusEnumType.Rejected,
-                StatusInfoType("reason", "additional")
-            ),
-            "CancelReservationResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+    fun `getLocalListVersion response format`() {
+        validateObject(GetLocalListVersionResp(1))
     }
 
     @Test
     fun `firmwareStatusNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            FirmwareStatusNotificationResp(),
-            "FirmwareStatusNotificationResponse.json"
+        validateObject(
+            FirmwareStatusNotificationResp()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+    }
+
+    @Test
+    fun `cancelReservation response format`() {
+        validateObject(
+            CancelReservationResp(CancelReservationStatusEnumType.Rejected)
+        )
     }
 
     @Test
     fun `clearChargingProfile response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ClearChargingProfileResp(ClearChargingProfileEnumType.Accepted), "ClearChargingProfileResponse.json"
+        validateObject(
+            ClearChargingProfileResp(ClearChargingProfileEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-            ClearChargingProfileResp(
-                ClearChargingProfileEnumType.Accepted,
-                StatusInfoType("reason", "additional")
-            ), "ClearChargingProfileResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `clearedChargingLimit response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            ClearedChargingLimitResp(), "ClearedChargingLimitResponse.json"
-        )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getCompositeSchedule response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetCompositeScheduleResp(GenericStatusEnumType.Accepted), "GetCompositeScheduleResponse.json"
+        validateObject(
+            GetCompositeScheduleResp(GenericStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetCompositeScheduleResp(
                 GenericStatusEnumType.Accepted,
                 CompositeScheduleType(
@@ -2182,659 +1842,458 @@ class JsonSchemaTest {
                     chargingSchedulePeriod = listOf(ChargingSchedulePeriodType(1, 1.0))
                 ),
                 StatusInfoType("reason", "additional")
-            ),
-            "GetCompositeScheduleResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `getLocalListVersion response format`() {
-        val errors = JsonSchemaValidator.isValidObject(GetLocalListVersionResp(1), "GetLocalListVersionResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-    }
-
-    @Test
-    fun `updatefirmware response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            UpdateFirmwareResp(
-                status = UpdateFirmwareStatusEnumType.Accepted
-            ),
-            "UpdateFirmwareResponse.json"
+    fun `updateFirmware response format`() {
+        validateObject(
+            UpdateFirmwareResp(status = UpdateFirmwareStatusEnumType.Accepted)
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             UpdateFirmwareResp(
                 status = UpdateFirmwareStatusEnumType.Accepted,
                 statusInfo = StatusInfoType("reason", "additional")
-            ),
-            "UpdateFirmwareResponse.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
+    }
+
+    @Test
+    fun `sendLocalList response format`() {
+        validateObject(SendLocalListResp(SendLocalListStatusEnumType.Accepted))
+
+        validateObject(
+            SendLocalListResp(
+                SendLocalListStatusEnumType.Accepted,
+                StatusInfoType("reason", "additional")
+            )
+        )
     }
 
     @Test
     fun `triggerMessage response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TriggerMessageResp(
                 TriggerMessageStatusEnumType.Accepted
-            ),
-            "TriggerMessageResponse.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             TriggerMessageResp(
                 TriggerMessageStatusEnumType.Accepted,
                 StatusInfoType("reason", "additional")
-            ),
-            "TriggerMessageResponse.json"
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-    }
-
-    @Test
-    fun `notifyChargingLimit response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            NotifyChargingLimitResp(), "NotifyChargingLimitResponse.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-    }
-
-    @Test
-    fun `getCertificateStatus response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            GetCertificateStatusResp(GetCertificateStatusEnumType.Accepted), "GetCertificateStatusResponse.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-
-        errors = JsonSchemaValidator.isValidObject(
-            GetCertificateStatusResp(GetCertificateStatusEnumType.Accepted, "", StatusInfoType("reason", "additional")),
-            "GetCertificateStatusResponse.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-    }
-
-    @Test
-    fun `notifyEVChargingNeeds response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            NotifyEVChargingNeedsResp(NotifyEVChargingNeedsStatusEnumType.Accepted),
-            "NotifyEVChargingNeedsResponse.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-
-        errors = JsonSchemaValidator.isValidObject(
-            NotifyEVChargingNeedsResp(
-                NotifyEVChargingNeedsStatusEnumType.Accepted,
-                StatusInfoType("reason", "additional")
-            ), "NotifyEVChargingNeedsResponse.json"
-        )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `reserveNow response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            ReserveNowResp(ReserveNowStatusEnumType.Accepted), "ReserveNowResponse.json"
+        validateObject(
+            ReserveNowResp(ReserveNowStatusEnumType.Accepted)
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notifyDisplayMessages response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            NotifyDisplayMessagesResp(),
-            "NotifyDisplayMessagesResponse.json"
+        validateObject(
+            NotifyDisplayMessagesResp()
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
 
     @Test
     fun `notifyEvent response format`() {
-        val errors = JsonSchemaValidator.isValidObject(NotifyEventResp(), "NotifyEventResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            NotifyEventResp()
+        )
     }
 
     @Test
     fun `getLog response format`() {
-        var errors = JsonSchemaValidator.isValidObject(GetLogResp(LogStatusEnumType.Accepted), "GetLogResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            GetLogResp(LogStatusEnumType.Accepted)
+        )
 
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             GetLogResp(
                 status = LogStatusEnumType.Accepted,
                 filename = "filename",
                 statusInfo = StatusInfoType("reason", "additional")
-            ), "GetLogResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `securityEventNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            SecurityEventNotificationResp(),
-            "SecurityEventNotificationResponse.json"
+        validateObject(
+            SecurityEventNotificationResp()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `reservationStatusUpdate response format`() {
-        val errors =
-            JsonSchemaValidator.isValidObject(ReservationStatusUpdateResp(), "ReservationStatusUpdateResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            ReservationStatusUpdateResp()
+        )
     }
 
     @Test
     fun `notifyMonitoringReport response format`() {
-        val errors =
-            JsonSchemaValidator.isValidObject(NotifyMonitoringReportResp(), "NotifyMonitoringReportResponse.json")
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+        validateObject(
+            NotifyMonitoringReportResp()
+        )
+    }
+
+    @Test
+    fun `reset request format`() {
+        validateObject(
+            ResetReq(type = ResetEnumType.Immediate)
+        )
+
+        validateObject(
+            ResetReq(type = ResetEnumType.OnIdle)
+        )
     }
 
     @Test
     fun `logStatusNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            LogStatusNotificationResp(),  "LogStatusNotificationResponse.json"
+        validateObject(
+            LogStatusNotificationResp()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
-    fun `certificateSigned response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            CertificateSignedResp(CertificateSignedStatusEnumType.Accepted), "CertificateSignedResponse.json"
+    fun `reset response format`() {
+        validateObject(
+            ResetResp(status = ResetStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-            CertificateSignedResp(
-                CertificateSignedStatusEnumType.Accepted,
-                StatusInfoType("reason", "info")
-            ),
-            "CertificateSignedResponse.json"
+        validateObject(
+            ResetResp(status = ResetStatusEnumType.Rejected)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `publishFirmwareStatusNotification response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-            PublishFirmwareStatusNotificationResp(),
-            "PublishFirmwareStatusNotificationResponse.json"
+        validateObject(
+            PublishFirmwareStatusNotificationResp()
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `signCertificate response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            SignCertificateResp(GenericStatusEnumType.Accepted),
-            "SignCertificateResponse.json"
+        validateObject(
+            SignCertificateResp(GenericStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             SignCertificateResp(
                 GenericStatusEnumType.Accepted,
                 StatusInfoType("reason", "additional")
-            ), "SignCertificateResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
+
     @Test
     fun `clearDisplayMessage response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-            ClearDisplayMessageResp(ClearMessageStatusEnumType.Accepted),
-            "ClearDisplayMessageResponse.json"
+        validateObject(
+            ClearDisplayMessageResp(ClearMessageStatusEnumType.Accepted)
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ClearDisplayMessageResp(
                 ClearMessageStatusEnumType.Accepted,
                 StatusInfoType("reason", "additional")
-            ), "ClearDisplayMessageResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getDisplayMessages response format`() {
-        //without optionnal parameters
-        var errors = JsonSchemaValidator.isValidObject(
-                GetDisplayMessagesResp(GetDisplayMessagesStatusEnumType.Accepted),
-                "GetDisplayMessagesResponse.json"
-        )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        //with all parameters
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetDisplayMessagesResp(
-                        GetDisplayMessagesStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "GetDisplayMessagesResponse.json"
+        // without optionnal parameters
+        validateObject(
+            GetDisplayMessagesResp(GetDisplayMessagesStatusEnumType.Accepted)
         )
 
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
+        // with all parameters
+        validateObject(
+            GetDisplayMessagesResp(
+                GetDisplayMessagesStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
+        )
     }
 
     @Test
     fun `setMonitoringBase response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringBaseResp(
-                        GenericDeviceModelStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "SetMonitoringBaseResponse.json"
+        validateObject(
+            SetMonitoringBaseResp(
+                GenericDeviceModelStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringBaseResp(
-                        GenericDeviceModelStatusEnumType.Accepted
-                ),
-                "SetMonitoringBaseResponse.json"
+        validateObject(
+            SetMonitoringBaseResp(
+                GenericDeviceModelStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
     }
 
     @Test
     fun `setNetworkProfile response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetNetworkProfileResp(
-                        SetNetworkProfileStatusEnumType.Accepted
-                ),
-                "SetNetworkProfileResponse.json"
+        validateObject(
+            SetNetworkProfileResp(
+                SetNetworkProfileStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                SetNetworkProfileResp(
-                        SetNetworkProfileStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "SetNetworkProfileResponse.json"
+        validateObject(
+            SetNetworkProfileResp(
+                SetNetworkProfileStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
     }
 
     @Test
     fun `setMonitoringLevel response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringLevelResp(
-                        GenericStatusEnumType.Accepted,
-                        StatusInfoType("reason","additionnal")
-                ),
-                "SetMonitoringLevelResponse.json"
+        validateObject(
+            SetMonitoringLevelResp(
+                GenericStatusEnumType.Accepted,
+                StatusInfoType("reason", "additionnal")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                SetMonitoringLevelResp(
-                        GenericStatusEnumType.Accepted
-                ),
-                "SetMonitoringLevelResponse.json"
+        validateObject(
+            SetMonitoringLevelResp(
+                GenericStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
     }
 
     @Test
     fun `getChargingProfiles response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetChargingProfilesResp(
-                        GetChargingProfileStatusEnumType.NoProfiles,
-                        StatusInfoType("reason","additionnal")),
-                "GetChargingProfilesResponse.json"
+        validateObject(
+            GetChargingProfilesResp(
+                GetChargingProfileStatusEnumType.NoProfiles,
+                StatusInfoType("reason", "additionnal")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetChargingProfilesResp(
-                        GetChargingProfileStatusEnumType.NoProfiles),
-                "GetChargingProfilesResponse.json"
+        validateObject(
+            GetChargingProfilesResp(
+                GetChargingProfileStatusEnumType.NoProfiles
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getInstalledCertificateIds response format`() {
-
-        var errors = JsonSchemaValidator.isValidObject(
-                GetInstalledCertificateIdsResp(
-                    GetInstalledCertificateStatusEnumType.Accepted,
-                    listOf(
-                            CertificateHashDataChainType(GetCertificateIdUseEnumType.CSMSRootCertificate, CertificateHashDataType(
-                                HashAlgorithmEnumType.SHA512,"","",""),listOf(CertificateHashDataType(
-                                HashAlgorithmEnumType.SHA512,"","",""),CertificateHashDataType(HashAlgorithmEnumType.SHA512,"","",""))),
-                    ),
-                    StatusInfoType("reason","info")
+        validateObject(
+            GetInstalledCertificateIdsResp(
+                GetInstalledCertificateStatusEnumType.Accepted,
+                listOf(
+                    CertificateHashDataChainType(
+                        GetCertificateIdUseEnumType.CSMSRootCertificate,
+                        CertificateHashDataType(
+                            HashAlgorithmEnumType.SHA512,
+                            "",
+                            "",
+                            ""
+                        ),
+                        listOf(
+                            CertificateHashDataType(
+                                HashAlgorithmEnumType.SHA512,
+                                "",
+                                "",
+                                ""
+                            ),
+                            CertificateHashDataType(HashAlgorithmEnumType.SHA512, "", "", "")
+                        )
+                    )
                 ),
-                "GetInstalledCertificateIdsResponse.json"
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetInstalledCertificateIdsResp(
-                        GetInstalledCertificateStatusEnumType.Accepted,
-                ),
-                "GetInstalledCertificateIdsResponse.json"
+        validateObject(
+            GetInstalledCertificateIdsResp(
+                GetInstalledCertificateStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `installCertificate response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                InstallCertificateResp(
-                    InstallCertificateStatusEnumType.Accepted,
-                    StatusInfoType("reason","info")
-                ),
-                "InstallCertificateResponse.json"
+        validateObject(
+            InstallCertificateResp(
+                InstallCertificateStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                InstallCertificateResp(
-                        InstallCertificateStatusEnumType.Accepted
-                ),
-                "InstallCertificateResponse.json"
+        validateObject(
+            InstallCertificateResp(
+                InstallCertificateStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
     }
 
     @Test
     fun `customerInformation response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                CustomerInformationResp(
-                        CustomerInformationStatusEnumType.Accepted,
-                        StatusInfoType("reason","code")
-                ),
-                "CustomerInformationResponse.json"
+        validateObject(
+            CustomerInformationResp(
+                CustomerInformationStatusEnumType.Accepted,
+                StatusInfoType("reason", "code")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                CustomerInformationResp(
-                        CustomerInformationStatusEnumType.Accepted
-                ),
-                "CustomerInformationResponse.json"
+        validateObject(
+            CustomerInformationResp(
+                CustomerInformationStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `reportChargingProfiles response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                ReportChargingProfilesResp(),
-                "ReportChargingProfilesResponse.json"
+        validateObject(
+            ReportChargingProfilesResp()
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `unpublishFirmware response format`() {
-        val errors = JsonSchemaValidator.isValidObject(
-                UnpublishFirmwareResp(UnpublishFirmwareStatusEnumType.Unpublished),
-                "UnpublishFirmwareResponse.json"
+        validateObject(
+            UnpublishFirmwareResp(UnpublishFirmwareStatusEnumType.Unpublished)
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `publishFirmware response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                PublishFirmwareResp(
-                        GenericStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "PublishFirmwareResponse.json"
+        validateObject(
+            PublishFirmwareResp(
+                GenericStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                PublishFirmwareResp(
-                        GenericStatusEnumType.Accepted
-                ),
-                "PublishFirmwareResponse.json"
+        validateObject(
+            PublishFirmwareResp(
+                GenericStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setVariableMonitoring response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetVariableMonitoringResp
-                (
-                    setMonitoringResult =listOf(
-                         SetMonitoringResultType(
-                                id=23,
-                                status=SetMonitoringStatusEnumType.Accepted,
-                                type=MonitorEnumType.Delta,
-                                severity=3,
-                                component=ComponentType("name"),
-                                variable=VariableType("name"),
-                                statusInfo=StatusInfoType("reason","info")
-                        )
+        validateObject(
+            SetVariableMonitoringResp(
+                setMonitoringResult = listOf(
+                    SetMonitoringResultType(
+                        id = 23,
+                        status = SetMonitoringStatusEnumType.Accepted,
+                        type = MonitorEnumType.Delta,
+                        severity = 3,
+                        component = ComponentType("name"),
+                        variable = VariableType("name"),
+                        statusInfo = StatusInfoType("reason", "info")
                     )
-                ),
-                "SetVariableMonitoringResponse.json"
+                )
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                SetVariableMonitoringResp
-                (
-                        setMonitoringResult =listOf(
-                                SetMonitoringResultType(
-                                        status=SetMonitoringStatusEnumType.Accepted,
-                                        type=MonitorEnumType.Delta,
-                                        severity=3,
-                                        component=ComponentType("name"),
-                                        variable=VariableType("name"),
-                                )
-                        )
-                ),
-                "SetVariableMonitoringResponse.json"
+        validateObject(
+            SetVariableMonitoringResp(
+                setMonitoringResult = listOf(
+                    SetMonitoringResultType(
+                        status = SetMonitoringStatusEnumType.Accepted,
+                        type = MonitorEnumType.Delta,
+                        severity = 3,
+                        component = ComponentType("name"),
+                        variable = VariableType("name")
+                    )
+                )
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getTransactionStatus response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetTransactionStatusResp(
-                        true,
-                        false
-                ),
-                "GetTransactionStatusResponse.json"
+        validateObject(
+            GetTransactionStatusResp(
+                true,
+                false
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetTransactionStatusResp(
-                        true,
-                ),
-                "GetTransactionStatusResponse.json"
+        validateObject(
+            GetTransactionStatusResp(
+                true
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `getTransactionStatus request format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetTransactionStatusReq(
-                    "id"
-                ),
-                "GetTransactionStatusRequest.json"
+        validateObject(
+            GetTransactionStatusReq(
+                "id"
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetTransactionStatusReq(
-                ),
-                "GetTransactionStatusRequest.json"
+        validateObject(
+            GetTransactionStatusReq()
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `setDisplayMessage response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                SetDisplayMessageResp(
-                        DisplayMessageStatusEnumType.Accepted,
-                        StatusInfoType("reason","code")
-                ),
-                "SetDisplayMessageResponse.json"
+        validateObject(
+            SetDisplayMessageResp(
+                DisplayMessageStatusEnumType.Accepted,
+                StatusInfoType("reason", "code")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
 
-        errors = JsonSchemaValidator.isValidObject(
-                SetDisplayMessageResp(
-                        DisplayMessageStatusEnumType.Accepted
-                ),
-                "SetDisplayMessageResponse.json"
+        validateObject(
+            SetDisplayMessageResp(
+                DisplayMessageStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `costUpdated response format`() {
-
-        val errors = JsonSchemaValidator.isValidObject(
-                CostUpdatedResp(),
-                "CostUpdatedResponse.json"
+        validateObject(
+            CostUpdatedResp()
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `deleteCertificate response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                //Test without optional parameter
-                DeleteCertificateResp(
-                        DeleteCertificateStatusEnumType.Accepted
-                ),
-                "DeleteCertificateResponse.json"
+        validateObject(
+            DeleteCertificateResp(
+
+                DeleteCertificateStatusEnumType.Accepted
+            )
         )
 
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
-
-        //Test with all parameters
-        errors = JsonSchemaValidator.isValidObject(
-                //Test without optional parameter
-                DeleteCertificateResp(
-                        DeleteCertificateStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "DeleteCertificateResponse.json"
+        validateObject(
+            DeleteCertificateResp(
+                DeleteCertificateStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors) {
-            get { this.size }.isEqualTo(0)
-        }
     }
+
     @Test
     fun `getMonitoringReport response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
-                GetMonitoringReportResp(
-                        GenericDeviceModelStatusEnumType.Accepted,
-                        StatusInfoType("reason","info")
-                ),
-                "GetMonitoringReportResponse.json"
+        validateObject(
+            GetMonitoringReportResp(
+                GenericDeviceModelStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
-                GetMonitoringReportResp(
-                        GenericDeviceModelStatusEnumType.Accepted
-                ),
-                "GetMonitoringReportResponse.json"
+        validateObject(
+            GetMonitoringReportResp(
+                GenericDeviceModelStatusEnumType.Accepted
+            )
         )
-        expectThat(errors)
-                .and { get { this.size }.isEqualTo(0) }
     }
 
     @Test
     fun `clearVariableMonitoring response format`() {
-        var errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ClearVariableMonitoringResp(
                 clearMonitoringResults =
                 listOf(
@@ -2847,13 +2306,9 @@ class JsonSchemaTest {
                         )
                     )
                 )
-            ),
-            "ClearVariableMonitoringResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
-
-        errors = JsonSchemaValidator.isValidObject(
+        validateObject(
             ClearVariableMonitoringResp(
                 clearMonitoringResults =
                 listOf(
@@ -2862,10 +2317,30 @@ class JsonSchemaTest {
                         id = 1
                     )
                 )
-            ),
-            "ClearVariableMonitoringResponse.json"
+            )
         )
-        expectThat(errors)
-            .and { get { this.size }.isEqualTo(0) }
+    }
+
+    @Test
+    fun `certificateSigned response format`() {
+        validateObject(
+            CertificateSignedResp(CertificateSignedStatusEnumType.Accepted)
+        )
+        validateObject(
+            CertificateSignedResp(
+                CertificateSignedStatusEnumType.Accepted,
+                StatusInfoType("reason", "info")
+            )
+        )
+    }
+
+    fun <T> validateObject(instance: T) {
+        expectThat(
+            parser.parseAnyFromString<Unit>(
+                parser.mapPayloadToString(
+                    instance
+                )
+            )
+        ).isA<JsonMessage<T>>()
     }
 }

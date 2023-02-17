@@ -1,23 +1,23 @@
 package com.izivia.ocpp.websocket.test
 
+import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core20.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core20.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core20.model.common.IdTokenInfoType
 import com.izivia.ocpp.core20.model.common.enumeration.AuthorizationStatusEnumType
-import com.izivia.ocpp.websocket.WebsocketClient
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
+import com.izivia.ocpp.websocket.WebsocketClient
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -28,18 +28,21 @@ import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
+import java.net.ServerSocket
 import java.util.*
 
 class WebsocketTest {
 
     @AfterEach
-    fun destroy(){
+    fun destroy() {
         unmockkAll()
     }
 
+    fun getFreePort(): Int =
+        ServerSocket(0).use { it.localPort }
+
     @Test
     fun `sendMessageClass success`() {
-
         val id = "a727d144-82bb-497a-a0c7-4ef2295910d4"
         val uuid = UUID.fromString(id)
         mockkStatic(UUID::class)
@@ -89,8 +92,7 @@ class WebsocketTest {
 
     @Test
     fun `receiveMessageClass success`() {
-
-        val port = 12345
+        val port = getFreePort()
 
         val server = OcppWampServer.newServer(port, setOf(OcppVersion.OCPP_1_6, OcppVersion.OCPP_2_0))
         server.register(object : OcppWampServerHandler {
@@ -101,26 +103,28 @@ class WebsocketTest {
         server.start()
 
         try {
-            val websocketClient = WebsocketClient("chargePoint2", OcppVersion.OCPP_1_6,"ws://localhost:$port/ws")
+            val websocketClient = WebsocketClient("chargePoint2", OcppVersion.OCPP_1_6, "ws://localhost:$port/ws")
 
-
-            val heartbeatFun : (HeartbeatReq) -> HeartbeatResp = { HeartbeatResp(Clock.System.now()) }
+            val heartbeatFun: (HeartbeatReq) -> HeartbeatResp = { HeartbeatResp(Clock.System.now()) }
             websocketClient.receiveMessageClass(HeartbeatReq::class, "heartbeat", heartbeatFun)
 
-            val authorizeFun : (AuthorizeReq) -> AuthorizeResp = { AuthorizeResp(IdTokenInfoType(AuthorizationStatusEnumType.Blocked)) }
+            val authorizeFun: (AuthorizeReq) -> AuthorizeResp =
+                { AuthorizeResp(IdTokenInfoType(AuthorizationStatusEnumType.Blocked)) }
             websocketClient.receiveMessageClass(AuthorizeReq::class, "authorize", authorizeFun)
 
             websocketClient.connect()
             Thread.sleep(100) // wait for connection to be fully established, it seems to cause issues on GH action
 
-            server.sendBlocking("chargePoint2", WampMessage.Call("1","authorize","{\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}"))
+            server.sendBlocking(
+                "chargePoint2",
+                WampMessage.Call("1", "authorize", "{\"idToken\": {\"idToken\": \"Tag1\", \"type\": \"Central\"}}")
+            )
 
-            server.sendBlocking("chargePoint2", WampMessage.Call("2","heartbeat","{}"))
+            server.sendBlocking("chargePoint2", WampMessage.Call("2", "heartbeat", "{}"))
 
             websocketClient.close()
         } finally {
             server.stop()
         }
     }
-
 }

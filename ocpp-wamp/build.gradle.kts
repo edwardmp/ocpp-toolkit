@@ -7,6 +7,8 @@ coreProject()
 
 dependencies {
     api(project(":ocpp-json"))
+    
+    implementation(project(":utils"))
 
     implementation("org.http4k:http4k-core:_")
     implementation("org.http4k:http4k-client-websocket:_")

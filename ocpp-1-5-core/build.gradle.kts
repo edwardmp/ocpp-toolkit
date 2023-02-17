@@ -7,7 +7,6 @@ plugins {
 coreProject()
 
 dependencies {
-    implementation(project(":utils"))
     implementation(project(":ocpp-transport"))
     implementation(project(":operation-information"))
 }

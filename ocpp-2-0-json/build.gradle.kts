@@ -12,6 +12,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:_")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:_")
     implementation("com.networknt:json-schema-validator:_")
+    implementation(project(mapOf("path" to ":utils")))
 
     testImplementation(kotlin("test-junit"))
 }

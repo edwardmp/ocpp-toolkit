@@ -55,12 +55,10 @@ class CoreTest {
         transport = mockk()
         every { transport.receiveMessage<Any, Any>(any(), any()) } returns Unit
         every { transport.receiveMessageClass<Any, Any>(any(), any(), any()) } returns Unit
-
     }
 
     @Test
     fun `heartbeat request`() {
-
         every { transport.sendMessage<HeartbeatReq, HeartbeatResp>(any(), any()) } returns HeartbeatResp(
             currentTime = Instant.parse("2022-02-15T00:00:00.000Z")
         )
@@ -133,7 +131,10 @@ class CoreTest {
                 TODO("Not implemented")
             }
 
-            override fun updateFirmware(meta: RequestMetadata, req: UpdateFirmwareReq): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
+            override fun updateFirmware(
+                meta: RequestMetadata,
+                req: UpdateFirmwareReq
+            ): OperationExecution<UpdateFirmwareReq, UpdateFirmwareResp> {
                 TODO("Not implemented")
             }
 
@@ -169,6 +170,8 @@ class CoreTest {
         val operations =
             ChargePointOperations.newChargePointOperations("", transport, csmsOperations)
         val response = operations.heartbeat(RequestMetadata(""), HeartbeatReq())
-        expectThat(response).and { get { this.response.currentTime }.isEqualTo(Instant.parse("2022-02-15T00:00:00.000Z")) }
+        expectThat(response).and { get { this.response.currentTime }.isEqualTo(
+            Instant.parse("2022-02-15T00:00:00.000Z")
+        ) }
     }
 }

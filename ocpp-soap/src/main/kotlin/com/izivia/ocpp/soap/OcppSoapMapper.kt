@@ -26,6 +26,7 @@ class OcppSoapMapper : ObjectMapper(
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .setDefaultPropertyInclusion(Include.NON_EMPTY)
         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
 )
 
 fun getNewFactory(nsAware: Boolean): XmlFactory =
@@ -51,7 +52,9 @@ abstract class SoapFaultMixin(
     @JacksonXmlProperty(localName = "s:Code")
     val code: FaultCode,
     @JacksonXmlProperty(localName = "s:Reason")
-    val reason: FaultReason
+    val reason: FaultReason,
+    @JacksonXmlProperty(localName = "s:Value")
+    val value: FaultCodeValue
 )
 
 abstract class FaultCodeMixin(
@@ -62,7 +65,11 @@ abstract class FaultCodeMixin(
 )
 
 abstract class FaultSubCodeMixin(
-    @JacksonXmlProperty(localName = "o:Value")
+    @JacksonXmlProperty(localName = "s:Code")
+    val code: FaultCode,
+    @JacksonXmlProperty(localName = "s:Reason")
+    val reason: FaultReason,
+    @JacksonXmlProperty(localName = "s:Value")
     val value: FaultSubCodeValue
 )
 

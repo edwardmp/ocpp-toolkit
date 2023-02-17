@@ -1,30 +1,54 @@
 package com.izivia.ocpp.json16
 
-import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
-import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
-import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
-import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
-import com.izivia.ocpp.core16.model.firmwarestatusnotification.FirmwareStatusNotificationReq
-import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
-import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
-import com.izivia.ocpp.core16.model.starttransaction.StartTransactionReq
-import com.izivia.ocpp.core16.model.statusnotification.StatusNotificationReq
-import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
+import com.fasterxml.jackson.databind.JsonNode
+import com.izivia.ocpp.core16.model.common.enumeration.Actions
+import com.izivia.ocpp.json.JsonMessage
+import com.izivia.ocpp.json.JsonMessageType
 import com.izivia.ocpp.json.OcppJsonParser
+import com.izivia.ocpp.json.OcppJsonValidator
+import com.izivia.ocpp.utils.MessageTypeException
+import com.networknt.schema.SpecVersion
+import com.networknt.schema.ValidationMessage
+import com.networknt.schema.ValidatorTypeCode
 
-class Ocpp16JsonParser : OcppJsonParser(Ocpp16JsonObjectMapper) {
+class Ocpp16JsonParser(
+    val ignoreValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    enableValidation: Boolean = true
+) :
+    OcppJsonParser(
+        mapper = Ocpp16JsonObjectMapper,
+        ocppJsonValidator = if (enableValidation) {
+            OcppJsonValidator(ignoreValidationCodes, SpecVersion.VersionFlag.V4)
+        } else null
+    ) {
 
-    override fun getRequestPayloadClass(action: String, context: String) = when (action.lowercase()) {
-        "authorize" -> AuthorizeReq::class.java
-        "bootnotification" -> BootNotificationReq::class.java
-        "datatransfer" -> DataTransferReq::class.java
-        "diagnosticsstatusnotification" -> DiagnosticsStatusNotificationReq::class.java
-        "firmwarestatusnotification" -> FirmwareStatusNotificationReq::class.java
-        "heartbeat" -> HeartbeatReq::class.java
-        "metervalues" -> MeterValuesReq::class.java
-        "starttransaction" -> StartTransactionReq::class.java
-        "statusnotification" -> StatusNotificationReq::class.java
-        "stoptransaction" -> StopTransactionReq::class.java
-        else -> throw IllegalArgumentException("Action not recognized. action = ${action}. message = $context")
+    override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
+        try {
+            Actions.valueOf(action.uppercase()).classRequest
+        } catch (e: Exception) {
+            throw errorHandler(e)
+        }
+
+    override fun getResponseActionFromClass(className: String): String =
+        Actions.valueOf(className.replace("[Resp|Req]$", "").uppercase()).value
+
+    override fun validateJson(
+        jsonMessage: JsonMessage<JsonNode>,
+        errorsHandler: (errors: List<ValidationMessage>) -> Unit
+    ) {
+        ocppJsonValidator?.isValidObject(
+            action = when (jsonMessage.msgType) {
+                JsonMessageType.CALL -> "${jsonMessage.action}Request"
+                JsonMessageType.CALL_RESULT -> "${jsonMessage.action}Response"
+                JsonMessageType.CALL_ERROR -> return
+                else -> throw MessageTypeException(
+                    message = "MessageType not supported ${jsonMessage.msgType}",
+                    messageId = jsonMessage.msgId
+                )
+            },
+            payload = jsonMessage.payload
+        )
+
+            ?.let { errorsHandler(it) }
     }
 }

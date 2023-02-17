@@ -82,8 +82,6 @@ import kotlinx.datetime.Instant
 
 internal object Ocpp15SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
         .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)

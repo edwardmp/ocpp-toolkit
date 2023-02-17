@@ -5,7 +5,7 @@ import kotlin.time.Duration
 fun main(args:Array<String>) {
     WampLoadTest().loadTest(
         server = WampLoadTest.NoopServerManager,
-        port = 12345,
+        port = 54003,
         startFromCSNumber = args.firstOrNull()?.toInt()?: 0,
         chargingStationNumber = 3000,
         heartbeatsNumber = 100000,

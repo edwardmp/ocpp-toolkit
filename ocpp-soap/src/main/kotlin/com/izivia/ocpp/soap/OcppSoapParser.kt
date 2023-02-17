@@ -1,8 +1,9 @@
 package com.izivia.ocpp.soap
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.izivia.ocpp.soap.OcppConstant.SOAP_ANONYMOUS
-import com.izivia.ocpp.soap.OcppConstant.SOAP_ANONYMOUS_FROM
+import com.izivia.ocpp.utils.*
+import com.izivia.ocpp.utils.fault.FAULT
+import com.izivia.ocpp.utils.fault.Fault
 import kotlin.reflect.KClass
 
 interface OcppSoapParser {
@@ -16,6 +17,12 @@ interface OcppSoapParser {
 
     fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any
     fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any
+
+    fun parseSoapFaulted(
+        soap: String,
+        e: Exception,
+        func: (soapFault: SoapFault) -> SoapBody
+    ): SoapEnvelope<SoapBody>
 }
 
 abstract class OcppSoapParserImpl(
@@ -29,8 +36,9 @@ abstract class OcppSoapParserImpl(
             messageId = response.messageId,
             action = "/${response.action.replaceFirstChar { it.uppercase() }}Response",
             relatesTo = response.relatesTo,
-            to = response.to ?: SOAP_ANONYMOUS,
-            from = response.from?.let { SoapHeaderFromOut(response.from.toValueText()) } ?: SOAP_ANONYMOUS_FROM,
+            to = response.to ?: OcppConstant.SOAP_ANONYMOUS,
+            from = response.from?.let { SoapHeaderFromOut(response.from.toValueText()) }
+                ?: OcppConstant.SOAP_ANONYMOUS_FROM,
             chargeBoxIdentity = response.chargeBoxIdentity
         )
         val xmlBuilder = SoapEnvelopeOut(
@@ -43,38 +51,63 @@ abstract class OcppSoapParserImpl(
 
     override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
         val envelope = readToEnvelop(messageStr)
-        return RequestSoapMessage(
-            messageId = envelope.header.messageId.value,
-            chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
-            action = envelope.header.action.value.removePrefix("/"),
-            from = envelope.header.from.address.value,
-            to = envelope.header.to.value,
-            payload = getRequestBodyContent(envelope)
-        )
+        try {
+            return RequestSoapMessage(
+                messageId = envelope.header.messageId.value,
+                chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
+                action = envelope.header.action.value.removePrefix("/"),
+                from = envelope.header.from.address.value,
+                to = envelope.header.to.value,
+                payload = getRequestBodyContent(envelope)
+            )
+        } catch (e: Exception) {
+            return RequestSoapMessage(
+                messageId = envelope.header.messageId.value,
+                chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
+                action = envelope.header.action.value.removePrefix("/"),
+                payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
+                from = envelope.header.from.address.value,
+                to = envelope.header.to.toString()
+            )
+        }
     }
 
     override fun parseAnyResponseFromSoap(messageStr: String): ResponseSoapMessage<Any> {
         val envelope = readToEnvelop(messageStr)
-        return ResponseSoapMessage(
-            messageId = envelope.header.messageId.value,
-            relatesTo = envelope.header.relatesTo?.value
-                ?: throw IllegalArgumentException(
-                    "Malformed envelope: missing <RelatesTo> in the header. envelope = $envelope"
-                ),
-            action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
-            payload = getResponseBodyContent(envelope),
-            from = envelope.header.from.address.value,
-            to = envelope.header.to.toString()
-        )
+        try {
+            return ResponseSoapMessage(
+                messageId = envelope.header.messageId.value,
+                relatesTo = envelope.header.relatesTo?.value
+                    ?: throw MissingRelatesToHeaderException(
+                        message = "Malformed envelope",
+                        messageId = envelope.header.messageId.value,
+                        errorDetails = listOf(ErrorDetail(code = "request", detail = envelope.toString()))
+                    ),
+                action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
+                payload = getResponseBodyContent(envelope),
+                from = envelope.header.from.address.value,
+                to = envelope.header.to.toString()
+            )
+        } catch (e: OcppParserException) {
+            return ResponseSoapMessage(
+                messageId = envelope.header.messageId.value,
+                relatesTo = e.messageId ?: "missing-relatesTo",
+                action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
+                payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
+                from = envelope.header.from.address.value,
+                to = envelope.header.to.toString()
+            )
+        }
     }
 
     override fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String {
         val headers = SoapHeaderOut(
             messageId = request.messageId,
             action = "/${request.action.replaceFirstChar { it.uppercase() }}",
-            to = request.to ?: SOAP_ANONYMOUS,
+            to = request.to ?: OcppConstant.SOAP_ANONYMOUS,
             relatesTo = null,
-            from = request.from?.let { SoapHeaderFromOut(request.from.toValueText()) } ?: SOAP_ANONYMOUS_FROM,
+            from = request.from?.let { SoapHeaderFromOut(request.from.toValueText()) }
+                ?: OcppConstant.SOAP_ANONYMOUS_FROM,
             chargeBoxIdentity = request.chargingStationId
         )
         val xmlBuilder = SoapEnvelopeOut(
@@ -84,7 +117,73 @@ abstract class OcppSoapParserImpl(
         )
         return soapMapperOutput.writeValueAsString(xmlBuilder)
     }
+
+    override fun parseSoapFaulted(
+        soap: String,
+        e: Exception,
+        func: (soapFault: SoapFault) -> SoapBody
+    ): SoapEnvelope<SoapBody> {
+        val chargeBoxIdentity: String? =
+            """${OcppConstant.CHARGEBOX_IDENTITY.lowercase()}>(.*?)</""".toRegex(RegexOption.IGNORE_CASE)
+                .find(soap)?.destructured?.component1()
+        val messageId: String? =
+            """${OcppConstant.MESSAGE_ID.lowercase()}>(.*?)</""".toRegex(RegexOption.IGNORE_CASE)
+                .find(soap)?.destructured?.component1()
+        val action: String? =
+            """${OcppConstant.ACTION.lowercase()}>(.*?)</""".toRegex(RegexOption.IGNORE_CASE)
+                .find(soap)?.destructured?.component1()
+
+        return SoapEnvelope(
+            header = SoapHeader(
+                chargeBoxIdentity = chargeBoxIdentity?.let { ValueText(it) },
+                messageId = messageId?.let { ValueText(it) }
+                    ?: ValueText("Unknown-messageId"),
+                action = ValueText(FAULT),
+                relatesTo = null
+            ),
+            body = func(buildSoapFault(action, soap, e))
+        )
+    }
 }
+
+fun SoapFault.toFaultReq() =
+    MessageErrorCode.fromValue(this.code.subCode.value.value).let { error ->
+        Fault(
+            errorCode = error.errorCode,
+            errorDescription = error.description, // reason.text.value.value,
+            errorDetails = listOf(
+                ErrorDetail(
+                    code = this.code.subCode.value.value,
+                    detail = reason.text.value.value
+                )
+            ).plus(
+                this.value?.errorDetails?.map {
+                    ErrorDetail(code = it.key.value, detail = it.value.value)
+                } ?: emptyList()
+            )
+        )
+    }
+
+private fun buildSoapFault(action: String?, soap: String, e: Exception) = SoapFault(
+    code = FaultCode(
+        value = FaultCodeValue.SENDER,
+        subCode = FaultSubCode(value = FaultSubCodeValue.PROTOCOL_ERROR)
+    ),
+    reason = FaultReason(text = FaultReasonText(value = FaultReasonTextValue.PROTOCOL_ERROR)),
+    value = FaultValue(
+        errorDescription = ValueText(e.toString()),
+        errorDetails = mutableMapOf(
+            Pair(ValueText(ErrorDetailCode.STACKTRACE.value), ValueText(e.stackTraceToString())),
+            Pair(ValueText(ErrorDetailCode.MESSAGE.value), ValueText(soap))
+        )
+            .also { map ->
+                action?.let {
+                    map[ValueText(ErrorDetailCode.ACTION.value)] = ValueText(it)
+                }
+            }
+            .toMap()
+    )
+)
 
 inline fun <reified T> OcppSoapParser.parseRequestFromSoap(messageStr: String): RequestSoapMessage<T> {
     val request = parseAnyRequestFromSoap(messageStr)

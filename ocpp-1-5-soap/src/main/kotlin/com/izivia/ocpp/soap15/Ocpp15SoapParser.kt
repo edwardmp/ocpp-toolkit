@@ -1,19 +1,23 @@
 package com.izivia.ocpp.soap15
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.izivia.ocpp.soap.OcppSoapParserImpl
-import com.izivia.ocpp.soap.SoapEnvelope
+import com.izivia.ocpp.soap.*
 
 class Ocpp15SoapParser : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2012/06/",
     soapMapperInput = Ocpp15SoapMapperIn,
     soapMapperOutput = Ocpp15SoapMapper
 ) {
-    override fun readToEnvelop(soap: String): SoapEnvelope<*> {
-        return soapMapperInput
-            .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
-            .readValue<SoapEnvelope<Ocpp15SoapBody>?>(soap)
-    }
+    override fun readToEnvelop(soap: String): SoapEnvelope<*> =
+        try {
+            soapMapperInput
+                .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
+                .readValue<SoapEnvelope<Ocpp15SoapBody>?>(soap)
+        } catch (e: Exception) {
+            parseSoapFaulted(soap, e) {
+                Ocpp15SoapBody(fault = it)
+            }
+        } as SoapEnvelope<Ocpp15SoapBody>
 
     override fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any =
         getRealRequestBodyContent(envelope as SoapEnvelope<Ocpp15SoapBody>)
@@ -47,7 +51,7 @@ class Ocpp15SoapParser : OcppSoapParserImpl(
         envelope.body.stopTransactionRequest != null -> envelope.body.stopTransactionRequest!!
         envelope.body.unlockConnectorRequest != null -> envelope.body.unlockConnectorRequest!!
         envelope.body.updateFirmwareRequest != null -> envelope.body.updateFirmwareRequest!!
-        envelope.body.fault != null -> envelope.body.fault!!
+        envelope.body.fault != null -> envelope.body.fault!!.toFaultReq()
         else -> throw IllegalArgumentException("Unknown request message operation. enveloppe = $envelope")
     }
 

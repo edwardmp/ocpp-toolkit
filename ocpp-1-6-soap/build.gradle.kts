@@ -9,6 +9,8 @@ dependencies {
     api(project(":ocpp-1-6-core"))
     api(project(":ocpp-soap"))
 
+    implementation(project(":utils"))
+
     implementation("com.fasterxml.jackson.core:jackson-core:_")
     implementation("com.fasterxml.jackson.core:jackson-databind:_")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:_")

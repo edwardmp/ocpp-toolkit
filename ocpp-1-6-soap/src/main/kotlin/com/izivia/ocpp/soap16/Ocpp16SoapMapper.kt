@@ -89,7 +89,7 @@ import com.izivia.ocpp.core16.model.triggermessage.enumeration.TriggerMessageSta
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core16.model.unlockconnector.enumeration.UnlockStatus
-import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
+import com.izivia.ocpp.core16.model.updatefirmware.SignedUpdateFirmwareReq
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
@@ -97,8 +97,6 @@ import java.math.BigDecimal
 
 internal object Ocpp16SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-        .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
         .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
@@ -172,7 +170,7 @@ internal object Ocpp16SoapMapper : ObjectMapper(
         .addMixIn(TriggerMessageResp::class.java, TriggerMessageRespMixin::class.java)
         .addMixIn(UnlockConnectorReq::class.java, UnlockConnectorReqMixin::class.java)
         .addMixIn(UnlockConnectorResp::class.java, UnlockConnectorRespMixin::class.java)
-        .addMixIn(UpdateFirmwareReq::class.java, UpdateFirmwareReqMixin::class.java)
+        .addMixIn(SignedUpdateFirmwareReq::class.java, UpdateFirmwareReqMixin::class.java)
         .addMixIn(UpdateFirmwareResp::class.java, UpdateFirmwareRespMixin::class.java)
         .addMixIn(SoapFault::class.java, SoapFaultMixin::class.java)
         .addMixIn(FaultCode::class.java, FaultCodeMixin::class.java)
