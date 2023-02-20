@@ -30,16 +30,17 @@ class Ocpp20JsonParser(
         }
 
     override fun getResponseActionFromClass(className: String): String =
-        Actions.valueOf(className.replace("[Resp|Req]$", "").uppercase()).value
+        Actions.valueOf(className.replace(classActionRegex, "").uppercase()).value
 
     override fun validateJson(
         jsonMessage: JsonMessage<JsonNode>,
         errorsHandler: (errors: List<ValidationMessage>) -> Unit
     ) {
+        val action = Actions.valueOf(jsonMessage.action!!.uppercase()).camelCase()
         ocppJsonValidator?.isValidObject(
             action = when (jsonMessage.msgType) {
-                JsonMessageType.CALL -> "${jsonMessage.action}Request"
-                JsonMessageType.CALL_RESULT -> "${jsonMessage.action}Response"
+                JsonMessageType.CALL -> "${action}Request"
+                JsonMessageType.CALL_RESULT -> "${action}Response"
                 JsonMessageType.CALL_ERROR -> return
                 else -> throw MessageTypeException(
                     message = "MessageType not supported ${jsonMessage.msgType}",

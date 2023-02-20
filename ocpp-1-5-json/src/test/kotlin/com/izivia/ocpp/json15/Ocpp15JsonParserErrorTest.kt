@@ -1,5 +1,7 @@
 package com.izivia.ocpp.json15
 
+import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.json.parseFromJson
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
@@ -208,6 +210,21 @@ class Ocpp15JsonParserErrorTest {
         expectThat(req)
             .and {
                 get { action }.isEqualTo("BootNotification")
+            }
+    }
+
+    @Test
+    fun `should parse to BootNotificationResp`() {
+        val ocppIgnore = Ocpp15JsonParser(enableValidation = false)
+
+        val jsonRequest = """[3,"messageId",
+            |{"currentTime":"2022-07-21T12:00:00Z","interval":1800,"status":"Accepted"}]
+        """.trimMargin()
+
+        val req = ocppIgnore.parseFromJson<BootNotificationResp>(jsonRequest)
+        expectThat(req)
+            .and {
+                get { action }.isEqualTo("bootNotification")
             }
     }
 
