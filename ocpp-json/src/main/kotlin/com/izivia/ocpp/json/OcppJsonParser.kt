@@ -12,6 +12,7 @@ abstract class OcppJsonParser(
     private val mapper: ObjectMapper,
     protected val ocppJsonValidator: OcppJsonValidator?
 ) {
+    val classActionRegex = "(Resp|Req)$".toRegex()
 
     protected abstract fun getRequestPayloadClass(
         action: String,
@@ -49,7 +50,7 @@ abstract class OcppJsonParser(
                 }
 
                 CALL_RESULT -> useClazz?.let {
-                    parsed = parsed.copy(action = getResponseActionFromClass(it::class.simpleName!!))
+                    parsed = parsed.copy(action = getResponseActionFromClass(it.simpleName!!))
                     clazz = useClazz
                 }
 
