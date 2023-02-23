@@ -50,7 +50,7 @@ abstract class OcppJsonParser(
                 }
 
                 CALL_RESULT -> useClazz?.let {
-                    parsed = parsed.copy(action = getResponseActionFromClass(it.simpleName!!))
+                    parsed = parsed.copy(action = getResponseActionFromClass(it.simpleName))
                     clazz = useClazz
                 }
 

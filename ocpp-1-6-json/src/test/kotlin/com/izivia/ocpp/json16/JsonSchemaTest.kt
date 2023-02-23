@@ -97,6 +97,7 @@ import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 
 class JsonSchemaTest {
 
@@ -488,8 +489,13 @@ class JsonSchemaTest {
 
     @Test
     fun `getDiagnostics request format`() {
-        validateObject(
-            GetDiagnosticsReq("http://www.ietf.org/rfc/rfc2396.txt")
+        val request = GetDiagnosticsReq("http://www.ietf.org/rfc/rfc2396.txt")
+        validateObject(request)
+
+        val json = parser.mapPayloadToString(request)
+
+        expectThat(json).isEqualTo(
+            """{"location":"http://www.ietf.org/rfc/rfc2396.txt"}""".trimIndent()
         )
 
         validateObject(

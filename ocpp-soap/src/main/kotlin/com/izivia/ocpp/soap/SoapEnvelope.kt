@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap
 
+import com.fasterxml.jackson.annotation.JacksonInject
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo

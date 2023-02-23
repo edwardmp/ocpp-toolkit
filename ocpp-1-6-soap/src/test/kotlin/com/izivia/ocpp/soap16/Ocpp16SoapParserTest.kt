@@ -125,8 +125,7 @@ class Ocpp16SoapParserTest {
             """
 
         expectThat(
-            ocpp16SoapParser
-                .parseRequestFromSoap<BootNotificationReq>(message).payload
+            ocpp16SoapParser.parseRequestFromSoap<BootNotificationReq>(message).payload
         ).and {
             get { chargePointModel }.isEqualTo("ZZZZZZZZ")
             get { chargePointVendor }.isEqualTo("YYYYYYYY")
@@ -138,6 +137,103 @@ class Ocpp16SoapParserTest {
             get { meterSerialNumber }.isNull()
             get { meterType }.isNull()
         }
+    }
+
+    @Test
+    fun `should not parse BOOTNOTIFICATION message with missing chargePointModel to BootNotificationReq`() {
+        val message =
+            """<?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">
+    <S:Header>
+        <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2015/10/">ocppId1</chargeBoxIdentity>
+        <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>http://XXX.XXX.X.3:12800/ws</wsa:Address>
+        </wsa:From>
+        <To xmlns="http://www.w3.org/2005/08/addressing">http://sigeif-enovates.vpn.l30.sodetrel.fr/ocpp/v16s</To>
+        <Action xmlns="http://www.w3.org/2005/08/addressing">/BootNotification</Action>
+        <ReplyTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </ReplyTo>
+        <FaultTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </FaultTo>
+        <MessageID xmlns="http://www.w3.org/2005/08/addressing">uuid:9f70d5fe-2e47-4c9e-9faa-371446c19e41</MessageID>
+    </S:Header>
+    <S:Body>
+        <bootNotificationRequest xmlns="urn://Ocpp/Cs/2015/10/">
+            <chargePointVendor>eNovates</chargePointVendor>
+            <chargePointSerialNumber>92075_03_03</chargePointSerialNumber>
+            <chargeBoxSerialNumber>92075_03_03</chargeBoxSerialNumber>
+            <firmwareVersion>1.8.6.3.2@110.8.3 3_256d3NOEVC</firmwareVersion>
+            <meterType>1f_Inepro</meterType>
+            <meterSerialNumber>537134162</meterSerialNumber>
+        </bootNotificationRequest>
+    </S:Body>
+</S:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser.parseAnyRequestFromSoap(message).payload
+        ).isA<Fault>()
+    }
+
+    @Test
+    fun `should parse BOOTNOTIFICATION message with missing chargePointModel to BootNotificationReq`() {
+        val parser = Ocpp16SoapParser(
+            listOf(
+                Ocpp16IgnoredNullRestriction(
+                    Actions.BOOTNOTIFICATION,
+                    true,
+                    "chargePointModel",
+                    "ValueInjected"
+                )
+            )
+        )
+        val message =
+            """<?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">
+    <S:Header>
+        <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2015/10/">ocppId1</chargeBoxIdentity>
+        <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>http://XXX.XXX.X.3:12800/ws</wsa:Address>
+        </wsa:From>
+        <To xmlns="http://www.w3.org/2005/08/addressing">http://sigeif-enovates.vpn.l30.sodetrel.fr/ocpp/v16s</To>
+        <Action xmlns="http://www.w3.org/2005/08/addressing">/BootNotification</Action>
+        <ReplyTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </ReplyTo>
+        <FaultTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </FaultTo>
+        <MessageID xmlns="http://www.w3.org/2005/08/addressing">uuid:9f70d5fe-2e47-4c9e-9faa-371446c19e41</MessageID>
+    </S:Header>
+    <S:Body>
+        <bootNotificationRequest xmlns="urn://Ocpp/Cs/2015/10/">
+            <chargePointVendor>eNovates</chargePointVendor>
+            <chargePointSerialNumber>92075_03_03</chargePointSerialNumber>
+            <chargeBoxSerialNumber>92075_03_03</chargeBoxSerialNumber>
+            <firmwareVersion>1.8.6.3.2@110.8.3 3_256d3NOEVC</firmwareVersion>
+            <meterType>1f_Inepro</meterType>
+            <meterSerialNumber>537134162</meterSerialNumber>
+        </bootNotificationRequest>
+    </S:Body>
+</S:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            parser.parseAnyRequestFromSoap(message).payload
+        ).isA<BootNotificationReq>()
+            .and {
+                get { chargePointModel }.isEqualTo("ValueInjected")
+                get { chargePointVendor }.isEqualTo("eNovates")
+                get { chargePointSerialNumber }.isEqualTo("92075_03_03")
+                get { chargeBoxSerialNumber }.isEqualTo("92075_03_03")
+                get { firmwareVersion }.isEqualTo("1.8.6.3.2@110.8.3 3_256d3NOEVC")
+                get { iccid }.isNull()
+                get { imsi }.isNull()
+                get { meterSerialNumber }.isEqualTo("537134162")
+                get { meterType }.isEqualTo("1f_Inepro")
+            }
     }
 
     @Test
@@ -1958,6 +2054,79 @@ class Ocpp16SoapParserTest {
 </soap:Envelope>""".trimSoap()
 
         expectThat(ocpp16SoapParser.parseAnyRequestFromSoap(request)) {
+            get { chargingStationId }.isEqualTo("XXXXXXXX")
+            get { messageId }.isEqualTo("urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321")
+            get { action }.isEqualTo("Fault")
+            get { payload }.isA<Fault>()
+                .and {
+                    get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
+                    get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)
+                    get { errorDetails }.hasSize(4)
+                        .and {
+                            get { get(0) }
+                                .and {
+                                    get { code }.isEqualTo("ProtocolError")
+                                    get { detail }.isEqualTo(
+                                        "Sender's message does not comply with protocol specification."
+                                    )
+                                }
+                            get { get(1) }
+                                .and {
+                                    get { code }.isEqualTo("stackTrace")
+                                    get { detail }.contains(
+                                        "JsonMappingException: Undeclared namespace prefix"
+                                    )
+                                }
+                            get { get(2) }
+                                .and {
+                                    get { code }.isEqualTo("message")
+                                    get { detail }.isEqualTo(request)
+                                }
+                            get { get(3) }
+                                .and {
+                                    get { code }.isEqualTo("action")
+                                    get { detail }.isEqualTo("/StopTransaction")
+                                }
+                        }
+                }
+        }
+    }
+
+    @Test
+    fun `should do magic undeclared namespace to SoapFault`() {
+        val parser = Ocpp16SoapParser(
+            listOf(
+                Ocpp16IgnoredNullRestriction(
+                    action = Actions.STARTTRANSACTION,
+                    isRequest = true,
+                    fieldPath = "chargePointModel",
+                    defaultNullValue = "unknown"
+                )
+            )
+        )
+        val request =
+            """<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
+               xmlns="urn://Ocpp/Cs/2015/10/">
+    <soap:Header>
+        <chargeBoxIdentity>XXXXXXXX</chargeBoxIdentity>
+        <a:Action>/StopTransaction</a:Action>
+        <a:MessageID>urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321</a:MessageID>
+        <a:From>
+            <a:Address>http://XX.XX.XX.XX:80/</a:Address>
+        </a:From>
+        <a:To>http://xxxxx.fr/ocpp/v15s/</a:To>
+    </soap:Header>
+    <soap:Body>
+        <stopTransactionRequest xmlns="urn://Ocpp/Cs/2012/06/">
+            <transactionId xsi:nil="true"></transactionId>
+            <idTag>AAAAAAAA</idTag>
+            <timestamp>2022-09-20T19:02:11.000Z</timestamp>
+            <meterStop>59</meterStop>
+        </stopTransactionRequest>
+    </soap:Body>
+</soap:Envelope>""".trimSoap()
+
+        expectThat(parser.parseAnyRequestFromSoap(request)) {
             get { chargingStationId }.isEqualTo("XXXXXXXX")
             get { messageId }.isEqualTo("urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321")
             get { action }.isEqualTo("Fault")

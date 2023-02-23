@@ -28,7 +28,8 @@ interface OcppSoapParser {
 abstract class OcppSoapParserImpl(
     private val ns_ocpp: String,
     private val soapMapperOutput: ObjectMapper,
-    val soapMapperInput: ObjectMapper
+    val soapMapperInput: ObjectMapper,
+    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction> = emptyList()
 ) : OcppSoapParser {
 
     override fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String {
