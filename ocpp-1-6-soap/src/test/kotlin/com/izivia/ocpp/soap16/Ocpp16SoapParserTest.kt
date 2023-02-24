@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap16
 
+import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
@@ -221,19 +222,22 @@ class Ocpp16SoapParserTest {
             """.trimSoap()
 
         expectThat(
-            parser.parseAnyRequestFromSoap(message).payload
-        ).isA<BootNotificationReq>()
-            .and {
-                get { chargePointModel }.isEqualTo("ValueInjected")
-                get { chargePointVendor }.isEqualTo("eNovates")
-                get { chargePointSerialNumber }.isEqualTo("92075_03_03")
-                get { chargeBoxSerialNumber }.isEqualTo("92075_03_03")
-                get { firmwareVersion }.isEqualTo("1.8.6.3.2@110.8.3 3_256d3NOEVC")
-                get { iccid }.isNull()
-                get { imsi }.isNull()
-                get { meterSerialNumber }.isEqualTo("537134162")
-                get { meterType }.isEqualTo("1f_Inepro")
-            }
+            parser.parseAnyRequestFromSoap(message)
+        ).and {
+            get { payload }.isA<BootNotificationReq>()
+                .and {
+                    get { chargePointModel }.isEqualTo("ValueInjected")
+                    get { chargePointVendor }.isEqualTo("eNovates")
+                    get { chargePointSerialNumber }.isEqualTo("92075_03_03")
+                    get { chargeBoxSerialNumber }.isEqualTo("92075_03_03")
+                    get { firmwareVersion }.isEqualTo("1.8.6.3.2@110.8.3 3_256d3NOEVC")
+                    get { iccid }.isNull()
+                    get { imsi }.isNull()
+                    get { meterSerialNumber }.isEqualTo("537134162")
+                    get { meterType }.isEqualTo("1f_Inepro")
+                }
+            get { warnings }.isNotNull().hasSize(1)
+        }
     }
 
     @Test
@@ -2074,80 +2078,7 @@ class Ocpp16SoapParserTest {
                                 .and {
                                     get { code }.isEqualTo("stackTrace")
                                     get { detail }.contains(
-                                        "JsonMappingException: Undeclared namespace prefix"
-                                    )
-                                }
-                            get { get(2) }
-                                .and {
-                                    get { code }.isEqualTo("message")
-                                    get { detail }.isEqualTo(request)
-                                }
-                            get { get(3) }
-                                .and {
-                                    get { code }.isEqualTo("action")
-                                    get { detail }.isEqualTo("/StopTransaction")
-                                }
-                        }
-                }
-        }
-    }
-
-    @Test
-    fun `should do magic undeclared namespace to SoapFault`() {
-        val parser = Ocpp16SoapParser(
-            listOf(
-                Ocpp16IgnoredNullRestriction(
-                    action = Actions.STARTTRANSACTION,
-                    isRequest = true,
-                    fieldPath = "chargePointModel",
-                    defaultNullValue = "unknown"
-                )
-            )
-        )
-        val request =
-            """<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
-               xmlns="urn://Ocpp/Cs/2015/10/">
-    <soap:Header>
-        <chargeBoxIdentity>XXXXXXXX</chargeBoxIdentity>
-        <a:Action>/StopTransaction</a:Action>
-        <a:MessageID>urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321</a:MessageID>
-        <a:From>
-            <a:Address>http://XX.XX.XX.XX:80/</a:Address>
-        </a:From>
-        <a:To>http://xxxxx.fr/ocpp/v15s/</a:To>
-    </soap:Header>
-    <soap:Body>
-        <stopTransactionRequest xmlns="urn://Ocpp/Cs/2012/06/">
-            <transactionId xsi:nil="true"></transactionId>
-            <idTag>AAAAAAAA</idTag>
-            <timestamp>2022-09-20T19:02:11.000Z</timestamp>
-            <meterStop>59</meterStop>
-        </stopTransactionRequest>
-    </soap:Body>
-</soap:Envelope>""".trimSoap()
-
-        expectThat(parser.parseAnyRequestFromSoap(request)) {
-            get { chargingStationId }.isEqualTo("XXXXXXXX")
-            get { messageId }.isEqualTo("urn:uuid:f81b9096-dccd-40ea-b16e-57f6086af321")
-            get { action }.isEqualTo("Fault")
-            get { payload }.isA<Fault>()
-                .and {
-                    get { errorCode }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
-                    get { errorDescription }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.description)
-                    get { errorDetails }.hasSize(4)
-                        .and {
-                            get { get(0) }
-                                .and {
-                                    get { code }.isEqualTo("ProtocolError")
-                                    get { detail }.isEqualTo(
-                                        "Sender's message does not comply with protocol specification."
-                                    )
-                                }
-                            get { get(1) }
-                                .and {
-                                    get { code }.isEqualTo("stackTrace")
-                                    get { detail }.contains(
-                                        "JsonMappingException: Undeclared namespace prefix"
+                                        "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }

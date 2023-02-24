@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
 import com.izivia.ocpp.core15.model.authorize.AuthorizeReq
@@ -81,35 +80,12 @@ import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
 
-data class Ocpp15IgnoredNullRestriction(
-    val action: Actions,
-    override val isRequest: Boolean,
-    override val fieldPath: String,
-    override val defaultNullValue: String
-) : AbstractIgnoredNullRestriction(isRequest = isRequest, fieldPath = fieldPath, defaultNullValue = defaultNullValue) {
-    override fun getBodyAction() =
-        if (isRequest) "${action.value}Request" else "${action.value}Response"
-}
-
-fun getOcpp15SoapMapperIn(ignores: List<Ocpp15IgnoredNullRestriction>): ObjectMapper =
+internal object Ocpp15SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
-        .registerModule(
-            SimpleModule().apply {
-                addDeserializer(
-                    Ocpp15SoapBody::class.java,
-                    OcppDeserializer(
-                        ignores,
-                        OcppSoapMapper()
-                            .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
-                            .addMixIn(Measurand::class.java, EnumMixin::class.java)
-                            .addMixIn(SampledValue::class.java, SampledValueMixin::class.java),
-                        Ocpp15SoapBody::class.java
-                    )
-                )
-            }
-        )
+        .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
+)
 
 internal object Ocpp15SoapMapper : ObjectMapper(
     OcppSoapMapper()

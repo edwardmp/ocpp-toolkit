@@ -81,12 +81,12 @@ import strikt.assertions.isA
 class JsonSchemaTest {
 
     companion object {
-        private val parser = Ocpp15JsonParser()
+        val parser = Ocpp15JsonParser()
     }
 
     @Test
     fun `heartbeat request format`() {
-        val result = parser.parseAnyFromString<Unit>(
+        val result = parser.parseAnyFromString(
             parser.mapPayloadToString(HeartbeatReq())
         )
         expectThat(result).isA<JsonMessage<HeartbeatReq>>()
@@ -666,9 +666,9 @@ class JsonSchemaTest {
         )
     }
 
-    fun <T> validateObject(instance: T) {
+    inline fun <reified T : Any> validateObject(instance: T) {
         expectThat(
-            parser.parseAnyFromString<Unit>(
+            parser.parseAnyFromJson<T>(
                 parser.mapPayloadToString(
                     instance
                 )

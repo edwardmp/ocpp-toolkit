@@ -1,7 +1,6 @@
 package com.izivia.ocpp.json15
 
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
-import com.izivia.ocpp.json.parseFromJson
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
@@ -22,7 +21,7 @@ class Ocpp15JsonParserErrorTest {
     fun `should parse Hearbeat request`() {
         val request = """[2,"messageId","Heartbeat",{}]"""
 
-        expectThat(parser.parseAnyFromString<Unit>(request))
+        expectThat(parser.parseAnyFromString(request))
             .get { action }.isEqualTo("Heartbeat")
     }
 
@@ -32,7 +31,7 @@ class Ocpp15JsonParserErrorTest {
             |"timestamp": "2022-08-03T11:00:01.916Z", "idTag": "idTag"}]
         """.trimMargin()
 
-        val req = parser.parseAnyFromString<Unit>(request)
+        val req = parser.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("Fault")
@@ -67,7 +66,7 @@ class Ocpp15JsonParserErrorTest {
     fun `should parse to Fault MESSAGE_TYPE_NOT_SUPPORTED inconsistent request`() {
         val request = """[15,"messageId","Heartbeat",{}]""".trimMargin()
 
-        val req = parser.parseAnyFromString<Unit>(request)
+        val req = parser.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("Fault")
@@ -92,7 +91,7 @@ class Ocpp15JsonParserErrorTest {
     fun `should parse to Fault NOT_IMPLEMENTED inconsistent request`() {
         val request = """[2,"messageId","NotAnAction",{}]""".trimMargin()
 
-        val req = parser.parseAnyFromString<Unit>(request)
+        val req = parser.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("Fault")
@@ -122,7 +121,7 @@ class Ocpp15JsonParserErrorTest {
     fun `should parse to Fault FORMAT_VIOLATION inconsistent request`() {
         val request = """{"Json": "Ok", "Ocpp": "not}""".trimMargin()
 
-        val req = parser.parseAnyFromString<Unit>(request)
+        val req = parser.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("Fault")
@@ -150,7 +149,7 @@ class Ocpp15JsonParserErrorTest {
             "chargePointSerialNumber":"1234567891011121314151617181920"}]
         """.trimMargin()
 
-        val req = parser.parseAnyFromString<Unit>(request)
+        val req = parser.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("Fault")
@@ -183,33 +182,35 @@ class Ocpp15JsonParserErrorTest {
 
     @Test
     fun `should parse to BootNotification on ignoring 1013 inconsistent request`() {
-        val ocppIgnore1013 = Ocpp15JsonParser(ignoreValidationCodes = listOf(ValidatorTypeCode.MAX_LENGTH))
+        val ocppIgnore1013 = Ocpp15JsonParser(ignoredValidationCodes = listOf(ValidatorTypeCode.MAX_LENGTH))
 
         val request = """[2,"messageId","BootNotification",
             {"chargePointModel": "testModel", "chargePointVendor": "testVendor",
             "chargePointSerialNumber":"1234567891011121314151617181920"}]
         """.trimMargin()
 
-        val req = ocppIgnore1013.parseAnyFromString<Unit>(request)
+        val req = ocppIgnore1013.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("BootNotification")
+                get { warnings }.isNotNull().hasSize(1)
             }
     }
 
     @Test
     fun `should parse to BootNotification on ignoring additional properties request`() {
-        val ocppIgnore = Ocpp15JsonParser(ignoreValidationCodes = listOf(ValidatorTypeCode.ADDITIONAL_PROPERTIES))
+        val ocppIgnore = Ocpp15JsonParser(ignoredValidationCodes = listOf(ValidatorTypeCode.ADDITIONAL_PROPERTIES))
 
         val request = """[2,"messageId","BootNotification",
             {"chargePointModel": "testModel", "chargePointVendor": "testVendor",
             "chargePointSerialNumber":"12345678910", "additional": "Properties"}]
         """.trimMargin()
 
-        val req = ocppIgnore.parseAnyFromString<Unit>(request)
+        val req = ocppIgnore.parseAnyFromString(request)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("BootNotification")
+                get { warnings }.isNotNull().hasSize(1)
             }
     }
 
@@ -221,7 +222,7 @@ class Ocpp15JsonParserErrorTest {
             |{"currentTime":"2022-07-21T12:00:00Z","interval":1800,"status":"Accepted"}]
         """.trimMargin()
 
-        val req = ocppIgnore.parseFromJson<BootNotificationResp>(jsonRequest)
+        val req = ocppIgnore.parseAnyFromJson<BootNotificationResp>(jsonRequest)
         expectThat(req)
             .and {
                 get { action }.isEqualTo("bootNotification")
@@ -269,7 +270,7 @@ class Ocpp15JsonParserErrorTest {
     fun timeit(requestList: List<String>, parser: Ocpp15JsonParser): Duration {
         return measureTime {
             for (i in 1..10000) {
-                parser.parseAnyFromString<Unit>(
+                parser.parseAnyFromString(
                     requestList.get(i % requestList.size).replace("messageId", i.toString())
                 )
             }

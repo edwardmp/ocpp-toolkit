@@ -6,11 +6,14 @@ import com.izivia.ocpp.json.JsonMessageType.*
 import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.*
 import com.networknt.schema.ValidationMessage
+import com.networknt.schema.ValidatorTypeCode
 import kotlin.reflect.KClass
 
 abstract class OcppJsonParser(
     private val mapper: ObjectMapper,
-    protected val ocppJsonValidator: OcppJsonValidator?
+    protected val ocppJsonValidator: OcppJsonValidator?,
+    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction> = emptyList(),
+    open val ignoredValidationCodes: List<ValidatorTypeCode> = emptyList()
 ) {
     val classActionRegex = "(Resp|Req)$".toRegex()
 
@@ -19,15 +22,17 @@ abstract class OcppJsonParser(
         errorHandler: (e: Exception) -> Throwable
     ): Class<out Any>
 
-    protected abstract fun getResponseActionFromClass(className: String): String
+    protected abstract fun getActionFromClass(className: String): String
 
     protected abstract fun validateJson(
         jsonMessage: JsonMessage<JsonNode>,
         errorsHandler: (errors: List<ValidationMessage>) -> Unit
     )
 
-    fun <T : Any> parseAnyFromString(messageStr: String, useClazz: Class<out Any>? = null): JsonMessage<Any> {
+    fun parseAnyFromString(messageStr: String, useClazz: Class<out Any>? = null): JsonMessage<Any> {
         try {
+            val warnings = mutableListOf<ErrorDetail>()
+
             var parsed = parseNodePayload(parseStringToJsonNode(messageStr))
 
             var clazz = useClazz
@@ -50,41 +55,58 @@ abstract class OcppJsonParser(
                 }
 
                 CALL_RESULT -> useClazz?.let {
-                    parsed = parsed.copy(action = getResponseActionFromClass(it.simpleName))
+                    parsed = parsed.copy(action = getActionFromClass(it.simpleName))
                     clazz = useClazz
                 }
 
-                else -> clazz = Fault::class.java
+                else -> {
+                    parsed = parsed.copy(
+                        action = getActionFromClass(useClazz?.simpleName ?: "clazzUndefinedAction")
+                    )
+                    clazz = Fault::class.java
+                }
             }
+
+            ignoredNullRestrictions.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
 
             validateJson(jsonMessage = parsed) {
-                throw ValidationException(
-                    message = "Validation error",
-                    messageId = parsed.msgId,
-                    errorDetails = listOf(
-                        ErrorDetail(
-                            code = ErrorDetailCode.ACTION.value,
-                            detail = parsed.action ?: FAULT
-                        ),
-                        ErrorDetail(
-                            code = ErrorDetailCode.MESSAGE.value,
-                            detail = messageStr
-                        )
-                    ).plus(
-                        it.map {
-                            ErrorDetail(
-                                code = it.code,
-                                detail = "Validations error : message=${it.message}, details=${it.details}"
-                            )
-                        }
+                it.mapNotNull {
+                    it.takeUnless { msg ->
+                        ignoredValidationCodes.contains(ValidatorTypeCode.fromValue(it.type))
+                            .also {
+                                warnings.add(
+                                    ErrorDetail(
+                                        code = msg.code,
+                                        detail = "Validations error : message=${msg.message}, details=${msg.details}"
+                                    )
+                                )
+                            }
+                    }
+                }.map {
+                    ErrorDetail(
+                        code = it.code,
+                        detail = "Validations error : message=${it.message}, details=${it.details}"
                     )
-                )
+                }.takeIf { it.isNotEmpty() }
+                    ?.let {
+                        throw ValidationException(
+                            message = "Validation error",
+                            messageId = parsed.msgId,
+                            errorDetails = listOf(
+                                ErrorDetail(
+                                    code = ErrorDetailCode.ACTION.value,
+                                    detail = parsed.action ?: FAULT
+                                ),
+                                ErrorDetail(
+                                    code = ErrorDetailCode.MESSAGE.value,
+                                    detail = messageStr
+                                )
+                            ).plus(it)
+                        )
+                    }
             }
-
-            return JsonMessage(
-                msgType = parsed.msgType,
-                msgId = parsed.msgId,
-                action = parsed.action,
+            parsed = parsed.copy(warnings = warnings)
+            return (parsed as JsonMessage<Any>).copy(
                 payload = mapJsonNodeToObject(parsed, clazz!!)
             )
         } catch (e: OcppParserException) {
@@ -173,11 +195,8 @@ abstract class OcppJsonParser(
             )
         }
 
-    fun <T : Any> parseFromJson(messageStr: String, clazz: KClass<T>): JsonMessage<Any> =
-        parseAnyFromString<T>(messageStr = messageStr, useClazz = clazz.java)
-
-    fun <T : Any> parseAnyFromJson(messageStr: String, expectedClass: KClass<T>): JsonMessage<Any> =
-        parseAnyFromString<T>(messageStr = messageStr, useClazz = expectedClass.java)
+    inline fun <reified T : Any> parseAnyFromJson(messageStr: String): JsonMessage<Any> =
+        parseAnyFromString(messageStr = messageStr, useClazz = T::class.java)
 
     fun parseNodePayload(jsonNode: JsonNode): JsonMessage<JsonNode> {
         var msgId: String? = null
@@ -294,9 +313,3 @@ abstract class OcppJsonParser(
             Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
     }
 }
-
-inline fun <reified T : Any> OcppJsonParser.parseFromJson(messageStr: String): JsonMessage<Any> =
-    parseAnyFromString<T>(messageStr, T::class.java)
-
-inline fun <reified T : Any> OcppJsonParser.parseAnyFromJson(messageStr: String): JsonMessage<Any> =
-    parseAnyFromString<T>(messageStr, T::class.java)

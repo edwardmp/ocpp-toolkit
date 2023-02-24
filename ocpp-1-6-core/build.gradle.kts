@@ -9,6 +9,7 @@ coreProject()
 dependencies {
     implementation(project(":ocpp-transport"))
     implementation(project(":operation-information"))
+    implementation(project(":utils"))
 }
 
 java {

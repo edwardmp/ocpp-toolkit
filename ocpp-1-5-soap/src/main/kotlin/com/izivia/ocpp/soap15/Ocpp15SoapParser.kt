@@ -1,21 +1,35 @@
 package com.izivia.ocpp.soap15
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.izivia.ocpp.core15.Ocpp15IgnoredNullRestriction
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.ErrorDetail
 import com.izivia.ocpp.utils.isA
+import com.izivia.ocpp.utils.parseNullField
 import kotlin.reflect.full.memberProperties
 
 class Ocpp15SoapParser(override val ignoredNullRestrictions: List<Ocpp15IgnoredNullRestriction> = emptyList()) :
     OcppSoapParserImpl(
         ns_ocpp = "urn://Ocpp/Cp/2012/06/",
-        soapMapperInput = getOcpp15SoapMapperIn(ignoredNullRestrictions),
+        soapMapperInput = Ocpp15SoapMapperIn,
         soapMapperOutput = Ocpp15SoapMapper
     ) {
-    override fun readToEnvelop(soap: String): SoapEnvelope<*> =
+    override fun readToEnvelop(
+        soap: String,
+        warnings: (warnings: List<ErrorDetail>) -> Unit
+    ): SoapEnvelope<*> =
         try {
             soapMapperInput
-                .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
-                .readValue<SoapEnvelope<Ocpp15SoapBody>?>(soap)
+                .readTree(soap)
+                .also {
+                    ignoredNullRestrictions.parseNullField(it.findValue(OcppConstant.BODY)) { node, rule ->
+                        if (node.has(rule.getBodyAction())) node.first() else null
+                    }?.let { warns -> warnings(warns) }
+                }.let {
+                    soapMapperInput
+                        .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
+                        .readValue(it)
+                }
         } catch (e: Exception) {
             parseSoapFaulted(soap, e) {
                 Ocpp15SoapBody(fault = it)

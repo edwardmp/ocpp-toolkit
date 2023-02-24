@@ -2,7 +2,6 @@ package com.izivia.ocpp.soap16
 
 import com.fasterxml.jackson.annotation.*
 import com.fasterxml.jackson.databind.*
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
@@ -94,34 +93,11 @@ import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant
 import java.math.BigDecimal
 
-data class Ocpp16IgnoredNullRestriction(
-    val action: Actions,
-    override val isRequest: Boolean,
-    override val fieldPath: String,
-    override val defaultNullValue: String
-) : AbstractIgnoredNullRestriction(isRequest = isRequest, fieldPath = fieldPath, defaultNullValue = defaultNullValue) {
-    override fun getBodyAction() =
-        if (isRequest) "${action.value}Request" else "${action.value}Response"
-}
-
-fun getOcpp16SoapMapperIn(ignores: List<Ocpp16IgnoredNullRestriction>): ObjectMapper =
+internal object Ocpp16SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
-        .registerModule(
-            SimpleModule().apply {
-                addDeserializer(
-                    Ocpp16SoapBody::class.java,
-                    OcppDeserializer(
-                        ignores,
-                        OcppSoapMapper()
-                            .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
-                            .addMixIn(Measurand::class.java, EnumMixin::class.java),
-                        Ocpp16SoapBody::class.java
-                    )
-                )
-            }
-        )
+)
 
 internal object Ocpp16SoapMapper : ObjectMapper(
     OcppSoapMapper()

@@ -1621,7 +1621,7 @@ class Ocpp15SoapParserTest {
                                 .and {
                                     get { code }.isEqualTo("stackTrace")
                                     get { detail }.contains(
-                                        "JsonMappingException: Undeclared namespace prefix"
+                                        "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }
