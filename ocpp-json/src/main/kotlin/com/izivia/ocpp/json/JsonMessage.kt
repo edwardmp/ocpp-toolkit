@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json
 
 import com.izivia.ocpp.json.JsonMessageType.*
+import com.izivia.ocpp.utils.ErrorDetail
 import com.izivia.ocpp.utils.MessageErrorCode
 
 data class JsonMessage<T>(
@@ -9,7 +10,8 @@ data class JsonMessage<T>(
     val action: String? = null,
     val errorCode: MessageErrorCode? = null,
     val errorDescription: String? = null,
-    val payload: T
+    val payload: T,
+    val warnings: List<ErrorDetail>? = null
 ) {
     companion object {
         fun <T> Call(msgId: String, action: String, payload: T) =

@@ -13,7 +13,7 @@ interface OcppSoapParser {
     fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String
     fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String
 
-    fun readToEnvelop(soap: String): SoapEnvelope<*>
+    fun readToEnvelop(soap: String, warnings: (warnings: List<ErrorDetail>) -> Unit = {}): SoapEnvelope<*>
 
     fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any
     fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any
@@ -28,7 +28,8 @@ interface OcppSoapParser {
 abstract class OcppSoapParserImpl(
     private val ns_ocpp: String,
     private val soapMapperOutput: ObjectMapper,
-    val soapMapperInput: ObjectMapper
+    val soapMapperInput: ObjectMapper,
+    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction> = emptyList()
 ) : OcppSoapParser {
 
     override fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String {
@@ -50,7 +51,10 @@ abstract class OcppSoapParserImpl(
     }
 
     override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
-        val envelope = readToEnvelop(messageStr)
+        val warnings = mutableListOf<ErrorDetail>()
+        val envelope = readToEnvelop(messageStr) {
+            warnings.addAll(it)
+        }
         try {
             return RequestSoapMessage(
                 messageId = envelope.header.messageId.value,
@@ -58,7 +62,8 @@ abstract class OcppSoapParserImpl(
                 action = envelope.header.action.value.removePrefix("/"),
                 from = envelope.header.from.address.value,
                 to = envelope.header.to.value,
-                payload = getRequestBodyContent(envelope)
+                payload = getRequestBodyContent(envelope),
+                warnings = warnings.takeIf { it.size > 0 }
             )
         } catch (e: Exception) {
             return RequestSoapMessage(
@@ -67,13 +72,17 @@ abstract class OcppSoapParserImpl(
                 action = envelope.header.action.value.removePrefix("/"),
                 payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
                 from = envelope.header.from.address.value,
-                to = envelope.header.to.toString()
+                to = envelope.header.to.toString(),
+                warnings = warnings.takeIf { it.size > 0 }
             )
         }
     }
 
     override fun parseAnyResponseFromSoap(messageStr: String): ResponseSoapMessage<Any> {
-        val envelope = readToEnvelop(messageStr)
+        val warnings = mutableListOf<ErrorDetail>()
+        val envelope = readToEnvelop(messageStr) {
+            warnings.addAll(it)
+        }
         try {
             return ResponseSoapMessage(
                 messageId = envelope.header.messageId.value,
@@ -86,7 +95,8 @@ abstract class OcppSoapParserImpl(
                 action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
                 payload = getResponseBodyContent(envelope),
                 from = envelope.header.from.address.value,
-                to = envelope.header.to.toString()
+                to = envelope.header.to.toString(),
+                warnings = warnings.takeIf { it.size > 0 }
             )
         } catch (e: OcppParserException) {
             return ResponseSoapMessage(
@@ -95,7 +105,8 @@ abstract class OcppSoapParserImpl(
                 action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
                 payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
                 from = envelope.header.from.address.value,
-                to = envelope.header.to.toString()
+                to = envelope.header.to.toString(),
+                warnings = warnings.takeIf { it.size > 0 }
             )
         }
     }

@@ -1,9 +1,7 @@
 package com.izivia.ocpp.soap16
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonRootName
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
@@ -99,7 +97,6 @@ internal object Ocpp16SoapMapperIn : ObjectMapper(
     OcppSoapMapper()
         .addMixIn(ReadingContext::class.java, EnumMixin::class.java)
         .addMixIn(Measurand::class.java, EnumMixin::class.java)
-        .addMixIn(SampledValue::class.java, SampledValueMixin::class.java)
 )
 
 internal object Ocpp16SoapMapper : ObjectMapper(

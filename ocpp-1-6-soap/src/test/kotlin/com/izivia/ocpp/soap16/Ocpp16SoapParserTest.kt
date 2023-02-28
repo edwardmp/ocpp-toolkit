@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap16
 
+import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
@@ -125,8 +126,7 @@ class Ocpp16SoapParserTest {
             """
 
         expectThat(
-            ocpp16SoapParser
-                .parseRequestFromSoap<BootNotificationReq>(message).payload
+            ocpp16SoapParser.parseRequestFromSoap<BootNotificationReq>(message).payload
         ).and {
             get { chargePointModel }.isEqualTo("ZZZZZZZZ")
             get { chargePointVendor }.isEqualTo("YYYYYYYY")
@@ -137,6 +137,106 @@ class Ocpp16SoapParserTest {
             get { imsi }.isNull()
             get { meterSerialNumber }.isNull()
             get { meterType }.isNull()
+        }
+    }
+
+    @Test
+    fun `should not parse BOOTNOTIFICATION message with missing chargePointModel to BootNotificationReq`() {
+        val message =
+            """<?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">
+    <S:Header>
+        <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2015/10/">ocppId1</chargeBoxIdentity>
+        <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>http://XXX.XXX.X.3:12800/ws</wsa:Address>
+        </wsa:From>
+        <To xmlns="http://www.w3.org/2005/08/addressing">http://sigeif-enovates.vpn.l30.sodetrel.fr/ocpp/v16s</To>
+        <Action xmlns="http://www.w3.org/2005/08/addressing">/BootNotification</Action>
+        <ReplyTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </ReplyTo>
+        <FaultTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </FaultTo>
+        <MessageID xmlns="http://www.w3.org/2005/08/addressing">uuid:9f70d5fe-2e47-4c9e-9faa-371446c19e41</MessageID>
+    </S:Header>
+    <S:Body>
+        <bootNotificationRequest xmlns="urn://Ocpp/Cs/2015/10/">
+            <chargePointVendor>eNovates</chargePointVendor>
+            <chargePointSerialNumber>92075_03_03</chargePointSerialNumber>
+            <chargeBoxSerialNumber>92075_03_03</chargeBoxSerialNumber>
+            <firmwareVersion>1.8.6.3.2@110.8.3 3_256d3NOEVC</firmwareVersion>
+            <meterType>1f_Inepro</meterType>
+            <meterSerialNumber>537134162</meterSerialNumber>
+        </bootNotificationRequest>
+    </S:Body>
+</S:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            ocpp16SoapParser.parseAnyRequestFromSoap(message).payload
+        ).isA<Fault>()
+    }
+
+    @Test
+    fun `should parse BOOTNOTIFICATION message with missing chargePointModel to BootNotificationReq`() {
+        val parser = Ocpp16SoapParser(
+            listOf(
+                Ocpp16IgnoredNullRestriction(
+                    Actions.BOOTNOTIFICATION,
+                    true,
+                    "chargePointModel",
+                    "ValueInjected"
+                )
+            )
+        )
+        val message =
+            """<?xml version='1.0' encoding='UTF-8'?>
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">
+    <S:Header>
+        <chargeBoxIdentity xmlns="urn://Ocpp/Cs/2015/10/">ocppId1</chargeBoxIdentity>
+        <wsa:From xmlns:wsa="http://www.w3.org/2005/08/addressing">
+            <wsa:Address>http://XXX.XXX.X.3:12800/ws</wsa:Address>
+        </wsa:From>
+        <To xmlns="http://www.w3.org/2005/08/addressing">http://sigeif-enovates.vpn.l30.sodetrel.fr/ocpp/v16s</To>
+        <Action xmlns="http://www.w3.org/2005/08/addressing">/BootNotification</Action>
+        <ReplyTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </ReplyTo>
+        <FaultTo xmlns="http://www.w3.org/2005/08/addressing">
+            <Address>http://www.w3.org/2005/08/addressing/anonymous</Address>
+        </FaultTo>
+        <MessageID xmlns="http://www.w3.org/2005/08/addressing">uuid:9f70d5fe-2e47-4c9e-9faa-371446c19e41</MessageID>
+    </S:Header>
+    <S:Body>
+        <bootNotificationRequest xmlns="urn://Ocpp/Cs/2015/10/">
+            <chargePointVendor>eNovates</chargePointVendor>
+            <chargePointSerialNumber>92075_03_03</chargePointSerialNumber>
+            <chargeBoxSerialNumber>92075_03_03</chargeBoxSerialNumber>
+            <firmwareVersion>1.8.6.3.2@110.8.3 3_256d3NOEVC</firmwareVersion>
+            <meterType>1f_Inepro</meterType>
+            <meterSerialNumber>537134162</meterSerialNumber>
+        </bootNotificationRequest>
+    </S:Body>
+</S:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            parser.parseAnyRequestFromSoap(message)
+        ).and {
+            get { payload }.isA<BootNotificationReq>()
+                .and {
+                    get { chargePointModel }.isEqualTo("ValueInjected")
+                    get { chargePointVendor }.isEqualTo("eNovates")
+                    get { chargePointSerialNumber }.isEqualTo("92075_03_03")
+                    get { chargeBoxSerialNumber }.isEqualTo("92075_03_03")
+                    get { firmwareVersion }.isEqualTo("1.8.6.3.2@110.8.3 3_256d3NOEVC")
+                    get { iccid }.isNull()
+                    get { imsi }.isNull()
+                    get { meterSerialNumber }.isEqualTo("537134162")
+                    get { meterType }.isEqualTo("1f_Inepro")
+                }
+            get { warnings }.isNotNull().hasSize(1)
         }
     }
 
@@ -1978,7 +2078,7 @@ class Ocpp16SoapParserTest {
                                 .and {
                                     get { code }.isEqualTo("stackTrace")
                                     get { detail }.contains(
-                                        "JsonMappingException: Undeclared namespace prefix"
+                                        "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }

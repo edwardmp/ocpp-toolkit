@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json16
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.json.JsonMessage
 import com.izivia.ocpp.json.JsonMessageType
@@ -12,13 +13,16 @@ import com.networknt.schema.ValidationMessage
 import com.networknt.schema.ValidatorTypeCode
 
 class Ocpp16JsonParser(
-    val ignoreValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction> = emptyList(),
+    override val ignoredValidationCodes: List<ValidatorTypeCode> = emptyList(),
     enableValidation: Boolean = true
 ) :
     OcppJsonParser(
         mapper = Ocpp16JsonObjectMapper,
+        ignoredNullRestrictions = ignoredNullRestrictions,
+        ignoredValidationCodes = ignoredValidationCodes,
         ocppJsonValidator = if (enableValidation) {
-            OcppJsonValidator(ignoreValidationCodes, SpecVersion.VersionFlag.V4)
+            OcppJsonValidator(SpecVersion.VersionFlag.V4)
         } else null
     ) {
 
@@ -29,7 +33,7 @@ class Ocpp16JsonParser(
             throw errorHandler(e)
         }
 
-    override fun getResponseActionFromClass(className: String): String =
+    override fun getActionFromClass(className: String): String =
         Actions.valueOf(className.replace("(Resp|Req)$".toRegex(), "").uppercase()).value
 
     override fun validateJson(

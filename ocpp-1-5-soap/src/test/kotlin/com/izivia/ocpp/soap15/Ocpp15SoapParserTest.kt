@@ -495,9 +495,7 @@ class Ocpp15SoapParserTest {
             get { transactionId }.isEqualTo(16696)
             get { idTag }.isEqualTo("AAAAAAAA")
             // It could be great to have an example with transaction data
-            get { transactionData }.isNotNull().hasSize(1).first().and {
-                get { values }.isNull()
-            }
+            get { transactionData }.isNotNull().hasSize(0)
         }
     }
 
@@ -1623,7 +1621,7 @@ class Ocpp15SoapParserTest {
                                 .and {
                                     get { code }.isEqualTo("stackTrace")
                                     get { detail }.contains(
-                                        "JsonMappingException: Undeclared namespace prefix"
+                                        "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }

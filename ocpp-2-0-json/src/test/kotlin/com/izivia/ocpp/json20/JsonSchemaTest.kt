@@ -212,12 +212,12 @@ import strikt.assertions.isA
 class JsonSchemaTest {
 
     companion object {
-        private val parser = Ocpp20JsonParser()
+        val parser = Ocpp20JsonParser()
     }
 
     @Test
     fun `heartbeat request format`() {
-        val result = parser.parseAnyFromString<Unit>(
+        val result = parser.parseAnyFromString(
             parser.mapPayloadToString(HeartbeatReq())
         )
         expectThat(result).isA<JsonMessage<HeartbeatReq>>()
@@ -1108,8 +1108,10 @@ class JsonSchemaTest {
     fun `deleteCertificate request format`() {
         val certif = CertificateHashDataType(
             HashAlgorithmEnumType.SHA512,
-            "3041edbcdd46190c0acc504ed195f8a90129efcab173a7b9ac4646b92d04cc80005acaa3554f4b1df839eacadc2491cb623bf3aa6f9eb44f6ea8ca005821d25d",
-            "1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
+            "3041edbcdd46190c0acc504ed195f8a90129efcab173a7b9ac4646b92d04cc80005acaa3554f4b1df839" +
+                "eacadc2491cb623bf3aa6f9eb44f6ea8ca005821d25d",
+            "1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252" +
+                "aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
             "7683246784"
         )
         validateObject(
@@ -2334,9 +2336,9 @@ class JsonSchemaTest {
         )
     }
 
-    fun <T> validateObject(instance: T) {
+    inline fun <reified T : Any> validateObject(instance: T) {
         expectThat(
-            parser.parseAnyFromString<Unit>(
+            parser.parseAnyFromJson<T>(
                 parser.mapPayloadToString(
                     instance
                 )

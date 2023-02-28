@@ -97,16 +97,17 @@ import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 
 class JsonSchemaTest {
 
     companion object {
-        private val parser = Ocpp16JsonParser()
+        val parser = Ocpp16JsonParser()
     }
 
     @Test
     fun `heartbeat request format`() {
-        val result = parser.parseAnyFromString<Unit>(
+        val result = parser.parseAnyFromString(
             parser.mapPayloadToString(HeartbeatReq())
         )
         expectThat(result).isA<JsonMessage<HeartbeatReq>>()
@@ -488,8 +489,13 @@ class JsonSchemaTest {
 
     @Test
     fun `getDiagnostics request format`() {
-        validateObject(
-            GetDiagnosticsReq("http://www.ietf.org/rfc/rfc2396.txt")
+        val request = GetDiagnosticsReq("http://www.ietf.org/rfc/rfc2396.txt")
+        validateObject(request)
+
+        val json = parser.mapPayloadToString(request)
+
+        expectThat(json).isEqualTo(
+            """{"location":"http://www.ietf.org/rfc/rfc2396.txt"}""".trimIndent()
         )
 
         validateObject(
@@ -777,9 +783,9 @@ class JsonSchemaTest {
         )
     }
 
-    fun <T> validateObject(instance: T) {
+    inline fun <reified T : Any> validateObject(instance: T) {
         expectThat(
-            parser.parseAnyFromString<Unit>(
+            parser.parseAnyFromJson<T>(
                 parser.mapPayloadToString(
                     instance
                 )

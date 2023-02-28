@@ -29,6 +29,8 @@ import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsReq
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
 import com.izivia.ocpp.core16.model.getlocallistversion.GetLocalListVersionReq
 import com.izivia.ocpp.core16.model.getlocallistversion.GetLocalListVersionResp
+import com.izivia.ocpp.core16.model.getlog.GetLogReq
+import com.izivia.ocpp.core16.model.getlog.GetLogResp
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
@@ -61,7 +63,7 @@ import com.izivia.ocpp.soap.SoapBody
 import com.izivia.ocpp.soap.SoapFault
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class Ocpp16SoapBody(
+data class Ocpp16SoapBody(
     val authorizeRequest: AuthorizeReq? = null,
     val authorizeResponse: AuthorizeResp? = null,
     val bootNotificationRequest: BootNotificationReq? = null,
@@ -90,6 +92,8 @@ internal data class Ocpp16SoapBody(
     val getDiagnosticsResponse: GetDiagnosticsResp? = null,
     val getLocalListVersionResponse: GetLocalListVersionResp? = null,
     val getLocalListVersionRequest: GetLocalListVersionReq? = null,
+    val getLogRequest: GetLogReq? = null,
+    val getLogResponse: GetLogResp? = null,
     val heartbeatRequest: HeartbeatReq? = null,
     val heartbeatResponse: HeartbeatResp? = null,
     val meterValuesRequest: MeterValuesReq? = null,

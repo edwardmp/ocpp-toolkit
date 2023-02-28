@@ -10,5 +10,6 @@ class OcppJsonMapper : ObjectMapper(
     jacksonObjectMapper()
         .registerModule(KotlinxInstantModule())
         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 )
