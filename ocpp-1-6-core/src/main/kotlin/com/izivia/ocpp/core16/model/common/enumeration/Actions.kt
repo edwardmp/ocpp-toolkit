@@ -45,7 +45,7 @@ enum class Actions(val value: String, val classRequest: Class<*>) {
     CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java),
     CHANGECONFIGURATION("changeConfiguration", ChangeConfigurationReq::class.java),
     CLEARCACHE("clearCache", ClearCacheReq::class.java),
-    CLEARCHARGINGPROFILE("clearCHargingProfile", ClearCacheReq::class.java),
+    CLEARCHARGINGPROFILE("clearChargingProfile", ClearCacheReq::class.java),
     DATATRANSFER("dataTransfer", DataTransferReq::class.java),
     DIAGNOSTICSSTATUSNOTIFICATION("diagnosticsStatusNotification", DiagnosticsStatusNotificationReq::class.java),
     FIRMWARESTATUSNOTIFICATION("firmwareStatusNotification", FirmwareStatusNotificationReq::class.java),
