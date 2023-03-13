@@ -6,6 +6,8 @@ import com.izivia.ocpp.core20.model.cancelreservation.CancelReservationReq
 import com.izivia.ocpp.core20.model.certificateSigned.CertificateSignedReq
 import com.izivia.ocpp.core20.model.changeavailability.ChangeAvailabilityReq
 import com.izivia.ocpp.core20.model.clearcache.ClearCacheReq
+import com.izivia.ocpp.core20.model.clearchargingprofile.ClearChargingProfileReq
+import com.izivia.ocpp.core20.model.cleardisplaymessage.ClearDisplayMessageReq
 import com.izivia.ocpp.core20.model.clearedcharginglimit.ClearedChargingLimitReq
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearVariableMonitoringReq
 import com.izivia.ocpp.core20.model.costupdated.CostUpdatedReq
@@ -70,8 +72,8 @@ enum class Actions(val value: String, val classRequest: Class<*>) {
     CERTIFICATESIGNED("certificateSigned", CertificateSignedReq::class.java),
     CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java),
     CLEARCACHE("clearCache", ClearCacheReq::class.java),
-    CLEARCHARGINGPROFILE("clearCHargingProfile", ClearCacheReq::class.java),
-    CLEARDISPLAYMESSAGE("clearDisplayMessage", ClearCacheReq::class.java),
+    CLEARCHARGINGPROFILE("clearChargingProfile", ClearChargingProfileReq::class.java),
+    CLEARDISPLAYMESSAGE("clearDisplayMessage", ClearDisplayMessageReq::class.java),
     CLEAREDCHARGINGLIMIT("clearedChargingLimit", ClearedChargingLimitReq::class.java),
     CLEARVARIABLEMONITORING("clearVariableMonitoring", ClearVariableMonitoringReq::class.java),
     COSTUPDATE("costUpdate", CostUpdatedReq::class.java),
