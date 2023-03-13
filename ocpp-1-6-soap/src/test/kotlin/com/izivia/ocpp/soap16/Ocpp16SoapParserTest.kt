@@ -40,6 +40,7 @@ import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.fault.Fault
 import kotlinx.datetime.Instant
@@ -2069,26 +2070,26 @@ class Ocpp16SoapParserTest {
                         .and {
                             get { get(0) }
                                 .and {
-                                    get { code }.isEqualTo("ProtocolError")
+                                    get { code }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
                                     get { detail }.isEqualTo(
                                         "Sender's message does not comply with protocol specification."
                                     )
                                 }
                             get { get(1) }
                                 .and {
-                                    get { code }.isEqualTo("stackTrace")
+                                    get { code }.isEqualTo(ErrorDetailCode.STACKTRACE.value)
                                     get { detail }.contains(
                                         "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }
                                 .and {
-                                    get { code }.isEqualTo("message")
+                                    get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                     get { detail }.isEqualTo(request)
                                 }
                             get { get(3) }
                                 .and {
-                                    get { code }.isEqualTo("action")
+                                    get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                     get { detail }.isEqualTo("/StopTransaction")
                                 }
                         }

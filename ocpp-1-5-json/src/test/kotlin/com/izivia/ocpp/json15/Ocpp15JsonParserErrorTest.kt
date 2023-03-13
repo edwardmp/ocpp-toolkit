@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json15
 
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
@@ -44,17 +45,17 @@ class Ocpp15JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("StartTransaction")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1028")
+                                        get { code }.isEqualTo(ValidatorTypeCode.REQUIRED.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }
@@ -79,7 +80,7 @@ class Ocpp15JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -104,12 +105,12 @@ class Ocpp15JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("NotAnAction")
                                     }
                             }
@@ -134,7 +135,7 @@ class Ocpp15JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -162,17 +163,17 @@ class Ocpp15JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("BootNotification")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1013")
+                                        get { code }.isEqualTo(ValidatorTypeCode.MAX_LENGTH.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }

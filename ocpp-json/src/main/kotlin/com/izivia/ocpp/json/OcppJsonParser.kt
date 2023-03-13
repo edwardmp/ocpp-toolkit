@@ -43,7 +43,7 @@ abstract class OcppJsonParser(
                         messageId = parsed.msgId,
                         errorDetails = listOf(
                             ErrorDetail(
-                                code = ErrorDetailCode.MESSAGE.value,
+                                code = ErrorDetailCode.PAYLOAD.value,
                                 detail = messageStr
                             ),
                             ErrorDetail(
@@ -69,10 +69,10 @@ abstract class OcppJsonParser(
 
             ignoredNullRestrictions.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
 
-            validateJson(jsonMessage = parsed) {
-                it.mapNotNull {
-                    it.takeUnless { msg ->
-                        ignoredValidationCodes.contains(ValidatorTypeCode.fromValue(it.type))
+            validateJson(jsonMessage = parsed) { lvm ->
+                lvm.mapNotNull { vm ->
+                    vm.takeUnless { msg ->
+                        ignoredValidationCodes.contains(ValidatorTypeCode.fromValue(vm.type))
                             .also {
                                 warnings.add(
                                     ErrorDetail(
@@ -82,10 +82,10 @@ abstract class OcppJsonParser(
                                 )
                             }
                     }
-                }.map {
+                }.map { vm ->
                     ErrorDetail(
-                        code = it.code,
-                        detail = "Validations error : message=${it.message}, details=${it.details}"
+                        code = vm.code,
+                        detail = "Validations error : message=${vm.message}, details=${vm.details}"
                     )
                 }.takeIf { it.isNotEmpty() }
                     ?.let {
@@ -98,16 +98,36 @@ abstract class OcppJsonParser(
                                     detail = parsed.action ?: FAULT
                                 ),
                                 ErrorDetail(
-                                    code = ErrorDetailCode.MESSAGE.value,
+                                    code = ErrorDetailCode.PAYLOAD.value,
                                     detail = messageStr
                                 )
                             ).plus(it)
                         )
                     }
             }
-            parsed = parsed.copy(warnings = warnings)
-            return (parsed as JsonMessage<Any>).copy(
-                payload = mapJsonNodeToObject(parsed, clazz!!)
+            val jsonMessage = (parsed.copy(warnings = warnings) as JsonMessage<Any>)
+
+            return clazz.takeIf { it != Fault::class.java }?.let {
+                jsonMessage.copy(
+                    payload = mapJsonNodeToObject(parsed, clazz!!)
+                )
+            } ?: jsonMessage.copy(
+                action = FAULT,
+                payload =
+                Fault(
+                    errorCode = parsed.errorCode?.errorCode ?: MessageErrorCode.INTERNAL_ERROR.errorCode,
+                    errorDescription = parsed.errorDescription ?: MessageErrorCode.INTERNAL_ERROR.description,
+                    errorDetails = listOf(
+                        ErrorDetail(
+                            code = ErrorDetailCode.PAYLOAD.value,
+                            detail = parsed.payload.toString()
+                        ),
+                        ErrorDetail(
+                            code = ErrorDetailCode.ACTION.value,
+                            detail = parsed.action ?: FAULT
+                        )
+                    )
+                )
             )
         } catch (e: OcppParserException) {
             return jsonMessage(
@@ -136,7 +156,7 @@ abstract class OcppJsonParser(
                     errorDescription = MessageErrorCode.INTERNAL_ERROR.description,
                     errorDetails = listOf(
                         ErrorDetail(code = ErrorDetailCode.STACKTRACE.value, detail = e.stackTraceToString()),
-                        ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = messageStr)
+                        ErrorDetail(code = ErrorDetailCode.PAYLOAD.value, detail = messageStr)
                     )
                 )
             )
@@ -191,7 +211,7 @@ abstract class OcppJsonParser(
             throw MalformedOcppMessageException(
                 message = "Cannot parse OCPP message to JsonNode",
                 messageId = null,
-                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = mesageString))
+                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.PAYLOAD.value, detail = mesageString))
             )
         }
 
@@ -207,7 +227,7 @@ abstract class OcppJsonParser(
             throw FormatViolationException(
                 message = "Malformed messageType in json=$jsonNode",
                 messageId = msgId,
-                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.MESSAGE.value, detail = jsonNode.toString()))
+                errorDetails = listOf(ErrorDetail(code = ErrorDetailCode.PAYLOAD.value, detail = jsonNode.toString()))
             )
         }.let {
             return when (it) {
@@ -232,7 +252,7 @@ abstract class OcppJsonParser(
                     messageId = msgId,
                     errorDetails = listOf(
                         ErrorDetail(
-                            code = ErrorDetailCode.MESSAGE.value,
+                            code = ErrorDetailCode.PAYLOAD.value,
                             detail = jsonNode.toString()
                         )
                     )

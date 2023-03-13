@@ -23,7 +23,9 @@ class Ocpp16JsonParser(
         ignoredValidationCodes = ignoredValidationCodes,
         ocppJsonValidator = if (enableValidation) {
             OcppJsonValidator(SpecVersion.VersionFlag.V4)
-        } else null
+        } else {
+            null
+        }
     ) {
 
     override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =

@@ -11,7 +11,7 @@ enum class ErrorDetailCode(val value: String) {
     STACKTRACE("stackTrace"),
     ACTION("action"),
     MISSING_FIELD_REPLACED("missingFieldReplaced"),
-    MESSAGE("message");
+    PAYLOAD("payload")
 }
 
 open class OcppParserException(

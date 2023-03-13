@@ -185,7 +185,7 @@ private fun buildSoapFault(action: String?, soap: String, e: Exception) = SoapFa
         errorDescription = ValueText(e.toString()),
         errorDetails = mutableMapOf(
             Pair(ValueText(ErrorDetailCode.STACKTRACE.value), ValueText(e.stackTraceToString())),
-            Pair(ValueText(ErrorDetailCode.MESSAGE.value), ValueText(soap))
+            Pair(ValueText(ErrorDetailCode.PAYLOAD.value), ValueText(soap))
         )
             .also { map ->
                 action?.let {

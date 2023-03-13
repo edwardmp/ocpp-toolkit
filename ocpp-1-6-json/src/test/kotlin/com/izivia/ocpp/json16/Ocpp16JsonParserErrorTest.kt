@@ -6,8 +6,8 @@ import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
 import com.izivia.ocpp.utils.ErrorDetail
+import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
-import com.izivia.ocpp.utils.fault.FAULT
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
@@ -50,12 +50,12 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("StartTransaction")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
@@ -85,7 +85,7 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -125,12 +125,12 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("NotAnAction")
                                     }
                             }
@@ -155,7 +155,7 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -183,17 +183,17 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("BootNotification")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1013")
+                                        get { code }.isEqualTo(ValidatorTypeCode.MAX_LENGTH.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }
@@ -312,15 +312,32 @@ class Ocpp16JsonParserErrorTest {
                     4,
                     "msgId",
                     "NotSupported",
-                    "SetDisplayMessageRequest not implemented",
-                    {}
+                    "GetDiagnosticsRequest not implemented",
+                    {"Test": "withvalue", "other": ["why", "not", "a", "list"]}
                 ]
             """.replace("\n", "").trimIndent()
 
         expectThat(parser.parseAnyFromJson<GetDiagnosticsResp>(response))
             .and {
                 get { payload }.isA<Fault>()
-                get { action }.isEqualTo(FAULT)
+                    .and {
+                        get { errorCode }.isEqualTo("NotSupported")
+                        get { errorDescription }.isEqualTo("GetDiagnosticsRequest not implemented")
+                        get { errorDetails }.hasSize(2).and {
+                            get { get(0) }.isA<ErrorDetail>()
+                                .and {
+                                    get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
+                                    get { detail }
+                                        .isEqualTo("""{"Test":"withvalue","other":["why","not","a","list"]}""")
+                                }
+                            get { get(1) }.isA<ErrorDetail>()
+                                .and {
+                                    get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
+                                    get { detail }.isEqualTo("getDiagnostics")
+                                }
+                        }
+                    }
+                get { action }.isEqualTo("Fault")
             }
     }
 

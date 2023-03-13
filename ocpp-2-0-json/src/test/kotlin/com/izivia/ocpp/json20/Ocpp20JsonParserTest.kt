@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json20
 
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
@@ -44,37 +45,37 @@ class Ocpp20JsonParserTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("TransactionEvent")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1028")
+                                        get { code }.isEqualTo(ValidatorTypeCode.REQUIRED.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                                 get { get(4) }
                                     .and {
-                                        get { code }.isEqualTo("1028")
+                                        get { code }.isEqualTo(ValidatorTypeCode.REQUIRED.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                                 get { get(5) }
                                     .and {
-                                        get { code }.isEqualTo("1028")
+                                        get { code }.isEqualTo(ValidatorTypeCode.REQUIRED.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                                 get { get(6) }
                                     .and {
-                                        get { code }.isEqualTo("1001")
+                                        get { code }.isEqualTo(ValidatorTypeCode.ADDITIONAL_PROPERTIES.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                                 get { get(7) }
                                     .and {
-                                        get { code }.isEqualTo("1001")
+                                        get { code }.isEqualTo(ValidatorTypeCode.ADDITIONAL_PROPERTIES.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }
@@ -99,7 +100,7 @@ class Ocpp20JsonParserTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -124,12 +125,12 @@ class Ocpp20JsonParserTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("NotAnAction")
                                     }
                             }
@@ -154,7 +155,7 @@ class Ocpp20JsonParserTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -202,17 +203,17 @@ class Ocpp20JsonParserTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("BootNotification")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1013")
+                                        get { code }.isEqualTo(ValidatorTypeCode.MAX_LENGTH.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }
