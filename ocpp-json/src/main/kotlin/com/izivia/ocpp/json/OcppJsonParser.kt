@@ -107,7 +107,11 @@ abstract class OcppJsonParser(
                         )
                     }
             }
-            val jsonMessage = (parsed.copy(warnings = warnings) as JsonMessage<Any>)
+            val jsonMessage = (
+                    warnings.takeIf { it.size > 0 }
+                        ?.let {
+                            parsed.copy(warnings = it.toList())
+                        } ?: parsed) as JsonMessage<Any>
 
             return clazz.takeIf { it != Fault::class.java }?.let {
                 jsonMessage.copy(

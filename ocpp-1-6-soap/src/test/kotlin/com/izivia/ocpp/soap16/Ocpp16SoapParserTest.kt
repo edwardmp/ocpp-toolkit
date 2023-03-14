@@ -50,7 +50,6 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.*
-import java.lang.Error
 import java.util.*
 
 class Ocpp16SoapParserTest {

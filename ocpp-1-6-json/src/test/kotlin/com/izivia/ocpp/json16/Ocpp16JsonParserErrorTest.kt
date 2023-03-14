@@ -12,7 +12,6 @@ import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.TypeConvertEnum
 import com.izivia.ocpp.utils.fault.Fault
-import com.networknt.schema.ErrorMessageType
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -344,6 +343,37 @@ class Ocpp16JsonParserErrorTest {
                     }
                 get { action }.isEqualTo("Fault")
             }
+    }
+
+    @Test
+    fun `should parse dataTransfer request`() {
+        val ocppParser = Ocpp16JsonParser(
+            enableValidation = false,
+            forceConvertFields = listOf(
+                Ocpp16ForceConvertField(
+                    action = Actions.DATATRANSFER,
+                    isRequest = true,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
+        val request = """[2,"messageId","DataTransfer",
+            {"vendorId":"vendorId","messageId":"sensor",
+            "data":"{parkingIds:1,name: Vehicle,state:1,timestamp:Sat Jan 7 17:23:25 2023}"}]
+        """.replace("\n", "").trimIndent()
+
+        val req = ocppParser.parseAnyFromString(request)
+        expectThat(req).and {
+            get { action }.isEqualTo(Actions.DATATRANSFER.camelCase())
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }
+                        .isEqualTo("""{parkingIds:1,name: Vehicle,state:1,timestamp:Sat Jan 7 17:23:25 2023}""")
+                }
+            get { warnings }.isNull()
+        }
     }
 
     @Test

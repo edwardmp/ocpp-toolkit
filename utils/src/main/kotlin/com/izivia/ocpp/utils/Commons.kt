@@ -1,8 +1,6 @@
 package com.izivia.ocpp.utils
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeCreator
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 
 inline fun <reified T : Any> Any.isA(function: (T) -> Any = { it -> it }): Any =
@@ -95,17 +93,24 @@ fun convertField(
         )
     } else if (node.has(key)) {
         val oldValue = node[key]
-        node.remove(key)
         return try {
             when (typeConverted) {
-                TypeConvertEnum.STRING -> node.put(key, oldValue.toString())
-                TypeConvertEnum.SET -> node.putPOJO(key, oldValue.toSet())
-                TypeConvertEnum.LIST -> node.putPOJO(key, oldValue.toList())
-            }.also {
-                replacedInfo(
-                    ErrorDetailCode.CONVERT_FIELD_REPLACED,
-                    "$node : $keyPath converted to $typeConverted"
-                )
+                TypeConvertEnum.STRING -> if (!oldValue.isTextual) {
+                    replacedInfo(
+                        ErrorDetailCode.CONVERT_FIELD_REPLACED,
+                        "$node : $keyPath converted to $typeConverted"
+                    )
+                    node.put(key, oldValue.toString())
+                } else node
+
+                TypeConvertEnum.SET,
+                TypeConvertEnum.LIST -> if (!oldValue.isPojo) {
+                    replacedInfo(
+                        ErrorDetailCode.CONVERT_FIELD_REPLACED,
+                        "$node : $keyPath converted to $typeConverted"
+                    )
+                    node.putPOJO(key, oldValue.toList())
+                } else node
             }
         } catch (e: Exception) {
             replacedInfo(
@@ -125,7 +130,7 @@ fun convertField(
 
 fun List<AbstractForceConvertField>.parseFieldToConvert(
     node: JsonNode,
-    isNodeAction: (node: JsonNode, rule: AbstractForceConvertField) -> JsonNode? = { n, r -> node }
+    isNodeAction: (node: JsonNode, rule: AbstractForceConvertField) -> JsonNode? = { _, _ -> node }
 ): List<ErrorDetail>? {
     val details = mutableListOf<ErrorDetail>()
     forEach { rule ->
