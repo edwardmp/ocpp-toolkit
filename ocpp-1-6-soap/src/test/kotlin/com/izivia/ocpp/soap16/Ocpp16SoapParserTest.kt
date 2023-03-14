@@ -1087,7 +1087,7 @@ class Ocpp16SoapParserTest {
                     get { data }
                         .isEqualTo(
                             "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\"," +
-                                "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
+                                    "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
                         )
                 }
         }
