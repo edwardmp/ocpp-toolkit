@@ -1,24 +1,30 @@
 package com.izivia.ocpp.json15
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.izivia.ocpp.core15.Ocpp15ForceConvertField
 import com.izivia.ocpp.core15.Ocpp15IgnoredNullRestriction
 import com.izivia.ocpp.core15.model.common.enumeration.Actions
 import com.izivia.ocpp.json.JsonMessage
 import com.izivia.ocpp.json.JsonMessageType
 import com.izivia.ocpp.json.OcppJsonParser
 import com.izivia.ocpp.json.OcppJsonValidator
+import com.izivia.ocpp.utils.AbstractForceConvertField
 import com.izivia.ocpp.utils.MessageTypeException
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import com.networknt.schema.ValidatorTypeCode
 
 class Ocpp15JsonParser(
-    override val ignoredNullRestrictions: List<Ocpp15IgnoredNullRestriction> = emptyList(),
-    override val ignoredValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    override val ignoredNullRestrictions: List<Ocpp15IgnoredNullRestriction>? = null,
+    override val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
+    override val forceConvertFields: List<Ocpp15ForceConvertField>? = null,
     enableValidation: Boolean = true
 ) :
     OcppJsonParser(
         mapper = Ocpp15JsonObjectMapper,
+        forceConvertFields = forceConvertFields,
+        ignoredValidationCodes = ignoredValidationCodes,
+        ignoredNullRestrictions = ignoredNullRestrictions,
         ocppJsonValidator = if (enableValidation) {
             OcppJsonValidator(SpecVersion.VersionFlag.V4)
         } else null

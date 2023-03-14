@@ -3,13 +3,12 @@ package com.izivia.ocpp.soap16
 import com.fasterxml.jackson.core.type.TypeReference
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.soap.*
-import com.izivia.ocpp.utils.ErrorDetail
-import com.izivia.ocpp.utils.isA
-import com.izivia.ocpp.utils.parseNullField
+import com.izivia.ocpp.utils.*
 import kotlin.reflect.full.memberProperties
 
 class Ocpp16SoapParser(
-    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction> = emptyList()
+    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction>? = null,
+    override val forceConvertFields: List<AbstractForceConvertField>? = null
 ) : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2015/10/",
     soapMapperInput = Ocpp16SoapMapperIn,
@@ -20,9 +19,15 @@ class Ocpp16SoapParser(
             soapMapperInput
                 .readTree(soap)
                 .also {
-                    ignoredNullRestrictions.parseNullField(it.findValue(OcppConstant.BODY)) { node, rule ->
+
+                    ignoredNullRestrictions?.parseNullField(it.findValue(OcppConstant.BODY)) { node, rule ->
                         if (node.has(rule.getBodyAction())) node.first() else null
                     }?.let { warns -> warnings(warns) }
+
+                    forceConvertFields?.parseFieldToConvert(it.findValue(OcppConstant.BODY)) { node, rule ->
+                        if (node.has(rule.getBodyAction())) node.first() else null
+                    }?.let { warns -> warnings(warns) }
+
                 }.let {
                     soapMapperInput
                         .readerFor(object : TypeReference<SoapEnvelope<Ocpp16SoapBody>>() {})

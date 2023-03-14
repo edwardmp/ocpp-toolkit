@@ -1,8 +1,12 @@
 package com.izivia.ocpp.json20
 
+import com.izivia.ocpp.core20.Ocpp20ForceConvertField
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.core20.model.common.enumeration.Actions
+import com.izivia.ocpp.core20.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
+import com.izivia.ocpp.utils.TypeConvertEnum
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
@@ -307,6 +311,44 @@ class Ocpp20JsonParserTest {
             .and {
                 get { action }.isEqualTo("bootNotification")
             }
+    }
+
+    @Test
+    fun `should parse datatransfert with non string value`() {
+        val ocppParser = Ocpp20JsonParser(
+            enableValidation = false,
+            forceConvertFields = listOf(
+                Ocpp20ForceConvertField(
+                    action = Actions.DATATRANSFER,
+                    isRequest = true,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
+        val request = """ [2,"dtt3675","DataTransfer",{"vendorId":"ukunweba_v1","messageId":"sensor",
+            "data":{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}}]
+            """.replace("\n", "").trimIndent()
+
+        val req = ocppParser.parseAnyFromString(request)
+        expectThat(req).and {
+            get { action }.isEqualTo(Actions.DATATRANSFER.camelCase())
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }
+                        .isEqualTo("""{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}""")
+                }
+            get { warnings }
+                .isNotNull()
+                .hasSize(1)
+                .and {
+                    get { get(0) }.and {
+                        get { code }.isEqualTo(ErrorDetailCode.CONVERT_FIELD_REPLACED.value)
+                        get { detail }.contains("[data] converted to STRING")
+                    }
+                }
+        }
     }
 
     @Test

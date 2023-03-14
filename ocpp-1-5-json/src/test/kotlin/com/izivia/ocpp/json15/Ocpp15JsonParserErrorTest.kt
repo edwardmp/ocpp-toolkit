@@ -1,8 +1,12 @@
 package com.izivia.ocpp.json15
 
+import com.izivia.ocpp.core15.Ocpp15ForceConvertField
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
+import com.izivia.ocpp.core15.model.common.enumeration.Actions
+import com.izivia.ocpp.core15.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
+import com.izivia.ocpp.utils.TypeConvertEnum
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
@@ -231,6 +235,44 @@ class Ocpp15JsonParserErrorTest {
     }
 
     @Test
+    fun `should parse datatransfert with non string value`() {
+        val ocppParser = Ocpp15JsonParser(
+            enableValidation = false,
+            forceConvertFields = listOf(
+                Ocpp15ForceConvertField(
+                    action = Actions.DATATRANSFER,
+                    isRequest = true,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
+        val request = """ [2,"dtt3675","DataTransfer",{"vendorId":"ukunweba_v1","messageId":"sensor",
+            "data":{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}}]
+            """.replace("\n", "").trimIndent()
+
+        val req = ocppParser.parseAnyFromString(request)
+        expectThat(req).and {
+            get { action }.isEqualTo(Actions.DATATRANSFER.camelCase())
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }
+                        .isEqualTo("""{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}""")
+                }
+            get { warnings }
+                .isNotNull()
+                .hasSize(1)
+                .and {
+                    get { get(0) }.and {
+                        get { code }.isEqualTo(ErrorDetailCode.CONVERT_FIELD_REPLACED.value)
+                        get { detail }.contains("[data] converted to STRING")
+                    }
+                }
+        }
+    }
+
+    @Test
     fun `perf with and without validation`() {
         val request1 = """[2,"messageId","Heartbeat",{}]"""
         val request2 = """[15,"messageId","Heartbeat",{}]""".trimMargin()
@@ -260,7 +302,7 @@ class Ocpp15JsonParserErrorTest {
 
         println(
             "elapsed time : with validation $elapsedWithValidation, " +
-                "without validation $elapsedWithoutValidation, $percent % faster without validation"
+                    "without validation $elapsedWithoutValidation, $percent % faster without validation"
         )
 
         // disabled because running tests in parallel can overload CPU and lead to unexpected behavior and failed

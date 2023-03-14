@@ -12,8 +12,9 @@ import kotlin.reflect.KClass
 abstract class OcppJsonParser(
     private val mapper: ObjectMapper,
     protected val ocppJsonValidator: OcppJsonValidator?,
-    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction> = emptyList(),
-    open val ignoredValidationCodes: List<ValidatorTypeCode> = emptyList()
+    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction>? = null,
+    open val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
+    open val forceConvertFields: List<AbstractForceConvertField>? = null
 ) {
     val classActionRegex = "(Resp|Req)$".toRegex()
 
@@ -67,12 +68,13 @@ abstract class OcppJsonParser(
                 }
             }
 
-            ignoredNullRestrictions.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
+            ignoredNullRestrictions?.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
+            forceConvertFields?.parseFieldToConvert(parsed.payload)?.also { warnings.addAll(it) }
 
             validateJson(jsonMessage = parsed) { lvm ->
                 lvm.mapNotNull { vm ->
                     vm.takeUnless { msg ->
-                        ignoredValidationCodes.contains(ValidatorTypeCode.fromValue(vm.type))
+                        ignoredValidationCodes?.contains(ValidatorTypeCode.fromValue(vm.type))
                             .also {
                                 warnings.add(
                                     ErrorDetail(
@@ -80,7 +82,7 @@ abstract class OcppJsonParser(
                                         detail = "Validations error : message=${msg.message}, details=${msg.details}"
                                     )
                                 )
-                            }
+                            } ?: false
                     }
                 }.map { vm ->
                     ErrorDetail(

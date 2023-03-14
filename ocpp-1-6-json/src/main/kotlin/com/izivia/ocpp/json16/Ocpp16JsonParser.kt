@@ -7,20 +7,23 @@ import com.izivia.ocpp.json.JsonMessage
 import com.izivia.ocpp.json.JsonMessageType
 import com.izivia.ocpp.json.OcppJsonParser
 import com.izivia.ocpp.json.OcppJsonValidator
+import com.izivia.ocpp.utils.AbstractForceConvertField
 import com.izivia.ocpp.utils.MessageTypeException
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import com.networknt.schema.ValidatorTypeCode
 
 class Ocpp16JsonParser(
-    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction> = emptyList(),
-    override val ignoredValidationCodes: List<ValidatorTypeCode> = emptyList(),
+    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction>? = null,
+    override val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
+    override val forceConvertFields: List<AbstractForceConvertField>? = null,
     enableValidation: Boolean = true
 ) :
     OcppJsonParser(
         mapper = Ocpp16JsonObjectMapper,
         ignoredNullRestrictions = ignoredNullRestrictions,
         ignoredValidationCodes = ignoredValidationCodes,
+        forceConvertFields = forceConvertFields,
         ocppJsonValidator = if (enableValidation) {
             OcppJsonValidator(SpecVersion.VersionFlag.V4)
         } else {
