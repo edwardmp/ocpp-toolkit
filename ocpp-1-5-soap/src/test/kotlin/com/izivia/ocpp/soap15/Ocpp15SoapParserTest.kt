@@ -1,6 +1,6 @@
 package com.izivia.ocpp.soap15
 
-import com.izivia.ocpp.core15.Ocpp15ForceConvertField
+import com.izivia.ocpp.core15.Ocpp15ForcedFieldType
 import com.izivia.ocpp.core15.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core15.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
@@ -32,6 +32,7 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.TypeConvertEnum
@@ -1582,10 +1583,10 @@ class Ocpp15SoapParserTest {
     @Test
     fun `should parse DataTransfert message with wrong data format to DataTransferReq`() {
         val parser = Ocpp15SoapParser(
-            forceConvertFields = listOf(
-                Ocpp15ForceConvertField(
+            forcedFieldTypes = listOf(
+                Ocpp15ForcedFieldType(
                     action = Actions.DATATRANSFER,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "data",
                     typeRequested = TypeConvertEnum.STRING
                 )

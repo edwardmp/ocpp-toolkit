@@ -1,13 +1,13 @@
 package com.izivia.ocpp.json16
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.json.JsonMessage
 import com.izivia.ocpp.json.JsonMessageType
 import com.izivia.ocpp.json.OcppJsonParser
 import com.izivia.ocpp.json.OcppJsonValidator
-import com.izivia.ocpp.utils.AbstractForceConvertField
 import com.izivia.ocpp.utils.MessageTypeException
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
@@ -16,19 +16,15 @@ import com.networknt.schema.ValidatorTypeCode
 class Ocpp16JsonParser(
     override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction>? = null,
     override val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
-    override val forceConvertFields: List<AbstractForceConvertField>? = null,
+    override val forcedFieldTypes: List<Ocpp16ForcedFieldType>? = null,
     enableValidation: Boolean = true
 ) :
     OcppJsonParser(
         mapper = Ocpp16JsonObjectMapper,
         ignoredNullRestrictions = ignoredNullRestrictions,
         ignoredValidationCodes = ignoredValidationCodes,
-        forceConvertFields = forceConvertFields,
-        ocppJsonValidator = if (enableValidation) {
-            OcppJsonValidator(SpecVersion.VersionFlag.V4)
-        } else {
-            null
-        }
+        forcedFieldTypes = forcedFieldTypes,
+        ocppJsonValidator = OcppJsonValidator(SpecVersion.VersionFlag.V4).takeIf { enableValidation }
     ) {
 
     override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
@@ -39,7 +35,7 @@ class Ocpp16JsonParser(
         }
 
     override fun getActionFromClass(className: String): String =
-        Actions.valueOf(className.replace("(Resp|Req)$".toRegex(), "").uppercase()).value
+        Actions.valueOf(getActionFromClassName(className)).value
 
     override fun validateJson(
         jsonMessage: JsonMessage<JsonNode>,

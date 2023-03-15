@@ -1,9 +1,10 @@
 package com.izivia.ocpp.json20
 
-import com.izivia.ocpp.core20.Ocpp20ForceConvertField
+import com.izivia.ocpp.core20.Ocpp20ForceTypeField
 import com.izivia.ocpp.core20.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core20.model.common.enumeration.Actions
 import com.izivia.ocpp.core20.model.datatransfer.DataTransferReq
+import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.TypeConvertEnum
@@ -317,10 +318,10 @@ class Ocpp20JsonParserTest {
     fun `should parse datatransfert with non string value`() {
         val ocppParser = Ocpp20JsonParser(
             enableValidation = false,
-            forceConvertFields = listOf(
-                Ocpp20ForceConvertField(
+            forcedFieldTypes = listOf(
+                Ocpp20ForceTypeField(
                     action = Actions.DATATRANSFER,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "data",
                     typeRequested = TypeConvertEnum.STRING
                 )

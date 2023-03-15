@@ -14,9 +14,12 @@ abstract class OcppJsonParser(
     protected val ocppJsonValidator: OcppJsonValidator?,
     open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction>? = null,
     open val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
-    open val forceConvertFields: List<AbstractForceConvertField>? = null
+    open val forcedFieldTypes: List<AbstractForcedFieldType>? = null
 ) {
     val classActionRegex = "(Resp|Req)$".toRegex()
+
+    protected fun getActionFromClassName(className: String) =
+        className.replace(classActionRegex, "").uppercase()
 
     protected abstract fun getRequestPayloadClass(
         action: String,
@@ -69,7 +72,7 @@ abstract class OcppJsonParser(
             }
 
             ignoredNullRestrictions?.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
-            forceConvertFields?.parseFieldToConvert(parsed.payload)?.also { warnings.addAll(it) }
+            forcedFieldTypes?.parseFieldToConvert(parsed.payload)?.also { warnings.addAll(it) }
 
             validateJson(jsonMessage = parsed) { lvm ->
                 lvm.mapNotNull { vm ->

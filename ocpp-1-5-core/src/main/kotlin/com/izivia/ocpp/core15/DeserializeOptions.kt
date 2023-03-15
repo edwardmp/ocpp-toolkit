@@ -1,26 +1,35 @@
 package com.izivia.ocpp.core15
 
 import com.izivia.ocpp.core15.model.common.enumeration.Actions
-import com.izivia.ocpp.utils.AbstractForceConvertField
+import com.izivia.ocpp.utils.AbstractForcedFieldType
 import com.izivia.ocpp.utils.AbstractIgnoredNullRestriction
+import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.TypeConvertEnum
 
 data class Ocpp15IgnoredNullRestriction(
-    val action: Actions,
-    override val isRequest: Boolean,
+    override val action: Actions,
+    override val actionType: ActionTypeEnum,
     override val fieldPath: String,
-    override val defaultNullValue: String
-) : AbstractIgnoredNullRestriction(isRequest = isRequest, fieldPath = fieldPath, defaultNullValue = defaultNullValue) {
-    override fun getBodyAction() =
-        if (isRequest) "${action.value}Request" else "${action.value}Response"
-}
+    override val defaultNullValue: String,
+    override val fieldPathSeparator: String = "."
+) : AbstractIgnoredNullRestriction(
+    actionType = actionType,
+    fieldPath = fieldPath,
+    defaultNullValue = defaultNullValue,
+    action = action,
+    fieldPathSeparator = fieldPathSeparator
+)
 
-data class Ocpp15ForceConvertField(
-    val action: Actions,
-    override val isRequest: Boolean,
+data class Ocpp15ForcedFieldType(
+    override val action: Actions,
+    override val actionType: ActionTypeEnum,
     override val fieldPath: String,
-    override val typeRequested: TypeConvertEnum
-) : AbstractForceConvertField(isRequest = isRequest, fieldPath = fieldPath, typeRequested = typeRequested) {
-    override fun getBodyAction() =
-        if (isRequest) "${action.value}Request" else "${action.value}Response"
-}
+    override val typeRequested: TypeConvertEnum,
+    override val fieldPathSeparator: String = "."
+) : AbstractForcedFieldType(
+    actionType = actionType,
+    fieldPath = fieldPath,
+    typeRequested = typeRequested,
+    action = action,
+    fieldPathSeparator = fieldPathSeparator
+)

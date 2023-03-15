@@ -1,6 +1,6 @@
 package com.izivia.ocpp.soap16
 
-import com.izivia.ocpp.core16.Ocpp16ForceConvertField
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
@@ -41,6 +41,7 @@ import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.utils.TypeConvertEnum
@@ -187,9 +188,9 @@ class Ocpp16SoapParserTest {
             listOf(
                 Ocpp16IgnoredNullRestriction(
                     Actions.BOOTNOTIFICATION,
-                    true,
-                    "chargePointModel",
-                    "ValueInjected"
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "chargePointModel",
+                    defaultNullValue = "ValueInjected"
                 )
             )
         )
@@ -1971,10 +1972,10 @@ class Ocpp16SoapParserTest {
     @Test
     fun `should parse DataTransfert message with wrong data format to DataTransferReq`() {
         val parser = Ocpp16SoapParser(
-            forceConvertFields = listOf(
-                Ocpp16ForceConvertField(
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
                     action = Actions.DATATRANSFER,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "data",
                     typeRequested = TypeConvertEnum.STRING
                 )

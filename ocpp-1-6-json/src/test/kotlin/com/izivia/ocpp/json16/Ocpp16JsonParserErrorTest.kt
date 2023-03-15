@@ -1,22 +1,18 @@
 package com.izivia.ocpp.json16
 
-import com.izivia.ocpp.core16.Ocpp16ForceConvertField
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
-import com.izivia.ocpp.utils.ErrorDetail
-import com.izivia.ocpp.utils.ErrorDetailCode
-import com.izivia.ocpp.utils.MessageErrorCode
-import com.izivia.ocpp.utils.TypeConvertEnum
+import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.*
-import java.lang.Error
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -244,7 +240,7 @@ class Ocpp16JsonParserErrorTest {
             ignoredNullRestrictions = listOf(
                 Ocpp16IgnoredNullRestriction(
                     action = Actions.BOOTNOTIFICATION,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "chargePointModel",
                     defaultNullValue = "ValueMissing"
                 )
@@ -275,7 +271,7 @@ class Ocpp16JsonParserErrorTest {
             ignoredNullRestrictions = listOf(
                 Ocpp16IgnoredNullRestriction(
                     action = Actions.BOOTNOTIFICATION,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "chargePointModel",
                     defaultNullValue = "ValueMissing"
                 )
@@ -349,10 +345,10 @@ class Ocpp16JsonParserErrorTest {
     fun `should parse dataTransfer request`() {
         val ocppParser = Ocpp16JsonParser(
             enableValidation = false,
-            forceConvertFields = listOf(
-                Ocpp16ForceConvertField(
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
                     action = Actions.DATATRANSFER,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "data",
                     typeRequested = TypeConvertEnum.STRING
                 )
@@ -380,10 +376,10 @@ class Ocpp16JsonParserErrorTest {
     fun `should parse datatransfert with non string value`() {
         val ocppParser = Ocpp16JsonParser(
             enableValidation = false,
-            forceConvertFields = listOf(
-                Ocpp16ForceConvertField(
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
                     action = Actions.DATATRANSFER,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "data",
                     typeRequested = TypeConvertEnum.STRING
                 )

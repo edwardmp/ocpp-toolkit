@@ -1,7 +1,7 @@
 package com.izivia.ocpp.json20
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.izivia.ocpp.core20.Ocpp20ForceConvertField
+import com.izivia.ocpp.core20.Ocpp20ForceTypeField
 import com.izivia.ocpp.core20.Ocpp20IgnoredNullRestriction
 import com.izivia.ocpp.core20.model.common.enumeration.Actions
 import com.izivia.ocpp.json.JsonMessage
@@ -16,17 +16,15 @@ import com.networknt.schema.ValidatorTypeCode
 class Ocpp20JsonParser(
     override val ignoredNullRestrictions: List<Ocpp20IgnoredNullRestriction>? = null,
     override val ignoredValidationCodes: List<ValidatorTypeCode>? = null,
-    override val forceConvertFields: List<Ocpp20ForceConvertField>? = null,
+    override val forcedFieldTypes: List<Ocpp20ForceTypeField>? = null,
     enableValidation: Boolean = true
 ) :
     OcppJsonParser(
         mapper = Ocpp20JsonObjectMapper,
         ignoredValidationCodes = ignoredValidationCodes,
         ignoredNullRestrictions = ignoredNullRestrictions,
-        forceConvertFields = forceConvertFields,
-        ocppJsonValidator = if (enableValidation) {
-            OcppJsonValidator(SpecVersion.VersionFlag.V6)
-        } else null
+        forcedFieldTypes = forcedFieldTypes,
+        ocppJsonValidator = OcppJsonValidator(SpecVersion.VersionFlag.V6).takeIf { enableValidation }
     ) {
 
     override fun getRequestPayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
@@ -37,7 +35,7 @@ class Ocpp20JsonParser(
         }
 
     override fun getActionFromClass(className: String): String =
-        Actions.valueOf(className.replace(classActionRegex, "").uppercase()).value
+        Actions.valueOf(getActionFromClassName(className)).value
 
     override fun validateJson(
         jsonMessage: JsonMessage<JsonNode>,
