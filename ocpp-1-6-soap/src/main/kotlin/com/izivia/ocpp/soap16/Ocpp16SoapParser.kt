@@ -1,29 +1,30 @@
 package com.izivia.ocpp.soap16
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.soap.*
-import com.izivia.ocpp.utils.ErrorDetail
-import com.izivia.ocpp.utils.isA
-import com.izivia.ocpp.utils.parseNullField
+import com.izivia.ocpp.utils.*
 import kotlin.reflect.full.memberProperties
 
 class Ocpp16SoapParser(
-    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction> = emptyList()
+    override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction>? = null,
+    override val forcedFieldTypes: List<Ocpp16ForcedFieldType>? = null
 ) : OcppSoapParserImpl(
     ns_ocpp = "urn://Ocpp/Cp/2015/10/",
     soapMapperInput = Ocpp16SoapMapperIn,
     soapMapperOutput = Ocpp16SoapMapper
 ) {
-    override fun readToEnvelop(soap: String, warnings: (warnings: List<ErrorDetail>) -> Unit): SoapEnvelope<*> =
+    override fun readToEnvelop(
+        soap: String,
+        warningHandler: (warnings: List<ErrorDetail>) -> Unit
+    ): SoapEnvelope<*> =
         try {
             soapMapperInput
                 .readTree(soap)
-                .also {
-                    ignoredNullRestrictions.parseNullField(it.findValue(OcppConstant.BODY)) { node, rule ->
-                        if (node.has(rule.getBodyAction())) node.first() else null
-                    }?.let { warns -> warnings(warns) }
-                }.let {
+                .apply {
+                    applyDeserializerOptions(this, warningHandler)
+                }?.let {
                     soapMapperInput
                         .readerFor(object : TypeReference<SoapEnvelope<Ocpp16SoapBody>>() {})
                         .readValue(it)
@@ -31,8 +32,8 @@ class Ocpp16SoapParser(
         } catch (e: Exception) {
             parseSoapFaulted(soap, e) {
                 Ocpp16SoapBody(fault = it)
-            } as SoapEnvelope<Ocpp16SoapBody>
-        }
+            }
+        } as SoapEnvelope<Ocpp16SoapBody>
 
     override fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any =
         getRealBodyContent(envelope as SoapEnvelope<Ocpp16SoapBody>)

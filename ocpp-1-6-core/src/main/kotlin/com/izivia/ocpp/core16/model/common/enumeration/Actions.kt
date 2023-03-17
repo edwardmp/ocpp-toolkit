@@ -7,6 +7,7 @@ import com.izivia.ocpp.core16.model.certificatesigned.CertificateSignedReq
 import com.izivia.ocpp.core16.model.changeavailability.ChangeAvailabilityReq
 import com.izivia.ocpp.core16.model.changeconfiguration.ChangeConfigurationReq
 import com.izivia.ocpp.core16.model.clearcache.ClearCacheReq
+import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.deletecertificate.DeleteCertificateReq
 import com.izivia.ocpp.core16.model.diagnosticsstatusnotification.DiagnosticsStatusNotificationReq
@@ -37,15 +38,16 @@ import com.izivia.ocpp.core16.model.triggermessage.ExtendedTriggerMessageReq
 import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.updatefirmware.SignedUpdateFirmwareReq
+import com.izivia.ocpp.utils.IActions
 
-enum class Actions(val value: String, val classRequest: Class<*>) {
+enum class Actions(override val value: String, override val classRequest: Class<*>) : IActions {
     AUTHORIZE("authorize", AuthorizeReq::class.java),
     BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java),
     CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java),
     CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java),
     CHANGECONFIGURATION("changeConfiguration", ChangeConfigurationReq::class.java),
     CLEARCACHE("clearCache", ClearCacheReq::class.java),
-    CLEARCHARGINGPROFILE("clearCHargingProfile", ClearCacheReq::class.java),
+    CLEARCHARGINGPROFILE("clearChargingProfile", ClearChargingProfileReq::class.java),
     DATATRANSFER("dataTransfer", DataTransferReq::class.java),
     DIAGNOSTICSSTATUSNOTIFICATION("diagnosticsStatusNotification", DiagnosticsStatusNotificationReq::class.java),
     FIRMWARESTATUSNOTIFICATION("firmwareStatusNotification", FirmwareStatusNotificationReq::class.java),

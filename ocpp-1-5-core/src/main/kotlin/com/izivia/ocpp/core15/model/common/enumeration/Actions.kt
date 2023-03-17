@@ -24,8 +24,9 @@ import com.izivia.ocpp.core15.model.statusnotification.StatusNotificationReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
+import com.izivia.ocpp.utils.IActions
 
-enum class Actions(val value: String, val classRequest: Class<*>) {
+enum class Actions(override val value: String, override val classRequest: Class<*>) : IActions {
     AUTHORIZE("authorize", AuthorizeReq::class.java),
     BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java),
     CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java),

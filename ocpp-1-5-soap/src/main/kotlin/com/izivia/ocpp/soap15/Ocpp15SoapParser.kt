@@ -1,31 +1,32 @@
 package com.izivia.ocpp.soap15
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.izivia.ocpp.core15.Ocpp15ForcedFieldType
 import com.izivia.ocpp.core15.Ocpp15IgnoredNullRestriction
 import com.izivia.ocpp.soap.*
-import com.izivia.ocpp.utils.ErrorDetail
-import com.izivia.ocpp.utils.isA
-import com.izivia.ocpp.utils.parseNullField
+import com.izivia.ocpp.utils.*
 import kotlin.reflect.full.memberProperties
 
-class Ocpp15SoapParser(override val ignoredNullRestrictions: List<Ocpp15IgnoredNullRestriction> = emptyList()) :
+class Ocpp15SoapParser(
+    override val ignoredNullRestrictions: List<Ocpp15IgnoredNullRestriction>? = null,
+    override val forcedFieldTypes: List<Ocpp15ForcedFieldType>? = null,
+) :
     OcppSoapParserImpl(
         ns_ocpp = "urn://Ocpp/Cp/2012/06/",
         soapMapperInput = Ocpp15SoapMapperIn,
         soapMapperOutput = Ocpp15SoapMapper
     ) {
+
     override fun readToEnvelop(
         soap: String,
-        warnings: (warnings: List<ErrorDetail>) -> Unit
+        warningHandler: (warnings: List<ErrorDetail>) -> Unit
     ): SoapEnvelope<*> =
         try {
             soapMapperInput
                 .readTree(soap)
-                .also {
-                    ignoredNullRestrictions.parseNullField(it.findValue(OcppConstant.BODY)) { node, rule ->
-                        if (node.has(rule.getBodyAction())) node.first() else null
-                    }?.let { warns -> warnings(warns) }
-                }.let {
+                .apply {
+                   applyDeserializerOptions(this, warningHandler)
+                }?.let {
                     soapMapperInput
                         .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
                         .readValue(it)

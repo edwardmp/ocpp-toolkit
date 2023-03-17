@@ -1,13 +1,13 @@
 package com.izivia.ocpp.json16
 
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
+import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
-import com.izivia.ocpp.utils.ErrorDetail
-import com.izivia.ocpp.utils.MessageErrorCode
-import com.izivia.ocpp.utils.fault.FAULT
+import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
 import org.junit.jupiter.api.Test
@@ -50,12 +50,12 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("StartTransaction")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
@@ -85,7 +85,7 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -125,12 +125,12 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("NotAnAction")
                                     }
                             }
@@ -155,7 +155,7 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                             }
@@ -183,17 +183,17 @@ class Ocpp16JsonParserErrorTest {
                             .and {
                                 get { get(0) }
                                     .and {
-                                        get { code }.isEqualTo("action")
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                         get { detail }.isEqualTo("BootNotification")
                                     }
                                 get { get(1) }
                                     .and {
-                                        get { code }.isEqualTo("message")
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                         get { detail }.isEqualTo(request)
                                     }
                                 get { get(2) }
                                     .and {
-                                        get { code }.isEqualTo("1013")
+                                        get { code }.isEqualTo(ValidatorTypeCode.MAX_LENGTH.errorCode)
                                         get { detail }.contains("Validations error")
                                     }
                             }
@@ -240,7 +240,7 @@ class Ocpp16JsonParserErrorTest {
             ignoredNullRestrictions = listOf(
                 Ocpp16IgnoredNullRestriction(
                     action = Actions.BOOTNOTIFICATION,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "chargePointModel",
                     defaultNullValue = "ValueMissing"
                 )
@@ -271,7 +271,7 @@ class Ocpp16JsonParserErrorTest {
             ignoredNullRestrictions = listOf(
                 Ocpp16IgnoredNullRestriction(
                     action = Actions.BOOTNOTIFICATION,
-                    isRequest = true,
+                    actionType = ActionTypeEnum.REQUEST,
                     fieldPath = "chargePointModel",
                     defaultNullValue = "ValueMissing"
                 )
@@ -312,16 +312,103 @@ class Ocpp16JsonParserErrorTest {
                     4,
                     "msgId",
                     "NotSupported",
-                    "SetDisplayMessageRequest not implemented",
-                    {}
+                    "GetDiagnosticsRequest not implemented",
+                    {"Test": "withvalue", "other": ["why", "not", "a", "list"]}
                 ]
             """.replace("\n", "").trimIndent()
 
         expectThat(parser.parseAnyFromJson<GetDiagnosticsResp>(response))
             .and {
                 get { payload }.isA<Fault>()
-                get { action }.isEqualTo(FAULT)
+                    .and {
+                        get { errorCode }.isEqualTo("NotSupported")
+                        get { errorDescription }.isEqualTo("GetDiagnosticsRequest not implemented")
+                        get { errorDetails }.hasSize(2).and {
+                            get { get(0) }.isA<ErrorDetail>()
+                                .and {
+                                    get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
+                                    get { detail }
+                                        .isEqualTo("""{"Test":"withvalue","other":["why","not","a","list"]}""")
+                                }
+                            get { get(1) }.isA<ErrorDetail>()
+                                .and {
+                                    get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
+                                    get { detail }.isEqualTo("getDiagnostics")
+                                }
+                        }
+                    }
+                get { action }.isEqualTo("Fault")
             }
+    }
+
+    @Test
+    fun `should parse dataTransfer request`() {
+        val ocppParser = Ocpp16JsonParser(
+            enableValidation = false,
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
+                    action = Actions.DATATRANSFER,
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
+        val request = """[2,"messageId","DataTransfer",
+            {"vendorId":"vendorId","messageId":"sensor",
+            "data":"{parkingIds:1,name: Vehicle,state:1,timestamp:Sat Jan 7 17:23:25 2023}"}]
+        """.replace("\n", "").trimIndent()
+
+        val req = ocppParser.parseAnyFromString(request)
+        expectThat(req).and {
+            get { action }.isEqualTo(Actions.DATATRANSFER.camelCase())
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }
+                        .isEqualTo("""{parkingIds:1,name: Vehicle,state:1,timestamp:Sat Jan 7 17:23:25 2023}""")
+                }
+            get { warnings }.isNull()
+        }
+    }
+
+    @Test
+    fun `should parse datatransfert with non string value`() {
+        val ocppParser = Ocpp16JsonParser(
+            enableValidation = false,
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
+                    action = Actions.DATATRANSFER,
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
+        val request = """ [2,"dtt3675","DataTransfer",{"vendorId":"ukunweba_v1","messageId":"sensor",
+            "data":{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}}]
+            """.replace("\n", "").trimIndent()
+
+        val req = ocppParser.parseAnyFromString(request)
+        expectThat(req).and {
+            get { action }.isEqualTo(Actions.DATATRANSFER.camelCase())
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }
+                        .isEqualTo("""{"connectorId":10,"name":"Door","state":1,"timestamp":"2023-02-21T11:37:54Z"}""")
+                }
+            get { warnings }
+                .isNotNull()
+                .hasSize(1)
+                .and {
+                    get { get(0) }.and {
+                        get { code }.isEqualTo(ErrorDetailCode.CONVERT_FIELD_REPLACED.value)
+                        get { detail }.contains("[data] converted to STRING")
+                    }
+                }
+        }
+
     }
 
     @Test
@@ -354,7 +441,7 @@ class Ocpp16JsonParserErrorTest {
 
         println(
             "elapsed time : with validation $elapsedWithValidation, " +
-                "without validation $elapsedWithoutValidation, $percent % faster without validation"
+                    "without validation $elapsedWithoutValidation, $percent % faster without validation"
         )
 
         // disabled because running tests in parallel can overload CPU and lead to unexpected behavior and failed

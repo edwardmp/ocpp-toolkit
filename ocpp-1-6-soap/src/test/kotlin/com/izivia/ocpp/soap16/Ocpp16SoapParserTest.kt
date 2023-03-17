@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap16
 
+import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
 import com.izivia.ocpp.core16.model.authorize.AuthorizeReq
 import com.izivia.ocpp.core16.model.authorize.AuthorizeResp
@@ -40,7 +41,10 @@ import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.utils.ActionTypeEnum
+import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
+import com.izivia.ocpp.utils.TypeConvertEnum
 import com.izivia.ocpp.utils.fault.Fault
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
@@ -184,9 +188,9 @@ class Ocpp16SoapParserTest {
             listOf(
                 Ocpp16IgnoredNullRestriction(
                     Actions.BOOTNOTIFICATION,
-                    true,
-                    "chargePointModel",
-                    "ValueInjected"
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "chargePointModel",
+                    defaultNullValue = "ValueInjected"
                 )
             )
         )
@@ -1083,7 +1087,7 @@ class Ocpp16SoapParserTest {
                     get { data }
                         .isEqualTo(
                             "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\"," +
-                                "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
+                                    "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
                         )
                 }
         }
@@ -1966,6 +1970,46 @@ class Ocpp16SoapParserTest {
     }
 
     @Test
+    fun `should parse DataTransfert message with wrong data format to DataTransferReq`() {
+        val parser = Ocpp16SoapParser(
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
+                    action = Actions.DATATRANSFER,
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+        val message =
+            """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+                xmlns:a="http://www.w3.org/2005/08/addressing"
+                 xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
+<a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/DataTransfer</a:Action>
+<o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From>
+<a:To>destination</a:To></s:Header><s:Body><o:dataTransferRequest><o:vendorId>XXXXXXXX</o:vendorId>
+<o:messageId>Detection loop</o:messageId>
+<o:data><not_a_good_format>Detection loop</not_a_good_format></o:data>
+</o:dataTransferRequest></s:Body></s:Envelope>
+            """.trimSoap()
+
+        expectThat(
+            parser.parseAnyRequestFromSoap(message)
+        ).and {
+            get { payload }.isA<DataTransferReq>()
+                .and {
+                    get { data }.isEqualTo("{\"not_a_good_format\":\"Detection loop\"}")
+                }
+            get { warnings }.isNotNull().hasSize(1).and {
+                get { get(0) }.and {
+                    get { code }.isEqualTo(ErrorDetailCode.CONVERT_FIELD_REPLACED.value)
+                    get { detail }.contains("[data] converted to STRING")
+                }
+            }
+        }
+    }
+
+    @Test
     fun `should parse message to SetChargingProfileResponse`() {
         val message = """<ns0:Envelope xmlns:ns0="http://www.w3.org/2003/05/soap-envelope"
             xmlns:ns1="http://www.w3.org/2005/08/addressing"
@@ -2069,26 +2113,26 @@ class Ocpp16SoapParserTest {
                         .and {
                             get { get(0) }
                                 .and {
-                                    get { code }.isEqualTo("ProtocolError")
+                                    get { code }.isEqualTo(MessageErrorCode.PROTOCOL_ERROR.errorCode)
                                     get { detail }.isEqualTo(
                                         "Sender's message does not comply with protocol specification."
                                     )
                                 }
                             get { get(1) }
                                 .and {
-                                    get { code }.isEqualTo("stackTrace")
+                                    get { code }.isEqualTo(ErrorDetailCode.STACKTRACE.value)
                                     get { detail }.contains(
                                         "JsonParseException: Undeclared namespace prefix"
                                     )
                                 }
                             get { get(2) }
                                 .and {
-                                    get { code }.isEqualTo("message")
+                                    get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
                                     get { detail }.isEqualTo(request)
                                 }
                             get { get(3) }
                                 .and {
-                                    get { code }.isEqualTo("action")
+                                    get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
                                     get { detail }.isEqualTo("/StopTransaction")
                                 }
                         }

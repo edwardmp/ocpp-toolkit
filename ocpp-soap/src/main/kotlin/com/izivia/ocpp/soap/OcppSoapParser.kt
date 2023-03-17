@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.FAULT
@@ -13,7 +14,9 @@ interface OcppSoapParser {
     fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String
     fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String
 
-    fun readToEnvelop(soap: String, warnings: (warnings: List<ErrorDetail>) -> Unit = {}): SoapEnvelope<*>
+    fun applyDeserializerOptions(node: JsonNode, warningHandler: (warnings: List<ErrorDetail>) -> Unit)
+
+    fun readToEnvelop(soap: String, warningHandler: (warnings: List<ErrorDetail>) -> Unit = {}): SoapEnvelope<*>
 
     fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any
     fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any
@@ -29,8 +32,24 @@ abstract class OcppSoapParserImpl(
     private val ns_ocpp: String,
     private val soapMapperOutput: ObjectMapper,
     val soapMapperInput: ObjectMapper,
-    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction> = emptyList()
+    open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction>? = null,
+    open val forcedFieldTypes: List<AbstractForcedFieldType>? = null,
 ) : OcppSoapParser {
+
+    companion object {
+        val isNodeAction: (node: JsonNode, rule: InterfaceFieldOption) -> JsonNode? =
+            { node, rule ->
+                node.first().takeIf { node.has(rule.getBodyAction()) }
+            }
+    }
+
+    override fun applyDeserializerOptions(node: JsonNode, warningHandler: (warnings: List<ErrorDetail>) -> Unit) {
+        ignoredNullRestrictions?.parseNullField(node.findValue(OcppConstant.BODY), isNodeAction)
+            ?.let { warns -> warningHandler(warns) }
+
+        forcedFieldTypes?.parseFieldToConvert(node.findValue(OcppConstant.BODY), isNodeAction)
+            ?.let { warns -> warningHandler(warns) }
+    }
 
     override fun <T> mapResponseToSoap(response: ResponseSoapMessage<T>): String {
         val headers = SoapHeaderOut(
@@ -52,9 +71,7 @@ abstract class OcppSoapParserImpl(
 
     override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
         val warnings = mutableListOf<ErrorDetail>()
-        val envelope = readToEnvelop(messageStr) {
-            warnings.addAll(it)
-        }
+        val envelope = readToEnvelop(messageStr) { warnings.addAll(it) }
         try {
             return RequestSoapMessage(
                 messageId = envelope.header.messageId.value,
@@ -185,7 +202,7 @@ private fun buildSoapFault(action: String?, soap: String, e: Exception) = SoapFa
         errorDescription = ValueText(e.toString()),
         errorDetails = mutableMapOf(
             Pair(ValueText(ErrorDetailCode.STACKTRACE.value), ValueText(e.stackTraceToString())),
-            Pair(ValueText(ErrorDetailCode.MESSAGE.value), ValueText(soap))
+            Pair(ValueText(ErrorDetailCode.PAYLOAD.value), ValueText(soap))
         )
             .also { map ->
                 action?.let {
