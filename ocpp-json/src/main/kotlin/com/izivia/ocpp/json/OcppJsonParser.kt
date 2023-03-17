@@ -71,8 +71,15 @@ abstract class OcppJsonParser(
                 }
             }
 
-            ignoredNullRestrictions?.parseNullField(parsed.payload)?.also { warnings.addAll(it) }
-            forcedFieldTypes?.parseFieldToConvert(parsed.payload)?.also { warnings.addAll(it) }
+            val isNodeAction: (node: JsonNode, rule: InterfaceFieldOption) -> JsonNode? = {
+                    node, rule ->
+                node.takeIf { parsed.action?.lowercase() == rule.action.value.lowercase() }
+            }
+
+            ignoredNullRestrictions?.parseNullField(parsed.payload, isNodeAction = isNodeAction)
+                ?.also { warnings.addAll(it) }
+            forcedFieldTypes?.parseFieldToConvert(parsed.payload, isNodeAction = isNodeAction)
+                ?.also { warnings.addAll(it) }
 
             validateJson(jsonMessage = parsed) { lvm ->
                 lvm.mapNotNull { vm ->
