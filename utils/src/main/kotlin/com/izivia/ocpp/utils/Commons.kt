@@ -155,7 +155,7 @@ fun convertField(
 
 fun List<AbstractForcedFieldType>.parseFieldToConvert(
     node: JsonNode,
-    isNodeAction: (node: JsonNode, rule: AbstractForcedFieldType) -> JsonNode? = { _, _ -> node }
+    isNodeAction: (node: JsonNode, rule: AbstractForcedFieldType) -> JsonNode? = { node, _ -> node }
 ): List<ErrorDetail>? {
     val details = mutableListOf<ErrorDetail>()
     forEach { rule ->

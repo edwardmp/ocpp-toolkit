@@ -7,6 +7,7 @@ import com.izivia.ocpp.core16.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.getdiagnostics.GetDiagnosticsResp
+import com.izivia.ocpp.json.JsonMessage
 import com.izivia.ocpp.utils.*
 import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidatorTypeCode
@@ -25,10 +26,24 @@ class Ocpp16JsonParserErrorTest {
 
     @Test
     fun `should parse Hearbeat request`() {
+        val ocppParser = Ocpp16JsonParser(
+            enableValidation = false,
+            forcedFieldTypes = listOf(
+                Ocpp16ForcedFieldType(
+                    action = Actions.DATATRANSFER,
+                    actionType = ActionTypeEnum.REQUEST,
+                    fieldPath = "data",
+                    typeRequested = TypeConvertEnum.STRING
+                )
+            )
+        )
+
         val request = """[2,"messageId","Heartbeat",{}]"""
 
-        expectThat(parser.parseAnyFromString(request))
-            .get { action }.isEqualTo("Heartbeat")
+        expectThat(ocppParser.parseAnyFromString(request)).and {
+            get { action }.isEqualTo("Heartbeat")
+            get { warnings }.isNull()
+        }
     }
 
     @Test
@@ -408,7 +423,6 @@ class Ocpp16JsonParserErrorTest {
                     }
                 }
         }
-
     }
 
     @Test
