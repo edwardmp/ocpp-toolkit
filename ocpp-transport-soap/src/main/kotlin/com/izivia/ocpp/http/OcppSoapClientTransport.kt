@@ -20,7 +20,9 @@ class OcppSoapClientTransport(
     private val ocppId: String,
     target: String,
     private val ocppSoapParser: OcppSoapParser,
-    private val headers: RequestHeaders = emptyList(),
+    private val headers: RequestHeaders = listOf(
+        "Content-Type" to "application/soap+xml;charset=utf-8;"
+    ),
     private val newMessageId: () -> String = { UUID.randomUUID().toString() }
 ) : ClientTransport {
 
