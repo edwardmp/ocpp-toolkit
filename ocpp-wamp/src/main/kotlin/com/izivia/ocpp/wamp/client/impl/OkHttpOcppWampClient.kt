@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 
 class OkHttpOcppWampClient(
     target: Uri,
@@ -26,7 +28,8 @@ class OkHttpOcppWampClient(
     val ocppVersion: OcppVersion,
     val timeoutInMs: Long = 30_000,
     baseAutoReconnectDelayInMs: Long = 250,
-    private val headers: WampMessageMetaHeaders = emptyList()
+    private val headers: WampMessageMetaHeaders = emptyList(),
+    hostnameVerifier: HostnameVerifier = HostnameVerifier { _, _ -> true }
 ) : OcppWampClient {
     val serverUri = target.path("${target.path.removeSuffix("/")}/$ocppId")
 
@@ -35,7 +38,7 @@ class OkHttpOcppWampClient(
     private val socketOkHttpClient = OkHttpClient.Builder()
         .readTimeout(timeoutInMs, TimeUnit.MILLISECONDS)
         .connectTimeout(timeoutInMs, TimeUnit.MILLISECONDS)
-        .hostnameVerifier { _, _ -> true }
+        .hostnameVerifier(hostnameVerifier)
         .build()
     private val autoReconnectHandler = AutoReconnectHandler(this, baseAutoReconnectDelayInMs)
 
