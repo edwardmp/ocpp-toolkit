@@ -54,6 +54,7 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
         if (connections[chargingStationOcppId] != null) {
             // already connected
             logger.warn("""[$chargingStationOcppId] already connected - the new connection will replace the previous one """)
+            connections[chargingStationOcppId]?.close()
         }
 
         val chargingStationConnection = ChargingStationConnection(
