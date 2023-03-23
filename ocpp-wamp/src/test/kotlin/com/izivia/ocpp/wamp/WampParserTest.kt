@@ -10,8 +10,29 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import java.io.File
+import java.util.*
 
 class WampParserTest {
+
+    @Test
+    fun `TreeMap should make connections insensitive`() {
+        // GIVEN
+        val connections = TreeMap<String, String> { a, b ->
+            a.lowercase().compareTo(b.lowercase())
+        }
+
+        // WHEN
+        connections["key"] = "val"
+        connections["keY"] = "val"
+
+        // THEN
+        expectThat(connections.size).isEqualTo(1)
+        expectThat(connections["key"]).isNotNull()
+        expectThat(connections["key"]).isEqualTo("val")
+        expectThat(connections["keY"]).isEqualTo("val")
+        expectThat(connections["Key"]).isEqualTo("val")
+        expectThat(connections["notExistingKey"]).isNull()
+    }
 
     @Test
     fun `should RemoveQuotesBeforePayloadAndTrim`() {
