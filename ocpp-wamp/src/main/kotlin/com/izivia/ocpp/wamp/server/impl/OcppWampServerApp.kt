@@ -72,7 +72,12 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
 
         logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
         ws.onMessage {
+            logger.info(
+                "OcppWampServerApp onMessage [$chargingStationOcppId] " +
+                    "[$wsConnectionId] connected - number of connexion : ${connections.size}"
+            )
             val msgString = it.bodyString()
+            logger.info("OcppWampServerApp onMessage $msgString")
             WampMessage.parse(msgString)?.also { msg ->
                 when (msg.msgType) {
                     WampMessageType.CALL -> {
