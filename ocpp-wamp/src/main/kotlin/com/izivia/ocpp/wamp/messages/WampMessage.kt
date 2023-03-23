@@ -77,49 +77,55 @@ object WampMessageParser {
     private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]+),(.*)""")
 
     fun parse(msg: String): WampMessage? {
-        try {
-            val formattedMsg = msg.formatWampMessage()
-            when (WampMessageType.fromId(formattedMsg.split(",")[0].toInt())) {
-                CALL -> {
-                    ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
-                        return matchResult.destructured.let {
-                            it.let { (_, msgId, action, payload) ->
-                                WampMessage.Call(msgId, action, payload)
+        logger.info("Trying to parse message: $msg")
+        when (msg) {
+            null, "{}" -> return null
+            else -> {
+                try {
+                    val formattedMsg = msg.formatWampMessage()
+                    when (WampMessageType.fromId(formattedMsg.split(",")[0].toInt())) {
+                        WampMessageType.CALL -> {
+                            ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, action, payload) ->
+                                        WampMessage.Call(msgId, action, payload)
+                                    }
+                                }
                             }
+                            logger.error("WampMessage CALL doesn't match to the expected format $msg")
                         }
-                    }
-                    logger.error("WampMessage CALL doesn't match to the expected format $msg")
-                }
 
-                CALL_RESULT -> {
-                    ocppMsgRegexTypeCallResult.matchEntire(formattedMsg)?.let { matchResult ->
-                        return matchResult.destructured.let {
-                            it.let { (_, msgId, payload) ->
-                                WampMessage.CallResult(msgId, payload)
+                        CALL_RESULT -> {
+                            ocppMsgRegexTypeCallResult.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, payload) ->
+                                        WampMessage.CallResult(msgId, payload)
+                                    }
+                                }
                             }
+                            logger.error("WampMessage CALL_RESULT doesn't match to the expected format $msg")
                         }
-                    }
-                    logger.error("WampMessage CALL_RESULT doesn't match to the expected format $msg")
-                }
 
-                CALL_ERROR -> {
-                    ocppMsgRegexTypeCallError.matchEntire(formattedMsg)?.let { matchResult ->
-                        return matchResult.destructured.let {
-                            it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                                WampMessage.CallError(
-                                    msgId,
-                                    MessageErrorCode.fromValue(errorCode),
-                                    errorDescription,
-                                    payload,
-                                )
+                        CALL_ERROR -> {
+                            ocppMsgRegexTypeCallError.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                                        WampMessage.CallError(
+                                            msgId,
+                                            MessageErrorCode.fromValue(errorCode),
+                                            errorDescription,
+                                            payload
+                                        )
+                                    }
+                                }
                             }
+                            logger.error("WampMessage CALL_ERROR doesn't match to the expected format $msg")
                         }
                     }
-                    logger.error("WampMessage CALL_ERROR doesn't match to the expected format $msg")
+                } catch (e: Exception) {
+                    logger.error("An error appears when trying to parse message : $msg", e)
                 }
             }
-        } catch (e: Exception) {
-            logger.error("An error appears when trying to parse message : $msg", e)
         }
         return null
     }
