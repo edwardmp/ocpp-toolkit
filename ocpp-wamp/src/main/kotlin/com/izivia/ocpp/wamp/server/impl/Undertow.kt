@@ -38,7 +38,7 @@ class Undertow(val port: Int = 8000, val enableHttp2: Boolean,
                         Hybi08Handshake(wsSubprotocols, false),
                         Hybi07Handshake(wsSubprotocols, false),
                     ),
-                    Http4kWebSocketCallback(it)
+                    UndertowWebSocketCallBack(it)
                 )
             }
         }
