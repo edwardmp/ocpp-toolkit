@@ -78,15 +78,19 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
             )
             val msgString = it.bodyString()
             logger.info("OcppWampServerApp onMessage $msgString")
-            WampMessage.parse(msgString)?.also { msg ->
-                when (msg.msgType) {
+            val msg = WampMessage.parse(msgString)
+            if (msg == null) {
+                logger.error("OcppWampServerApp onMessage : Parsing Wamp message return null")
+            }
+            msg?.also { wampMessage ->
+                when (wampMessage.msgType) {
                     WampMessageType.CALL -> {
                         if (shutdown.get()) {
                             logger.info("""[$chargingStationOcppId] [$wsConnectionId] - rejected call - shutting down - $msgString""")
                             ws.send(
                                 WsMessage(
                                     WampMessage.CallError(
-                                        msg.msgId,
+                                        wampMessage.msgId,
                                         MessageErrorCode.INTERNAL_ERROR,
                                         "Rejected call - shutting down",
                                         "{}"
@@ -102,24 +106,24 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
                             .map {
                                 it.onAction(
                                     WampMessageMeta(ocppVersion, chargingStationOcppId, ws.upgradeRequest.headers),
-                                    msg
+                                    wampMessage
                                 )
                             }
                             .filterNotNull()
                             .firstOrNull()
                             ?: WampMessage.CallError(
-                                msg.msgId,
+                                wampMessage.msgId,
                                 MessageErrorCode.INTERNAL_ERROR,
                                 "No action handler found",
-                                """{"message":"$msg"}"""
-                            ).also { logger.warn("no action handler found for $msg") }
+                                """{"message":"$wampMessage"}"""
+                            ).also { logger.warn("no action handler found for $wampMessage") }
 
                         logger.info("""[$chargingStationOcppId] [$wsConnectionId] <- ${resp.toJson()}""")
                         ws.send(WsMessage(resp.toJson()))
                     }
                     WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
                         chargingStationConnection.callManager.handleResult(
-                            "[$chargingStationOcppId] [$wsConnectionId]", msg)
+                            "[$chargingStationOcppId] [$wsConnectionId]", wampMessage)
                     }
                 }
             }
