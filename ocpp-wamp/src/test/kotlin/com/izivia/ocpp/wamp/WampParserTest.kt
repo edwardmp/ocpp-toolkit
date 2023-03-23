@@ -38,11 +38,11 @@ class WampParserTest {
     fun `should RemoveQuotesBeforePayloadAndTrim`() {
         var s = """[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254",{"status":"Accepted"}]"""
         s = s.removeQuotesBeforePayloadAndTrim()
-        expectThat(s).equals("""[3,ffd94ceeA8c5bA4b9dA9a1bA21c64276d254,{"status":"Accepted"}]""")
+        expectThat(s).isEqualTo("""[3,ffd94ceeA8c5bA4b9dA9a1bA21c64276d254,{"status":"Accepted"}]""")
 
         s = """[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254","status":"Accepted"]"""
         s = s.removeQuotesBeforePayloadAndTrim()
-        expectThat(s).equals("""[3,ffd94ceeA8c5bA4b9dA9a1bA21c64276d254,status:Accepted]""")
+        expectThat(s).isEqualTo("""[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254","status":"Accepted"]""")
     }
 
     @Test
