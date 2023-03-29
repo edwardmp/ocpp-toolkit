@@ -73,6 +73,7 @@ import com.izivia.ocpp.core15.model.unlockconnector.enumeration.UnlockStatus
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.json.JsonMessage
+import com.izivia.ocpp.json.JsonMessageType
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -368,6 +369,7 @@ class JsonSchemaTest {
         )
     }
 
+
     @Test
     fun `sendLocalList request format`() {
         validateObject(
@@ -378,7 +380,7 @@ class JsonSchemaTest {
             SendLocalListReq(
                 listVersion = 1,
                 updateType = UpdateType.Differential,
-                localAuthorizationList = listOf(AuthorisationData(""))
+                localAuthorizationList = listOf(AuthorisationData("idTag"))
             )
         )
     }
@@ -667,12 +669,19 @@ class JsonSchemaTest {
     }
 
     inline fun <reified T : Any> validateObject(instance: T) {
+        val instanceClass = instance::class.java.simpleName
         expectThat(
             parser.parseAnyFromJson<T>(
-                parser.mapPayloadToString(
-                    instance
+                parser.mapToJson(
+                    JsonMessage(
+                        msgType = JsonMessageType.CALL.takeIf { instanceClass.endsWith("Req") }
+                            ?: JsonMessageType.CALL_RESULT,
+                        msgId = "123456",
+                        action = instanceClass.replace(Regex("Req$"), "").replace(Regex("Resp$"), ""),
+                        payload = instance
+                    )
                 )
             )
-        ).isA<JsonMessage<T>>()
+        ).isA<JsonMessage<T>>().get { payload }.isA<T>()
     }
 }

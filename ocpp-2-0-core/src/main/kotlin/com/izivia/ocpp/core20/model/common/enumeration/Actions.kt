@@ -77,7 +77,7 @@ enum class Actions(override val value: String, override val classRequest: Class<
     CLEARDISPLAYMESSAGE("clearDisplayMessage", ClearDisplayMessageReq::class.java),
     CLEAREDCHARGINGLIMIT("clearedChargingLimit", ClearedChargingLimitReq::class.java),
     CLEARVARIABLEMONITORING("clearVariableMonitoring", ClearVariableMonitoringReq::class.java),
-    COSTUPDATE("costUpdate", CostUpdatedReq::class.java),
+    COSTUPDATED("costUpdated", CostUpdatedReq::class.java),
     CUSTOMERINFORMATION("customerInformation", CustomerInformationReq::class.java),
     DATATRANSFER("dataTransfer", DataTransferReq::class.java),
     DELETECERTIFICATE("deleteCertificate", DeleteCertificateReq::class.java),
