@@ -34,9 +34,7 @@ import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearVariableMonitor
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.ClearVariableMonitoringResp
 import com.izivia.ocpp.core20.model.clearvariablemonitoring.enumeration.ClearMonitoringStatusEnumType
 import com.izivia.ocpp.core20.model.common.*
-import com.izivia.ocpp.core20.model.common.ComponentVariableType
 import com.izivia.ocpp.core20.model.common.enumeration.*
-import com.izivia.ocpp.core20.model.common.enumeration.HashAlgorithmEnumType
 import com.izivia.ocpp.core20.model.costupdated.CostUpdatedReq
 import com.izivia.ocpp.core20.model.costupdated.CostUpdatedResp
 import com.izivia.ocpp.core20.model.customerinformation.CustomerInformationReq
@@ -203,6 +201,7 @@ import com.izivia.ocpp.core20.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core20.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.core20.model.updatefirmware.enumeration.UpdateFirmwareStatusEnumType
 import com.izivia.ocpp.json.JsonMessage
+import com.izivia.ocpp.json.JsonMessageType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
@@ -217,10 +216,7 @@ class JsonSchemaTest {
 
     @Test
     fun `heartbeat request format`() {
-        val result = parser.parseAnyFromString(
-            parser.mapPayloadToString(HeartbeatReq())
-        )
-        expectThat(result).isA<JsonMessage<HeartbeatReq>>()
+        validateObject(HeartbeatReq())
     }
 
     @Test
@@ -234,9 +230,21 @@ class JsonSchemaTest {
 
         validateObject(
             AuthorizeReq(
-                idToken = IdTokenType("Tag1", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
+                idToken = IdTokenType(
+                    "Tag1",
+                    IdTokenEnumType.Central,
+                    listOf(AdditionalInfoType("additionalIdToken", "type"))
+                ),
                 certificate = "certificate1",
-                iso15118CertificateHashData = listOf(OCSPRequestDataType(HashAlgorithmEnumType.SHA256, "", "", "", ""))
+                iso15118CertificateHashData = listOf(
+                    OCSPRequestDataType(
+                        HashAlgorithmEnumType.SHA256,
+                        "issuerNameHash",
+                        "issuerKeyHash",
+                        "serialNumber",
+                        "responseUrl"
+                    )
+                )
             )
         )
     }
@@ -266,8 +274,13 @@ class JsonSchemaTest {
                             SampledValueType(
                                 value = 0.9,
                                 phase = PhaseEnumType.L1,
-                                signedMeterValue = SignedMeterValueType("", "", "", ""),
-                                unitOfMeasure = UnitOfMeasure("", 2)
+                                signedMeterValue = SignedMeterValueType(
+                                    "signedMeterData",
+                                    "signingMethod",
+                                    "encodingMethod",
+                                    "publicKey"
+                                ),
+                                unitOfMeasure = UnitOfMeasure("unit", 2)
                             )
                         ),
                         Instant.parse("2022-02-15T00:00:00.000Z")
@@ -285,7 +298,7 @@ class JsonSchemaTest {
                 Instant.parse("2022-02-15T00:00:00.000Z"),
                 TriggerReasonEnumType.Authorized,
                 1,
-                TransactionType("")
+                TransactionType("transactionId")
             )
         )
 
@@ -295,13 +308,13 @@ class JsonSchemaTest {
                 Instant.parse("2022-02-15T00:00:00.000Z"),
                 TriggerReasonEnumType.Authorized,
                 1,
-                TransactionType(""),
+                TransactionType("transactionId"),
                 1,
                 EVSEType(1, 2),
                 IdTokenType(
-                    "",
+                    "idToken",
                     IdTokenEnumType.Central,
-                    listOf(AdditionalInfoType("", ""))
+                    listOf(AdditionalInfoType("additionalToken", "type"))
                 ),
                 listOf(MeterValueType(listOf(SampledValueType(10.9)), Instant.parse("2022-02-15T00:00:00.000Z"))),
                 3,
@@ -353,7 +366,7 @@ class JsonSchemaTest {
                     model = "model",
                     vendorName = "vendor",
                     firmwareVersion = "version",
-                    modem = ModemType("", ""),
+                    modem = ModemType("iccid", "imsi"),
                     serialNumber = "0"
                 ),
                 reason = BootReasonEnumType.ApplicationReset
@@ -418,7 +431,11 @@ class JsonSchemaTest {
         validateObject(
             RequestStartTransactionReq(
                 remoteStartId = 1,
-                idToken = IdTokenType("token", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
+                idToken = IdTokenType(
+                    "token",
+                    IdTokenEnumType.Central,
+                    listOf(AdditionalInfoType("additionalToken", "type"))
+                ),
                 evseId = 1,
                 chargingProfile = ChargingProfileType(
                     id = 1,
@@ -439,7 +456,7 @@ class JsonSchemaTest {
                     recurrencyKind = RecurrencyKindEnumType.Daily,
                     validFrom = Instant.parse("2022-02-15T00:00:00.000Z"),
                     validTo = Instant.parse("2022-02-15T00:00:00.000Z"),
-                    transactionId = ""
+                    transactionId = "transactionId"
                 )
             )
         )
@@ -641,20 +658,24 @@ class JsonSchemaTest {
                 UpdateEnumType.Full,
                 listOf(
                     AuthorizationData(
-                        IdTokenType("", IdTokenEnumType.Central, listOf(AdditionalInfoType("", ""))),
+                        IdTokenType(
+                            "idToken",
+                            IdTokenEnumType.Central,
+                            listOf(AdditionalInfoType("additionalToken", "type"))
+                        ),
                         IdTokenInfoType(
                             AuthorizationStatusEnumType.Accepted,
                             Instant.parse("2022-02-15T00:00:00.000Z"),
                             9,
-                            "",
+                            "fr",
                             listOf(2, 4),
-                            "",
+                            "en",
                             IdTokenType(
-                                "",
+                                "idToken",
                                 IdTokenEnumType.Central,
-                                listOf(AdditionalInfoType("", ""))
+                                listOf(AdditionalInfoType("additionalToken", "type"))
                             ),
-                            MessageContentType(MessageFormatEnumType.ASCII, "", "")
+                            MessageContentType(MessageFormatEnumType.ASCII, "content", "language")
                         )
                     )
                 )
@@ -706,10 +727,10 @@ class JsonSchemaTest {
             GetCertificateStatusReq(
                 OCSPRequestDataType(
                     HashAlgorithmEnumType.SHA256,
-                    "",
-                    "",
-                    "",
-                    ""
+                    "issuerNameHash",
+                    "issuerKeyHash",
+                    "serialNumber",
+                    "responderUrl"
                 )
             )
         )
@@ -1582,17 +1603,17 @@ class JsonSchemaTest {
                     AuthorizationStatusEnumType.Accepted,
                     Instant.parse("2022-02-15T00:00:00.000Z"),
                     9,
-                    "",
+                    "fr",
                     listOf(2, 4),
-                    "",
+                    "en",
                     IdTokenType(
-                        "",
+                        "idToken",
                         IdTokenEnumType.Central,
-                        listOf(AdditionalInfoType("", ""))
+                        listOf(AdditionalInfoType("addititionalIdToken", "type"))
                     ),
-                    MessageContentType(MessageFormatEnumType.ASCII, "", "")
+                    MessageContentType(MessageFormatEnumType.ASCII, "content", "language")
                 ),
-                MessageContentType(MessageFormatEnumType.ASCII, "", "")
+                MessageContentType(MessageFormatEnumType.ASCII, "content", "language")
             )
         )
     }
@@ -1614,7 +1635,7 @@ class JsonSchemaTest {
             DataTransferResp(
                 status = DataTransferStatusEnumType.Accepted,
                 data = "data1",
-                statusInfo = StatusInfoType("", "")
+                statusInfo = StatusInfoType("reasonCode", "additionalInfo")
             )
         )
     }
@@ -1635,7 +1656,7 @@ class JsonSchemaTest {
                 currentTime = Instant.parse("2022-02-15T00:00:00.000Z"),
                 interval = 10,
                 status = RegistrationStatusEnumType.Accepted,
-                statusInfo = StatusInfoType("", "")
+                statusInfo = StatusInfoType("reasonCode", "additionalInfo")
             )
         )
     }
@@ -1649,7 +1670,7 @@ class JsonSchemaTest {
         validateObject(
             ChangeAvailabilityResp(
                 ChangeAvailabilityStatusEnumType.Accepted,
-                StatusInfoType("", "")
+                StatusInfoType("reasonCode", "additionalInfo")
             )
         )
     }
@@ -1660,7 +1681,12 @@ class JsonSchemaTest {
             ClearCacheResp(ClearCacheStatusEnumType.Accepted)
         )
 
-        validateObject(ClearCacheResp(ClearCacheStatusEnumType.Accepted, StatusInfoType("", "")))
+        validateObject(
+            ClearCacheResp(
+                ClearCacheStatusEnumType.Accepted,
+                StatusInfoType("reasonCode", "additionalInfo")
+            )
+        )
     }
 
     @Test
@@ -1669,7 +1695,12 @@ class JsonSchemaTest {
             UnlockConnectorResp(UnlockStatusEnumType.Unlocked)
         )
 
-        validateObject(UnlockConnectorResp(UnlockStatusEnumType.Unlocked, StatusInfoType("", "")))
+        validateObject(
+            UnlockConnectorResp(
+                UnlockStatusEnumType.Unlocked,
+                StatusInfoType("reasonCode", "additionalInfo")
+            )
+        )
     }
 
     @Test
@@ -1972,7 +2003,7 @@ class JsonSchemaTest {
         )
 
         validateObject(
-            ResetResp(status = ResetStatusEnumType.Rejected)
+            ResetResp(status = ResetStatusEnumType.Rejected, StatusInfoType("reasonCode", "additionalInfo"))
         )
     }
 
@@ -2095,18 +2126,22 @@ class JsonSchemaTest {
                         GetCertificateIdUseEnumType.CSMSRootCertificate,
                         CertificateHashDataType(
                             HashAlgorithmEnumType.SHA512,
-                            "",
-                            "",
-                            ""
+                            "issuerNameHash",
+                            "issuerKeyHash",
+                            "serialNumber"
                         ),
                         listOf(
                             CertificateHashDataType(
                                 HashAlgorithmEnumType.SHA512,
-                                "",
-                                "",
-                                ""
+                                "issuerNameHash",
+                                "issuerKeyHash",
+                                "serialNumber"
                             ),
-                            CertificateHashDataType(HashAlgorithmEnumType.SHA512, "", "", "")
+                            CertificateHashDataType(
+                                HashAlgorithmEnumType.SHA512, "issuerNameHash",
+                                "issuerKeyHash",
+                                "serialNumber"
+                            )
                         )
                     )
                 ),
@@ -2337,12 +2372,19 @@ class JsonSchemaTest {
     }
 
     inline fun <reified T : Any> validateObject(instance: T) {
+        val instanceClass = instance::class.java.simpleName
         expectThat(
             parser.parseAnyFromJson<T>(
-                parser.mapPayloadToString(
-                    instance
+                parser.mapToJson(
+                    JsonMessage(
+                        msgType = JsonMessageType.CALL.takeIf { instanceClass.endsWith("Req") }
+                            ?: JsonMessageType.CALL_RESULT,
+                        msgId = "123456",
+                        action = instanceClass.replace(Regex("Req$"), "").replace(Regex("Resp$"), ""),
+                        payload = instance
+                    )
                 )
             )
-        ).isA<JsonMessage<T>>()
+        ).isA<JsonMessage<T>>().get { payload }.isA<T>()
     }
 }

@@ -21,16 +21,8 @@ import com.izivia.ocpp.core16.model.clearcache.enumeration.ClearCacheStatus
 import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileReq
 import com.izivia.ocpp.core16.model.clearchargingprofile.ClearChargingProfileResp
 import com.izivia.ocpp.core16.model.clearchargingprofile.enumeration.ClearChargingProfileStatus
-import com.izivia.ocpp.core16.model.common.ChargingProfile
-import com.izivia.ocpp.core16.model.common.ChargingSchedule
-import com.izivia.ocpp.core16.model.common.IdTagInfo
-import com.izivia.ocpp.core16.model.common.MeterValue
-import com.izivia.ocpp.core16.model.common.SampledValue
-import com.izivia.ocpp.core16.model.common.enumeration.AuthorizationStatus
-import com.izivia.ocpp.core16.model.common.enumeration.ChargingProfilePurposeType
-import com.izivia.ocpp.core16.model.common.enumeration.ChargingRateUnitType
-import com.izivia.ocpp.core16.model.common.enumeration.Phase
-import com.izivia.ocpp.core16.model.common.enumeration.RemoteStartStopStatus
+import com.izivia.ocpp.core16.model.common.*
+import com.izivia.ocpp.core16.model.common.enumeration.*
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferReq
 import com.izivia.ocpp.core16.model.datatransfer.DataTransferResp
 import com.izivia.ocpp.core16.model.datatransfer.enumeration.DataTransferStatus
@@ -54,7 +46,9 @@ import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesResp
-import com.izivia.ocpp.core16.model.remotestart.*
+import com.izivia.ocpp.core16.model.remotestart.ChargingSchedulePeriod
+import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionReq
+import com.izivia.ocpp.core16.model.remotestart.RemoteStartTransactionResp
 import com.izivia.ocpp.core16.model.remotestart.enumeration.ChargingProfileKindType
 import com.izivia.ocpp.core16.model.remotestart.enumeration.RecurrencyKindType
 import com.izivia.ocpp.core16.model.remotestop.RemoteStopTransactionReq
@@ -93,6 +87,7 @@ import com.izivia.ocpp.core16.model.unlockconnector.enumeration.UnlockStatus
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.json.JsonMessage
+import com.izivia.ocpp.json.JsonMessageType
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -436,7 +431,7 @@ class JsonSchemaTest {
         )
 
         validateObject(
-            SendLocalListReq(1, UpdateType.Differential, listOf(AuthorizationData("")))
+            SendLocalListReq(2, UpdateType.Differential, listOf(AuthorizationData("idTag")))
         )
     }
 
@@ -784,12 +779,19 @@ class JsonSchemaTest {
     }
 
     inline fun <reified T : Any> validateObject(instance: T) {
+        val instanceClass = instance::class.java.simpleName
         expectThat(
             parser.parseAnyFromJson<T>(
-                parser.mapPayloadToString(
-                    instance
+                parser.mapToJson(
+                    JsonMessage(
+                        msgType = JsonMessageType.CALL.takeIf { instanceClass.endsWith("Req") }
+                            ?: JsonMessageType.CALL_RESULT,
+                        msgId = "123456",
+                        action = instanceClass.replace(Regex("Req$"), "").replace(Regex("Resp$"), ""),
+                        payload = instance
+                    )
                 )
             )
-        ).isA<JsonMessage<T>>()
+        ).isA<JsonMessage<T>>().get { payload }.isA<T>()
     }
 }

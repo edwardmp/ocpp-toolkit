@@ -38,6 +38,7 @@ import com.izivia.ocpp.core16.model.triggermessage.ExtendedTriggerMessageReq
 import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.updatefirmware.SignedUpdateFirmwareReq
+import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.utils.IActions
 
 enum class Actions(override val value: String, override val classRequest: Class<*>) : IActions {
@@ -68,7 +69,7 @@ enum class Actions(override val value: String, override val classRequest: Class<
     STOPTRANSACTION("stopTransaction", StopTransactionReq::class.java),
     TRIGGERMESSAGE("triggerMessage", TriggerMessageReq::class.java),
     UNLOCKCONNECTOR("unlockConnector", UnlockConnectorReq::class.java),
-    UPDATEFIRMWARE("updateFirmware", SignedUpdateFirmwareReq::class.java),
+    UPDATEFIRMWARE("updateFirmware", UpdateFirmwareReq::class.java),
 
     CERTIFICATESIGNED("certificateSigned", CertificateSignedReq::class.java),
     DELETECERTIFICATE("deleteCertificate", DeleteCertificateReq::class.java),
