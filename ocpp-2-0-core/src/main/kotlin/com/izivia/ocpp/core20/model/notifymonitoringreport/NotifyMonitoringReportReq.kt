@@ -1,5 +1,6 @@
 package com.izivia.ocpp.core20.model.notifymonitoringreport
 
+import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
 data class NotifyMonitoringReportReq(
@@ -8,4 +9,7 @@ data class NotifyMonitoringReportReq(
     val seqNo: Int,
     val generatedAt: Instant,
     val monitor: List<MonitoringDataType>? = null
-)
+) : HasActionTimestamp {
+    override val timestamp: Instant
+        get() = generatedAt
+}

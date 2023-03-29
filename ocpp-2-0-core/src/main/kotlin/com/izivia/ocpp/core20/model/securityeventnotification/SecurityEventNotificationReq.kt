@@ -1,9 +1,10 @@
 package com.izivia.ocpp.core20.model.securityeventnotification
 
+import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
 data class SecurityEventNotificationReq(
     val type: String,
-    val timestamp: Instant,
+    override val timestamp: Instant,
     val techInfo: String? = null
-)
+) : HasActionTimestamp
