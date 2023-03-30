@@ -1,11 +1,12 @@
 package com.izivia.ocpp.core20.model.statusnotification
 
 import com.izivia.ocpp.core20.model.statusnotification.enumeration.ConnectorStatusEnumType
+import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
 data class StatusNotificationReq(
     val connectorId: Int,
     val connectorStatus: ConnectorStatusEnumType,
     val evseId: Int,
-    val timestamp: Instant
-)
+    override val timestamp: Instant
+) : HasActionTimestamp

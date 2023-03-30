@@ -5,11 +5,12 @@ import com.izivia.ocpp.core20.model.common.IdTokenType
 import com.izivia.ocpp.core20.model.common.MeterValueType
 import com.izivia.ocpp.core20.model.transactionevent.enumeration.TransactionEventEnumType
 import com.izivia.ocpp.core20.model.transactionevent.enumeration.TriggerReasonEnumType
+import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
 data class TransactionEventReq(
     val eventType: TransactionEventEnumType,
-    val timestamp: Instant,
+    override val timestamp: Instant,
     val triggerReason: TriggerReasonEnumType,
     val seqNo: Int,
     val transactionInfo: TransactionType,
@@ -20,4 +21,4 @@ data class TransactionEventReq(
     val numberOfPhasesUsed: Int? = null,
     val offline: Boolean? = false,
     val reservationId: Int? = null
-)
+) : HasActionTimestamp

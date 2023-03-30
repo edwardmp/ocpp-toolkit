@@ -2,6 +2,7 @@ package com.izivia.ocpp.core16.model.statusnotification
 
 import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointErrorCode
 import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointStatus
+import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
 data class StatusNotificationReq(
@@ -9,7 +10,7 @@ data class StatusNotificationReq(
     val errorCode: ChargePointErrorCode,
     val status: ChargePointStatus,
     val info: String? = null,
-    val timestamp: Instant? = null,
+    override val timestamp: Instant? = null,
     val vendorErrorCode: String? = null,
     val vendorId: String? = null
-)
+) : HasActionTimestamp
