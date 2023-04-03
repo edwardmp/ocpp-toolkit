@@ -277,32 +277,6 @@ abstract class OcppJsonParser(
         }
     }
 
-    fun parseAsStringPayloadFromJson(messageStr: String): JsonMessage<String>? =
-        ocppMsgRegex.matchEntire(messageStr.replace("\n", ""))
-            ?.destructured
-            ?.let {
-                when (val msgType = it.component1().toInt()) {
-                    CALL.id -> it.let { (_, msgId, action, _, payload) ->
-                        JsonMessage.Call(msgId, action, payload)
-                    }
-
-                    CALL_RESULT.id -> it.let { (_, msgId, _, _, payload) ->
-                        JsonMessage.CallResult(msgId, payload)
-                    }
-
-                    CALL_ERROR.id -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                        JsonMessage.CallError(
-                            msgId,
-                            MessageErrorCode.fromValue(errorCode),
-                            errorDescription,
-                            payload
-                        )
-                    }
-
-                    else -> throw IllegalArgumentException("message type $msgType not known. message = $messageStr")
-                }
-            }
-
     fun <T : Any> parsePayloadFromJson(payload: String, clazz: KClass<T>): T =
         mapper.readValue(payload, clazz.java)
 
@@ -342,10 +316,4 @@ abstract class OcppJsonParser(
                 }
             }
             .let { mapper.writeValueAsString(it) }
-
-    companion object {
-        // Same as WampMessage - cross-reference 7bb7e3a7-bbef-4ff4-a8e6-6a3622e9bd4b
-        private val ocppMsgRegex =
-            Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
-    }
 }

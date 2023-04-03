@@ -162,6 +162,7 @@ class OkHttpOcppWampClient(
     private fun onMessage(text: String) {
         CoroutineScope(Dispatchers.Default).launch {
             val msgString = text
+            logger.info("OkHttpOcppWampClient onMessage : $msgString")
             val msg = WampMessage.parse(msgString)
 
             if (msg == null) {
@@ -172,6 +173,7 @@ class OkHttpOcppWampClient(
                         // outcoming call result
                         try {
                             withTimeout(timeoutInMs) {
+                                logger.info("OkHttpOcppWampClient connect callManager : ${wampConnection?.callManager}")
                                 wampConnection?.callManager?.handleResult("[$ocppId]", msg)
                             }
                         } catch (e: TimeoutCancellationException) {

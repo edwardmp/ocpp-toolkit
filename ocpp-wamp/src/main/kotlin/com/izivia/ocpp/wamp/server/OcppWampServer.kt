@@ -60,7 +60,7 @@ interface OcppWampServer {
             port: Int,
             ocppVersions: Set<OcppVersion> = OcppVersion.values().toSet(),
             path: String = "ws",
-            timeoutInMs: Long = 30_000,
+            timeoutInMs: Long = 60_000,
             onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
             onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
         ) = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsCloseHandler)

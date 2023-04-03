@@ -22,101 +22,136 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * @param handlers are called in the list order and return the first not null response
  */
-class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
-                        private val handlers: (CSOcppId)-> List<OcppWampServerHandler>,
-                        private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-                        private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-                        private val ocppWsEndpoint: OcppWsEndpoint,
-                        val timeoutInMs:Long) {
+class OcppWampServerApp(
+    val ocppVersions: Set<OcppVersion>,
+    private val handlers: (CSOcppId) -> List<OcppWampServerHandler>,
+    private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val ocppWsEndpoint: OcppWsEndpoint,
+    val timeoutInMs: Long
+) {
     companion object {
         private val logger = LoggerFactory.getLogger("com.izivia.ocpp.wamp.server")
     }
-    private val connections:MutableMap<String, ChargingStationConnection?> = mutableMapOf()
+
+    private val connections = TreeMap<String, ChargingStationConnection?> { a, b ->
+        a.lowercase().compareTo(b.lowercase())
+    }
     private val shutdown = AtomicBoolean(false)
 
     private fun newConnection(ws: Websocket) {
-        if (shutdown.get()) {
-            logger.warn("shutting down - rejecting connection")
-            ws.close()
-            return
-        }
-        val wsConnectionId = UUID.randomUUID().toString()
-        val chargingStationOcppId = ocppWsEndpoint.extractChargingStationOcppId(ws.upgradeRequest.uri.path)
-            ?.takeUnless { it.isEmpty() }
-            ?:throw IllegalArgumentException("malformed request - no chargingStationOcppId - ${ws.upgradeRequest}")
-        val ocppVersion = ws.upgradeRequest.header("Sec-WebSocket-Protocol")
-            ?.split(",")?.firstOrNull()?.trim()
-            ?.let { ocppVersions.filter { v -> v.subprotocol == it.lowercase() }.firstOrNull() }
-            ?:throw IllegalArgumentException("malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}")
-        val handler = handlers(chargingStationOcppId)
-        onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
-
-        if (connections[chargingStationOcppId] != null) {
-            // already connected
-            logger.warn("""[$chargingStationOcppId] already connected - the new connection will replace the previous one """)
-        }
-
-        val chargingStationConnection = ChargingStationConnection(
-            wsConnectionId, chargingStationOcppId, ws, ocppVersion, timeoutInMs, shutdown)
-        connections[chargingStationOcppId] = chargingStationConnection
-        ws.onClose {
-            logger.info("""[$chargingStationOcppId] [$wsConnectionId] disconnected """)
-            if (connections[chargingStationOcppId]?.wsConnectionId == wsConnectionId) {
-                connections[chargingStationOcppId] = null
-            } else {
-                logger.info("warn: do not clear ws on close - not current connection in map")
+        try {
+            if (shutdown.get()) {
+                logger.warn("shutting down - rejecting connection")
+                ws.close()
+                return
             }
-            onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
-        }
+            val wsConnectionId = UUID.randomUUID().toString()
+            val chargingStationOcppId = ocppWsEndpoint.extractChargingStationOcppId(ws.upgradeRequest.uri.path)
+                ?.takeUnless { it.isEmpty() }
+                ?: throw IllegalArgumentException("malformed request - no chargingStationOcppId - ${ws.upgradeRequest}")
+            val ocppVersion = ws.upgradeRequest.header("Sec-WebSocket-Protocol")
+                ?.split(",")?.firstOrNull()?.trim()
+                ?.let { ocppVersions.filter { v -> v.subprotocol == it.lowercase() }.firstOrNull() }
+                ?: throw IllegalArgumentException(
+                    "malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}"
+                )
+            val handler = handlers(chargingStationOcppId)
+            onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
 
-        logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
-        ws.onMessage {
-            val msgString = it.bodyString()
-            WampMessage.parse(msgString)?.also { msg ->
-                when (msg.msgType) {
-                    WampMessageType.CALL -> {
-                        if (shutdown.get()) {
-                            logger.info("""[$chargingStationOcppId] [$wsConnectionId] - rejected call - shutting down - $msgString""")
-                            ws.send(
-                                WsMessage(
-                                    WampMessage.CallError(
-                                        msg.msgId,
-                                        MessageErrorCode.INTERNAL_ERROR,
-                                        "Rejected call - shutting down",
-                                        "{}"
-                                    ).toJson()
+            if (connections[chargingStationOcppId] != null) {
+                // already connected
+                logger.warn(
+                    """[$chargingStationOcppId] already connected - the new connection will replace the previous one """
+                )
+                connections[chargingStationOcppId]?.close()
+            }
+
+            val chargingStationConnection = ChargingStationConnection(
+                wsConnectionId,
+                chargingStationOcppId,
+                ws,
+                ocppVersion,
+                timeoutInMs,
+                shutdown
+            )
+            connections[chargingStationOcppId] = chargingStationConnection
+            ws.onClose {
+                logger.info("""[$chargingStationOcppId] [$wsConnectionId] disconnected """)
+                if (connections[chargingStationOcppId]?.wsConnectionId == wsConnectionId) {
+                    connections[chargingStationOcppId] = null
+                } else {
+                    logger.info("warn: do not clear ws on close - not current connection in map")
+                }
+                onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+            }
+
+            logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
+            ws.onMessage {
+                logger.info(
+                    "OcppWampServerApp onMessage [$chargingStationOcppId] " +
+                        "[$wsConnectionId] connected - number of connexion : ${connections.size}"
+                )
+                val msgString = it.bodyString()
+                logger.info("OcppWampServerApp onMessage $msgString")
+                val msg = WampMessage.parse(msgString)
+                if (msg == null) {
+                    logger.error("OcppWampServerApp onMessage : Parsing Wamp message return null")
+                }
+                msg?.also { wampMessage ->
+                    when (wampMessage.msgType) {
+                        WampMessageType.CALL -> {
+                            if (shutdown.get()) {
+                                logger.info(
+                                    """[$chargingStationOcppId] [$wsConnectionId] - rejected call - shutting down - $msgString"""
                                 )
-                            )
-                            return@onMessage
+                                ws.send(
+                                    WsMessage(
+                                        WampMessage.CallError(
+                                            wampMessage.msgId,
+                                            MessageErrorCode.INTERNAL_ERROR,
+                                            "Rejected call - shutting down",
+                                            "{}"
+                                        ).toJson()
+                                    )
+                                )
+                                return@onMessage
+                            }
+
+                            logger.info("""[$chargingStationOcppId] [$wsConnectionId] -> ${it.bodyString()}""")
+                            val resp = handler.asSequence()
+                                // use sequence to avoid greedy mapping, to find the first handler with non null result
+                                .map {
+                                    it.onAction(
+                                        WampMessageMeta(ocppVersion, chargingStationOcppId, ws.upgradeRequest.headers),
+                                        wampMessage
+                                    )
+                                }
+                                .filterNotNull()
+                                .firstOrNull()
+                                ?: WampMessage.CallError(
+                                    wampMessage.msgId,
+                                    MessageErrorCode.INTERNAL_ERROR,
+                                    "No action handler found",
+                                    """{"message":"$wampMessage"}"""
+                                ).also { logger.warn("no action handler found for $wampMessage") }
+
+                            logger.info("""[$chargingStationOcppId] [$wsConnectionId] <- ${resp.toJson()}""")
+                            ws.send(WsMessage(resp.toJson()))
                         }
 
-                        logger.info("""[$chargingStationOcppId] [$wsConnectionId] -> ${it.bodyString()}""")
-                        val resp = handler.asSequence()
-                            // use sequence to avoid greedy mapping, to find the first handler with non null result
-                            .map {
-                                it.onAction(
-                                    WampMessageMeta(ocppVersion, chargingStationOcppId, ws.upgradeRequest.headers),
-                                    msg
-                                )
-                            }
-                            .filterNotNull()
-                            .firstOrNull()
-                            ?: WampMessage.CallError(
-                                msg.msgId,
-                                MessageErrorCode.INTERNAL_ERROR,
-                                "No action handler found",
-                                """{"message":"$msg"}"""
-                            ).also { logger.warn("no action handler found for $msg") }
-
-                        logger.info("""[$chargingStationOcppId] [$wsConnectionId] <- ${resp.toJson()}""")
-                        ws.send(WsMessage(resp.toJson()))
-                    }
-                    WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
-                        chargingStationConnection.callManager.handleResult(
-                            "[$chargingStationOcppId] [$wsConnectionId]", msg)
+                        WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
+                            chargingStationConnection.callManager.handleResult(
+                                "[$chargingStationOcppId] [$wsConnectionId]",
+                                wampMessage
+                            )
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            logger.error("Error during new connection", e)
+            throw e
         }
     }
 
@@ -152,12 +187,16 @@ class OcppWampServerApp(val ocppVersions:Set<OcppVersion>,
 
     fun newRoutingHandler() = websockets(ocppWsEndpoint.uriTemplate.toString() bind ::newConnection)
 
-    private class ChargingStationConnection(val wsConnectionId:String,
-                                                 val ocppId:CSOcppId, val ws: Websocket,
-                                                 val ocppVersion: OcppVersion,
-                                                 timeoutInMs:Long, shutdown: AtomicBoolean
+    private class ChargingStationConnection(
+        val wsConnectionId: String,
+        val ocppId: CSOcppId,
+        val ws: Websocket,
+        val ocppVersion: OcppVersion,
+        timeoutInMs: Long,
+        shutdown: AtomicBoolean
     ) {
-        val callManager:WampCallManager = WampCallManager(logger, {m:String -> ws.send(WsMessage(m))}, timeoutInMs, shutdown)
+        val callManager: WampCallManager =
+            WampCallManager(logger, { m: String -> ws.send(WsMessage(m)) }, timeoutInMs, shutdown)
 
         fun sendBlocking(message: WampMessage): WampMessage =
             callManager.callBlocking("[$ocppId] [$wsConnectionId]", message)

@@ -4,6 +4,7 @@ import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessageType.*
+import org.slf4j.LoggerFactory
 
 data class WampMessage(
     val msgType: WampMessageType,
@@ -50,28 +51,84 @@ data class WampMessage(
 }
 
 object WampMessageParser {
-    // Same as JsonMessage - cross-reference 7bb7e3a7-bbef-4ff4-a8e6-6a3622e9bd4b
-    private val ocppMsgRegex =
-        Regex("""\[\s*(\d+)\s*,\s*"([^"]+)"\s*(?:,\s*"([^"]+)"\s*)?(?:,\s*"([^"]+)"\s*)?,\s*(.+)]""")
 
-    fun parse(string: String): WampMessage? =
-        ocppMsgRegex.matchEntire(string.replace("\n", ""))
-            ?.destructured
-            ?.let {
-                when (WampMessageType.fromId(it.component1().toInt())) {
-                    CALL -> it.let { (_, msgId, action, _, payload) ->
-                        WampMessage.Call(msgId, action, payload)
-                    }
+    private val logger = LoggerFactory.getLogger(WampMessageParser::class.java)
 
-                    CALL_RESULT -> it.let { (_, msgId, _, _, payload) ->
-                        WampMessage.CallResult(msgId, payload)
-                    }
+    private fun String.formatWampMessage(): String =
+        this.replace("\n", "").removeBracketsAndTrim().removeQuotesBeforePayloadAndTrim()
 
-                    CALL_ERROR -> it.let { (_, msgId, errorCode, errorDescription, payload) ->
-                        WampMessage.CallError(msgId, MessageErrorCode.fromValue(errorCode), errorDescription, payload)
+    private fun String.removeBracketsAndTrim(): String = this.trim().removePrefix("[").removeSuffix("]")
+
+    fun String.removeQuotesBeforePayloadAndTrim(): String {
+        this.indexOf("{", 0).let { indexOfFirstBrace ->
+            if (indexOfFirstBrace != -1) {
+                return this.substring(0, indexOfFirstBrace).replace("\"", "").replace(", ", ",") + this.substring(
+                    indexOfFirstBrace,
+                ).trim()
+            } else {
+                logger.error("No brace found from WampMessqages $this")
+                return this
+            }
+        }
+    }
+
+    private val ocppMsgRegexTypeCall = Regex("""(\d+),([^,]+),([^,]+),(.*)""")
+    private val ocppMsgRegexTypeCallResult = Regex("""(\d+),([^,]+),(.*)""")
+    private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]+),(.*)""")
+
+    fun parse(msg: String): WampMessage? {
+        logger.info("Trying to parse message: $msg")
+        when (msg) {
+            null, "{}" -> return null
+            else -> {
+                try {
+                    val formattedMsg = msg.formatWampMessage()
+                    when (WampMessageType.fromId(formattedMsg.split(",")[0].toInt())) {
+                        WampMessageType.CALL -> {
+                            ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, action, payload) ->
+                                        WampMessage.Call(msgId, action, payload)
+                                    }
+                                }
+                            }
+                            logger.error("WampMessage CALL doesn't match to the expected format $msg")
+                        }
+
+                        CALL_RESULT -> {
+                            ocppMsgRegexTypeCallResult.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, payload) ->
+                                        WampMessage.CallResult(msgId, payload)
+                                    }
+                                }
+                            }
+                            logger.error("WampMessage CALL_RESULT doesn't match to the expected format $msg")
+                        }
+
+                        CALL_ERROR -> {
+                            ocppMsgRegexTypeCallError.matchEntire(formattedMsg)?.let { matchResult ->
+                                return matchResult.destructured.let {
+                                    it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                                        WampMessage.CallError(
+                                            msgId,
+                                            MessageErrorCode.fromValue(errorCode),
+                                            errorDescription,
+                                            payload
+                                        )
+                                    }
+                                }
+                            }
+                            logger.error("WampMessage CALL_ERROR doesn't match to the expected format $msg")
+                        }
                     }
+                } catch (e: Exception) {
+                    logger.error("An error appears when trying to parse message : $msg", e)
                 }
             }
+        }
+        return null
+    }
 }
 
 enum class WampMessageType(val id: Int) {
