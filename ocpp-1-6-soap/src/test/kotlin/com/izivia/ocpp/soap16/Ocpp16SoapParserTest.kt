@@ -40,7 +40,12 @@ import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointEr
 import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointStatus
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
-import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
+import com.izivia.ocpp.core16.model.triggermessage.enumeration.MessageTrigger
+import com.izivia.ocpp.soap.RequestSoapMessage
+import com.izivia.ocpp.soap.ResponseSoapMessage
+import com.izivia.ocpp.soap.SoapFault
+import com.izivia.ocpp.soap.parseRequestFromSoap
 import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
@@ -561,6 +566,77 @@ class Ocpp16SoapParserTest {
             get { idTag }.isEqualTo("AAAAAAAA")
             get { reason }.isNull()
             get { transactionData }.isNull()
+        }
+    }
+
+    @Test
+    fun `should parse message to TriggerMessageReq`() {
+        val message =
+            """
+                <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope"
+                xmlns:cs="urn://Ocpp/Cs/2012/06/" xmlns:wsa5="http://www.w3.org/2005/08/addressing">
+                    <SOAP-ENV:Header>
+                        <cs:chargeBoxIdentity>CS1</cs:chargeBoxIdentity>
+                        <wsa5:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</wsa5:MessageID>
+                        <wsa5:From>
+                            <wsa5:Address>http://:8082/</wsa5:Address>
+                        </wsa5:From>
+                        <wsa5:ReplyTo>
+                            <wsa5:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa5:Address>
+                        </wsa5:ReplyTo>
+                        <wsa5:To SOAP-ENV:mustUnderstand="true">http://example.fr:80/ocpp/v15s/</wsa5:To>
+                        <wsa5:Action SOAP-ENV:mustUnderstand="true">/TriggerMessage</wsa5:Action>
+                    </SOAP-ENV:Header>
+                    <SOAP-ENV:Body>
+                        <cs:triggerMessageRequest>
+                            <cs:connectorId>1</cs:connectorId>
+                            <cs:requestedMessage>BootNotification</cs:requestedMessage>
+                        </cs:triggerMessageRequest>
+                    </SOAP-ENV:Body>
+                </SOAP-ENV:Envelope>
+            """
+
+        expectThat(
+            ocpp16SoapParser
+                .parseRequestFromSoap<TriggerMessageReq>(message)
+        ).and {
+            get { messageId }.isEqualTo("urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49")
+            get { chargingStationId }.isEqualTo("CS1")
+            get { action }.isEqualTo("TriggerMessage")
+            get { from }.isEqualTo("http://:8082/")
+            get { to }.isEqualTo("http://example.fr:80/ocpp/v15s/")
+            get { payload }.and {
+                isA<TriggerMessageReq>()
+                get { connectorId }.isEqualTo(1)
+                get { requestedMessage }.isEqualTo(MessageTrigger.BootNotification)
+            }
+        }
+    }
+
+    @Test
+    fun `should parse TriggerMessageReq to soap message`() {
+        val triggerMessageReq = RequestSoapMessage(
+            "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
+            "CS1",
+            "TriggerMessage",
+            from = "http://:8082/",
+            to = "http://example.fr:80/ocpp/v15s/",
+            payload = TriggerMessageReq(MessageTrigger.BootNotification, 1)
+        )
+
+        expectThat(
+            ocpp16SoapParser.mapRequestToSoap(triggerMessageReq)
+        ).and {
+            get { this }.contains("<a:Action>/TriggerMessage</a:Action>")
+            get { this }.contains( """
+                <o:triggerMessageRequest>
+                    <o:requestedMessage>BootNotification</o:requestedMessage>
+                    <o:connectorId>1</o:connectorId>
+                </o:triggerMessageRequest>
+            """.replace("\\n| ".toRegex(), "")
+                .trimIndent()
+            )
+
         }
     }
 
@@ -1087,7 +1163,7 @@ class Ocpp16SoapParserTest {
                     get { data }
                         .isEqualTo(
                             "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\"," +
-                                    "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
+                                "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
                         )
                 }
         }
