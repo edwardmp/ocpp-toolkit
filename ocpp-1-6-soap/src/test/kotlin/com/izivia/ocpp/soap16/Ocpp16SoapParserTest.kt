@@ -41,11 +41,10 @@ import com.izivia.ocpp.core16.model.statusnotification.enumeration.ChargePointSt
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core16.model.stoptransaction.StopTransactionResp
 import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
+import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageResp
 import com.izivia.ocpp.core16.model.triggermessage.enumeration.MessageTrigger
-import com.izivia.ocpp.soap.RequestSoapMessage
-import com.izivia.ocpp.soap.ResponseSoapMessage
-import com.izivia.ocpp.soap.SoapFault
-import com.izivia.ocpp.soap.parseRequestFromSoap
+import com.izivia.ocpp.core16.model.triggermessage.enumeration.TriggerMessageStatus
+import com.izivia.ocpp.soap.*
 import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
@@ -616,9 +615,9 @@ class Ocpp16SoapParserTest {
     @Test
     fun `should parse TriggerMessageReq to soap message`() {
         val triggerMessageReq = RequestSoapMessage(
-            "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
-            "CS1",
-            "TriggerMessage",
+            messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
+            chargingStationId = "CS1",
+            action = "TriggerMessage",
             from = "http://:8082/",
             to = "http://example.fr:80/ocpp/v15s/",
             payload = TriggerMessageReq(MessageTrigger.BootNotification, 1)
@@ -633,6 +632,66 @@ class Ocpp16SoapParserTest {
                     <o:requestedMessage>BootNotification</o:requestedMessage>
                     <o:connectorId>1</o:connectorId>
                 </o:triggerMessageRequest>
+            """.replace("\\n| ".toRegex(), "")
+                .trimIndent()
+            )
+
+        }
+    }
+
+    @Test
+    fun `should parse soap message to TriggerMessageResp`() {
+        val message = """
+            <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" 
+                        xmlns:a="http://www.w3.org/2005/08/addressing" 
+                        xmlns:o="urn://Ocpp/Cp/2015/10/">
+                <s:Header>
+                    <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID>
+                    <a:Action>/TriggerMessageResponse</a:Action>
+                    <a:From><a:Address>http://example.fr:80/ocpp/v15s/</a:Address></a:From>
+                    <a:RelatesTo>CS1</a:RelatesTo>
+                </s:Header>
+                <s:Body>
+                    <o:triggerMessageResponse><o:status>Accepted</o:status></o:triggerMessageResponse>
+                </s:Body>
+            </s:Envelope>
+        """.trimIndent()
+
+        expectThat(
+            ocpp16SoapParser.parseResponseFromSoap<TriggerMessageResp>(message)
+        ).and {
+            get { messageId }.isEqualTo("urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49")
+            get { relatesTo }.isEqualTo("CS1")
+            get { action }.isEqualTo("TriggerMessage")
+            get { from }.isEqualTo("http://example.fr:80/ocpp/v15s/")
+            get { payload }.and {
+                isA<TriggerMessageResp>()
+                get { status }.isEqualTo(TriggerMessageStatus.Accepted)
+            }
+        }
+    }
+
+    @Test
+    fun `should parse TriggerMessageResp to soap message`() {
+        val triggerMessageResp = ResponseSoapMessage(
+            action = "TriggerMessage",
+            messageId = "urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49",
+            relatesTo = "CS1",
+            from = "http://:8082/",
+            to = "http://example.fr:80/ocpp/v15s/",
+            payload = TriggerMessageResp(TriggerMessageStatus.Accepted)
+        )
+
+        println(            ocpp16SoapParser.mapResponseToSoap(triggerMessageResp)
+        )
+        expectThat(
+            ocpp16SoapParser.mapResponseToSoap(triggerMessageResp)
+        ).and {
+            get { this }.contains("<a:Action>/TriggerMessageResponse</a:Action>")
+            get { this }.contains( """
+                <o:triggerMessageResponse>
+                    <o:status>Accepted</o:status>
+                </o:triggerMessageResponse>
             """.replace("\\n| ".toRegex(), "")
                 .trimIndent()
             )
