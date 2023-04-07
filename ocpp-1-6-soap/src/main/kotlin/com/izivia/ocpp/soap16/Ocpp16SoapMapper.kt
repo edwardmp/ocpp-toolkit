@@ -273,15 +273,15 @@ private abstract class ClearChargingProfileReqMixin(
     val stackLevel: Int? = null
 )
 
-@JsonRootName("triggerMessageResponse")
+@JsonRootName("triggerMessageRequest")
 private abstract class TriggerMessageReqMixin(
-    @JacksonXmlProperty(localName = "o:requestMessage")
-    val requestMessage: MessageTrigger,
+    @JacksonXmlProperty(localName = "o:requestedMessage")
+    val requestedMessage: MessageTrigger,
     @JacksonXmlProperty(localName = "o:connectorId")
     val connectorId: Int? = null
 )
 
-@JsonRootName("triggerMessageRequest")
+@JsonRootName("triggerMessageResponse")
 private abstract class TriggerMessageRespMixin(
     @JacksonXmlProperty(localName = "o:status")
     val status: TriggerMessageStatus
