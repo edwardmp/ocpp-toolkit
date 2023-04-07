@@ -100,32 +100,26 @@ abstract class OcppSoapParserImpl(
         val envelope = readToEnvelop(messageStr) {
             warnings.addAll(it)
         }
-        try {
-            return ResponseSoapMessage(
-                messageId = envelope.header.messageId.value,
-                relatesTo = envelope.header.relatesTo?.value
-                    ?: throw MissingRelatesToHeaderException(
-                        message = "Malformed envelope",
-                        messageId = envelope.header.messageId.value,
-                        errorDetails = listOf(ErrorDetail(code = "request", detail = envelope.toString()))
-                    ),
-                action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
-                payload = getResponseBodyContent(envelope),
-                from = envelope.header.from.address.value,
-                to = envelope.header.to.toString(),
-                warnings = warnings.takeIf { it.size > 0 }
-            )
-        } catch (e: OcppParserException) {
-            return ResponseSoapMessage(
-                messageId = envelope.header.messageId.value,
-                relatesTo = e.messageId ?: "missing-relatesTo",
-                action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
-                payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
-                from = envelope.header.from.address.value,
-                to = envelope.header.to.toString(),
-                warnings = warnings.takeIf { it.size > 0 }
-            )
-        }
+        return ResponseSoapMessage(
+            messageId = envelope.header.messageId.value,
+            relatesTo = envelope.header.relatesTo?.value ?: "missing-relatesTo".also {
+                warnings.add(
+                    ErrorDetail(
+                        code = ErrorDetailCode.MISSING_FIELD_REPLACED.value,
+                        detail = "Missing relatesTo value : $envelope"
+                    )
+                )
+            },
+            action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
+            payload = try {
+                getResponseBodyContent(envelope)
+            } catch (e: Exception) {
+                buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e)
+            },
+            from = envelope.header.from.address.value,
+            to = envelope.header.to.toString(),
+            warnings = warnings.takeIf { it.size > 0 }
+        )
     }
 
     override fun <T> mapRequestToSoap(request: RequestSoapMessage<T>): String {

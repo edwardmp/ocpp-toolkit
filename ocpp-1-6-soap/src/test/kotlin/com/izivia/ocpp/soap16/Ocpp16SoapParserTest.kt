@@ -21,6 +21,7 @@ import com.izivia.ocpp.core16.model.firmwarestatusnotification.enumeration.Firmw
 import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
 import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.core16.model.getcompositeschedule.enumeration.GetCompositeScheduleStatus
+import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationResp
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
@@ -627,13 +628,14 @@ class Ocpp16SoapParserTest {
             ocpp16SoapParser.mapRequestToSoap(triggerMessageReq)
         ).and {
             get { this }.contains("<a:Action>/TriggerMessage</a:Action>")
-            get { this }.contains( """
+            get { this }.contains(
+                """
                 <o:triggerMessageRequest>
                     <o:requestedMessage>BootNotification</o:requestedMessage>
                     <o:connectorId>1</o:connectorId>
                 </o:triggerMessageRequest>
             """.replace("\\n| ".toRegex(), "")
-                .trimIndent()
+                    .trimIndent()
             )
 
         }
@@ -682,18 +684,20 @@ class Ocpp16SoapParserTest {
             payload = TriggerMessageResp(TriggerMessageStatus.Accepted)
         )
 
-        println(            ocpp16SoapParser.mapResponseToSoap(triggerMessageResp)
+        println(
+            ocpp16SoapParser.mapResponseToSoap(triggerMessageResp)
         )
         expectThat(
             ocpp16SoapParser.mapResponseToSoap(triggerMessageResp)
         ).and {
             get { this }.contains("<a:Action>/TriggerMessageResponse</a:Action>")
-            get { this }.contains( """
+            get { this }.contains(
+                """
                 <o:triggerMessageResponse>
                     <o:status>Accepted</o:status>
                 </o:triggerMessageResponse>
             """.replace("\\n| ".toRegex(), "")
-                .trimIndent()
+                    .trimIndent()
             )
 
         }
@@ -2211,6 +2215,99 @@ class Ocpp16SoapParserTest {
             }
         }
     }
+
+    @Test
+    fun `should map message with missing relatesTo to soap`() {
+        val message = """<?xml version="1.0" encoding="UTF-8"?>
+            <SOAP-ENV:Envelope
+            	xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance"
+            	xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding"
+            	xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" >
+            	<SOAP-ENV:Header>
+            		<Action xmlns="http://www.w3.org/2005/08/addressing">/GetConfigurationResponse</Action>
+            		<MessageID
+            			xmlns="http://www.w3.org/2005/08/addressing">urn:uuid:8608e9ad-9925-4d43-a356-49c12ff4dd31
+            		</MessageID>
+            		<chargeBoxIdentity
+            			xmlns="http://www.w3.org/2005/08/addressing">00:13:F6:01:57:AD
+            		</chargeBoxIdentity>
+            	</SOAP-ENV:Header>
+            	<SOAP-ENV:Body>
+            		<getConfigurationResponse
+            			xmlns="urn://Ocpp/Cp/2012/06/">
+            			<configurationKey>
+            				<key>And_Or</key>
+            				<readonly>true</readonly>
+            				<value>2</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>Access_control</key>
+            				<readonly>true</readonly>
+            				<value>2</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>Three-phase</key>
+            				<readonly>true</readonly>
+            				<value>0</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>Name</key>
+            				<readonly>false</readonly>
+            				<value>"Park"</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>Wh_per_impulse1</key>
+            				<readonly>true</readonly>
+            				<value>1</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>Wh_per_impulse2</key>
+            				<readonly>true</readonly>
+            				<value>1</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>NetworkFailure</key>
+            				<readonly>false</readonly>
+            				<value>0</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>SetPoint1</key>
+            				<readonly>false</readonly>
+            				<value>63</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>SetPoint2</key>
+            				<readonly>false</readonly>
+            				<value>63</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>HeartbeatInterval</key>
+            				<readonly>false</readonly>
+            				<value>1800</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>MeterValueSampleInterval</key>
+            				<readonly>false</readonly>
+            				<value>60</value>
+            			</configurationKey>
+            			<configurationKey>
+            				<key>refcp</key>
+            				<readonly>true</readonly>
+            				<value>""</value>
+            			</configurationKey>
+            		</getConfigurationResponse>
+            	</SOAP-ENV:Body>
+            </SOAP-ENV:Envelope>""".trimSoap()
+
+        expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(message)).and {
+            get { action }.isEqualTo("GetConfiguration")
+            get { relatesTo }.isEqualTo("missing-relatesTo")
+            get { warnings }.isNotNull().isNotEmpty().get { this[0].code }
+                .isEqualTo(ErrorDetailCode.MISSING_FIELD_REPLACED.value)
+            get { payload }.isA<GetConfigurationResp>()
+        }
+    }
+
 
     @Test
     fun `should map undeclared namespace to SoapFault`() {
