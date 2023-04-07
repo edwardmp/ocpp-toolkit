@@ -2,6 +2,8 @@ package com.izivia.ocpp.soap
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
 import com.fasterxml.jackson.dataformat.xml.XmlFactory
@@ -40,6 +42,7 @@ private object CustomXmlModule : JacksonXmlModule() {
     init {
         setDefaultUseWrapper(false)
         setXMLTextElementName("text")
+        addDeserializer(Boolean::class.java, CustomBooleanDeserializer())
     }
 }
 
@@ -76,3 +79,14 @@ abstract class FaultReasonMixin(
     @JacksonXmlProperty(localName = "s:Text")
     val text: FaultReasonText
 )
+
+class CustomBooleanDeserializer : JsonDeserializer<Boolean>() {
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): Boolean =
+        when (p?.currentTokenId()) {
+            JsonTokenId.ID_STRING -> p.text == "1" || p.text.lowercase() == "true"
+            JsonTokenId.ID_TRUE -> true
+            JsonTokenId.ID_FALSE -> false
+            JsonTokenId.ID_NUMBER_INT -> p.numberValue == 1
+            else -> false
+        }
+}
