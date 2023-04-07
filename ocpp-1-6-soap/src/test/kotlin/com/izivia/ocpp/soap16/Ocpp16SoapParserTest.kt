@@ -22,6 +22,7 @@ import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleReq
 import com.izivia.ocpp.core16.model.getcompositeschedule.GetCompositeScheduleResp
 import com.izivia.ocpp.core16.model.getcompositeschedule.enumeration.GetCompositeScheduleStatus
 import com.izivia.ocpp.core16.model.getconfiguration.GetConfigurationResp
+import com.izivia.ocpp.core16.model.getconfiguration.KeyValue
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core16.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core16.model.metervalues.MeterValuesReq
@@ -2247,64 +2248,72 @@ class Ocpp16SoapParserTest {
             			</configurationKey>
             			<configurationKey>
             				<key>Three-phase</key>
-            				<readonly>true</readonly>
+            				<readonly>1</readonly>
             				<value>0</value>
             			</configurationKey>
             			<configurationKey>
             				<key>Name</key>
             				<readonly>false</readonly>
-            				<value>"Park"</value>
+            				<value>Park</value>
             			</configurationKey>
             			<configurationKey>
             				<key>Wh_per_impulse1</key>
-            				<readonly>true</readonly>
+            				<readonly>1</readonly>
             				<value>1</value>
             			</configurationKey>
             			<configurationKey>
             				<key>Wh_per_impulse2</key>
-            				<readonly>true</readonly>
+            				<readonly>1</readonly>
             				<value>1</value>
             			</configurationKey>
             			<configurationKey>
             				<key>NetworkFailure</key>
-            				<readonly>false</readonly>
+            				<readonly>0</readonly>
             				<value>0</value>
             			</configurationKey>
             			<configurationKey>
             				<key>SetPoint1</key>
-            				<readonly>false</readonly>
+            				<readonly>0</readonly>
             				<value>63</value>
             			</configurationKey>
             			<configurationKey>
             				<key>SetPoint2</key>
-            				<readonly>false</readonly>
+            				<readonly>0</readonly>
             				<value>63</value>
             			</configurationKey>
             			<configurationKey>
             				<key>HeartbeatInterval</key>
-            				<readonly>false</readonly>
+            				<readonly>0</readonly>
             				<value>1800</value>
             			</configurationKey>
             			<configurationKey>
             				<key>MeterValueSampleInterval</key>
-            				<readonly>false</readonly>
+            				<readonly>0</readonly>
             				<value>60</value>
             			</configurationKey>
             			<configurationKey>
             				<key>refcp</key>
-            				<readonly>true</readonly>
+            				<readonly>1</readonly>
             				<value>""</value>
             			</configurationKey>
             		</getConfigurationResponse>
             	</SOAP-ENV:Body>
             </SOAP-ENV:Envelope>""".trimSoap()
 
+        println(ocpp16SoapParser.parseAnyResponseFromSoap(message))
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(message)).and {
             get { action }.isEqualTo("GetConfiguration")
             get { relatesTo }.isEqualTo("missing-relatesTo")
             get { warnings }.isNotNull().isNotEmpty().get { this[0].code }
                 .isEqualTo(ErrorDetailCode.MISSING_FIELD_REPLACED.value)
-            get { payload }.isA<GetConfigurationResp>()
+            get { payload }.isA<GetConfigurationResp>().and {
+                get { configurationKey }.isNotNull().isNotEmpty().contains(
+                    KeyValue("And_Or", true, "2"),
+                    KeyValue("Three-phase", true, "0"),
+                    KeyValue("Name", false, "Park"),
+                    KeyValue("NetworkFailure", false, "0"),
+                )
+            }
         }
     }
 
