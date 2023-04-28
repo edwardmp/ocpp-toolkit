@@ -6,6 +6,7 @@ import com.izivia.ocpp.wamp.messages.WampMessageParser.removeQuotesBeforePayload
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.isContainedIn
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 import strikt.assertions.isNull
@@ -74,6 +75,9 @@ class WampParserTest {
         val callTypeMsgWithoutQuoteAndBracet =
             """2,37e834e6-0698-46da-b6d0-f2b3b3de11d9,StatusNotification,{"connectorId":1,"errorCode":"NoError","info":"","status":"Available","timestamp":"2023-03-03T11:38:43.522Z"}"""
 
+        val callTypeMsgWithCariageReturn =
+            """[2,\n"2840",\n"Heartbeat",\n{"}\n]"""
+
         var wampMessage = WampMessageParser.parse(callTypeMsg)
         expectThat(wampMessage).isNotNull()
         expectThat(wampMessage!!) {
@@ -107,6 +111,18 @@ class WampParserTest {
                 payload
             }.isEqualTo(
                 """{"connectorId":1,"errorCode":"NoError","info":"","status":"Available","timestamp":"2023-03-03T11:38:43.522Z"}"""
+            )
+        }
+
+        wampMessage = WampMessageParser.parse(callTypeMsgWithCariageReturn)
+        expectThat(wampMessage).isNotNull()
+        expectThat(wampMessage!!) {
+            get { msgId }.isEqualTo("2840")
+            get { action }.isEqualTo("Heartbeat")
+            get {
+                payload
+            }.isEqualTo(
+                """{}"""
             )
         }
     }
