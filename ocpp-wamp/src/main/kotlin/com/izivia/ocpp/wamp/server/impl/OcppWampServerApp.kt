@@ -34,9 +34,9 @@ class OcppWampServerApp(
         private val logger = LoggerFactory.getLogger("com.izivia.ocpp.wamp.server")
     }
 
-    private val connections = TreeMap<String, ChargingStationConnection?> { a, b ->
+    private val connections = Collections.synchronizedMap(TreeMap<String, ChargingStationConnection?> { a, b ->
         a.lowercase().compareTo(b.lowercase())
-    }
+    })
     private val shutdown = AtomicBoolean(false)
 
     private fun newConnection(ws: Websocket) {

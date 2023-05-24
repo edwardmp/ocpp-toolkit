@@ -55,16 +55,23 @@ object WampMessageParser {
     private val logger = LoggerFactory.getLogger(WampMessageParser::class.java)
 
     private fun String.formatWampMessage(): String =
-        this.replace("\n", "").removeBracketsAndTrim().removeQuotesBeforePayloadAndTrim()
+        this.replace("\n", "")
+            .replace("\\n", "")
+            .removeBracketsAndTrim()
+            .removeQuotesBeforePayloadAndTrim()
 
     private fun String.removeBracketsAndTrim(): String = this.trim().removePrefix("[").removeSuffix("]")
 
     fun String.removeQuotesBeforePayloadAndTrim(): String {
         this.indexOf("{", 0).let { indexOfFirstBrace ->
             if (indexOfFirstBrace != -1) {
-                return this.substring(0, indexOfFirstBrace).replace("\"", "").replace(", ", ",") + this.substring(
-                    indexOfFirstBrace,
-                ).trim()
+                return this.substring(0, indexOfFirstBrace)
+                    .replace("\"", "").replace(", ", ",")
+                    .plus(
+                        this.substring(indexOfFirstBrace).let { str ->
+                            str.takeIf { it.count { it == '"' } == 1 }?.replace("\"", "") ?: str
+                        }
+                    ).trim()
             } else {
                 logger.error("No brace found from WampMessqages $this")
                 return this
