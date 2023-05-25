@@ -25,32 +25,49 @@ import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core15.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.utils.IActions
+import com.izivia.ocpp.utils.OcppInitiator
 
-enum class Actions(override val value: String, override val classRequest: Class<*>) : IActions {
-    AUTHORIZE("authorize", AuthorizeReq::class.java),
-    BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java),
-    CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java),
-    CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java),
-    CHANGECONFIGURATION("changeConfiguration", ChangeConfigurationReq::class.java),
-    CLEARCACHE("clearCache", ClearCacheReq::class.java),
-    DATATRANSFER("dataTransfer", DataTransferReq::class.java),
-    DIAGNOSTICSSTATUSNOTIFICATION("diagnosticsStatusNotification", DiagnosticsStatusNotificationReq::class.java),
-    FIRMWARESTATUSNOTIFICATION("firmwareStatusNotification", FirmwareStatusNotificationReq::class.java),
-    GETCONFIGURATION("getConfiguration", GetConfigurationReq::class.java),
-    GETDIAGNOSTICS("getDiagnostics", GetDiagnosticsReq::class.java),
-    GETLOCALLISTVERSION("getLocalListVersion", GetLocalListVersionReq::class.java),
-    HEARTBEAT("heartbeat", HeartbeatReq::class.java),
-    METERVALUES("meterValues", MeterValuesReq::class.java),
-    REMOTESTARTTRANSACTION("remoteStartTransaction", RemoteStartTransactionReq::class.java),
-    REMOTESTOPTRANSACTION("remoteStopTransaction", RemoteStopTransactionReq::class.java),
-    RESERVENOW("reserveNow", ReserveNowReq::class.java),
-    RESET("reset", ResetReq::class.java),
-    SENDLOCALLIST("sendLocalList", SendLocalListReq::class.java),
-    STARTTRANSACTION("startTransaction", StartTransactionReq::class.java),
-    STATUSNOTIFICATION("statusNotification", StatusNotificationReq::class.java),
-    STOPTRANSACTION("stopTransaction", StopTransactionReq::class.java),
-    UNLOCKCONNECTOR("unlockConnector", UnlockConnectorReq::class.java),
-    UPDATEFIRMWARE("updateFirmware", UpdateFirmwareReq::class.java);
+enum class Actions(
+    override val value: String, override val classRequest: Class<*>,
+    override val initiatedBy: OcppInitiator
+) : IActions {
+    AUTHORIZE("authorize", AuthorizeReq::class.java, OcppInitiator.CHARGING_STATION),
+    BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java, OcppInitiator.CHARGING_STATION),
+    CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CHANGECONFIGURATION("changeConfiguration", ChangeConfigurationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CLEARCACHE("clearCache", ClearCacheReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    DATATRANSFER("dataTransfer", DataTransferReq::class.java, OcppInitiator.ALL),
+    DIAGNOSTICSSTATUSNOTIFICATION(
+        "diagnosticsStatusNotification",
+        DiagnosticsStatusNotificationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    FIRMWARESTATUSNOTIFICATION(
+        "firmwareStatusNotification",
+        FirmwareStatusNotificationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    GETCONFIGURATION("getConfiguration", GetConfigurationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETDIAGNOSTICS("getDiagnostics", GetDiagnosticsReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETLOCALLISTVERSION("getLocalListVersion", GetLocalListVersionReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    HEARTBEAT("heartbeat", HeartbeatReq::class.java, OcppInitiator.CHARGING_STATION),
+    METERVALUES("meterValues", MeterValuesReq::class.java, OcppInitiator.CHARGING_STATION),
+    REMOTESTARTTRANSACTION(
+        "remoteStartTransaction",
+        RemoteStartTransactionReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    REMOTESTOPTRANSACTION("remoteStopTransaction", RemoteStopTransactionReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM),
+    RESERVENOW("reserveNow", ReserveNowReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    RESET("reset", ResetReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SENDLOCALLIST("sendLocalList", SendLocalListReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    STARTTRANSACTION("startTransaction", StartTransactionReq::class.java, OcppInitiator.CHARGING_STATION),
+    STATUSNOTIFICATION("statusNotification", StatusNotificationReq::class.java, OcppInitiator.CHARGING_STATION),
+    STOPTRANSACTION("stopTransaction", StopTransactionReq::class.java, OcppInitiator.CHARGING_STATION),
+    UNLOCKCONNECTOR("unlockConnector", UnlockConnectorReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    UPDATEFIRMWARE("updateFirmware", UpdateFirmwareReq::class.java, OcppInitiator.CENTRAL_SYSTEM);
 
     fun lowercase() = value.lowercase()
 

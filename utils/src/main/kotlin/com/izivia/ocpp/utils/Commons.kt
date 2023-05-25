@@ -9,6 +9,7 @@ inline fun <reified T : Any> Any.isA(function: (T) -> Any = { it -> it }): Any =
 interface IActions {
     val value: String
     val classRequest: Class<*>
+    val initiatedBy: OcppInitiator
 }
 
 interface InterfaceFieldOption {
@@ -17,6 +18,13 @@ interface InterfaceFieldOption {
     val action: IActions
     val fieldPathSeparator: String
     fun getBodyAction(): String
+}
+
+enum class OcppInitiator {
+    CHARGING_STATION,
+    CENTRAL_SYSTEM,
+    LOCAL_CONTROLLER,
+    ALL
 }
 
 enum class TypeConvertEnum {

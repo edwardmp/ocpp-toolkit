@@ -840,7 +840,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>$msgId</a:MessageID><a:Action>/Authorize</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address>
 </a:From><a:To>destination</a:To></s:Header>
@@ -881,7 +881,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID><a:Action>/AuthorizeResponse</a:Action>
 <a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To>
@@ -923,7 +923,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/BootNotification</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
 <a:From><a:Address>source</a:Address></a:From>
@@ -964,6 +964,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/BootNotificationResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1000,7 +1001,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>$msgId</a:MessageID><a:Action>/DataTransfer</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To></s:Header><s:Body><o:dataTransferRequest>
@@ -1043,6 +1044,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/DataTransferResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1074,6 +1076,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(reqSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/DiagnosticsStatusNotification</a:Action>")
             get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
         }
@@ -1101,6 +1104,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/DiagnosticsStatusNotificationResponse</a:Action>")
             get { this }.contains("<a:MessageID>$messageId</a:MessageID>")
             get { this }.contains("<a:RelatesTo>$relateTo</a:RelatesTo>")
@@ -1130,7 +1134,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID>
 <a:Action>/FirmwareStatusNotification</a:Action><o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From>
 <a:Address>source</a:Address></a:From><a:To>destination</a:To>
@@ -1163,7 +1167,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>
 <a:Action>/FirmwareStatusNotificationResponse</a:Action><a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To>
@@ -1194,7 +1198,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/Heartbeat</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To></s:Header><s:Body><o:heartbeatRequest/></s:Body></s:Envelope>""".trimSoap()
@@ -1223,6 +1227,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/HeartbeatResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1269,7 +1274,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/MeterValues</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
 </s:Header><s:Body><o:meterValuesRequest><o:connectorId>1</o:connectorId>
@@ -1313,6 +1318,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/MeterValuesResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1345,7 +1351,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/StartTransaction</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
 </s:Header><s:Body><o:startTransactionRequest><o:connectorId>1</o:connectorId><o:idTag>AAAAAAAA</o:idTag>
@@ -1385,6 +1391,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/StartTransactionResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1425,7 +1432,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/StatusNotification</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
 </s:Header><s:Body><o:statusNotificationRequest><o:connectorId>1</o:connectorId><o:errorCode>NoError</o:errorCode>
@@ -1461,6 +1468,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/StatusNotificationResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1493,7 +1501,7 @@ class Ocpp15SoapParserTest {
         val expectedEnvelope =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header>
+                xmlns:o="urn://Ocpp/Cs/2012/06/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID>
 <a:Action>/StopTransaction</a:Action><o:chargeBoxIdentity>CS1</o:chargeBoxIdentity>
 <a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To>
@@ -1533,6 +1541,7 @@ class Ocpp15SoapParserTest {
         )
 
         expectThat(messageSoap) {
+            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2012/06/\"")
             get { this }.contains("<a:Action>/StopTransactionResponse</a:Action>")
             get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
             get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
@@ -1600,7 +1609,7 @@ class Ocpp15SoapParserTest {
         val message =
             """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
                 xmlns:a="http://www.w3.org/2005/08/addressing"
-                 xmlns:o="urn://Ocpp/Cp/2015/10/"><s:Header>
+                 xmlns:o="urn://Ocpp/Cs/2015/10/"><s:Header>
 <a:MessageID>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:MessageID><a:Action>/DataTransfer</a:Action>
 <o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From>
 <a:To>destination</a:To></s:Header><s:Body><o:dataTransferRequest><o:vendorId>XXXXXXXX</o:vendorId>

@@ -1,6 +1,7 @@
 package com.izivia.ocpp.soap
 
 import com.izivia.ocpp.utils.ErrorDetail
+import com.izivia.ocpp.utils.OcppInitiator
 
 data class RequestSoapMessage<T>(
     val messageId: String,
@@ -9,5 +10,6 @@ data class RequestSoapMessage<T>(
     val from: String?,
     val to: String?,
     val payload: T,
-    val warnings: List<ErrorDetail>? = null
+    val warnings: List<ErrorDetail>? = null,
+    val forcedInitiator: OcppInitiator? = null
 )

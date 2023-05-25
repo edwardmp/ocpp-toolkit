@@ -7,6 +7,11 @@ import com.izivia.ocpp.utils.fault.FAULT
 import com.izivia.ocpp.utils.fault.Fault
 import kotlin.reflect.KClass
 
+data class OcppNs(
+    val ocppCpNs: String,
+    val ocppCsNs: String
+)
+
 interface OcppSoapParser {
 
     fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any>
@@ -21,6 +26,8 @@ interface OcppSoapParser {
     fun getRequestBodyContent(envelope: SoapEnvelope<*>): Any
     fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any
 
+    fun getOcppInitiator(action: String): OcppInitiator
+
     fun parseSoapFaulted(
         soap: String,
         e: Exception,
@@ -29,7 +36,7 @@ interface OcppSoapParser {
 }
 
 abstract class OcppSoapParserImpl(
-    private val ns_ocpp: String,
+    private val ocppNs: OcppNs,
     private val soapMapperOutput: ObjectMapper,
     val soapMapperInput: ObjectMapper,
     open val ignoredNullRestrictions: List<AbstractIgnoredNullRestriction>? = null,
@@ -64,10 +71,17 @@ abstract class OcppSoapParserImpl(
         val xmlBuilder = SoapEnvelopeOut(
             header = headers,
             body = response.payload,
-            ocpp = ns_ocpp
+            ocpp = ocppNs.toInitiatorNamespace(response.forcedInitiator ?: getOcppInitiator(response.action))
         )
         return soapMapperOutput.writeValueAsString(xmlBuilder)
     }
+
+    private fun OcppNs.toInitiatorNamespace(initiator: OcppInitiator): String =
+        when (initiator) {
+            OcppInitiator.CENTRAL_SYSTEM -> this.ocppCpNs
+            OcppInitiator.CHARGING_STATION -> this.ocppCsNs
+            else -> this.ocppCsNs
+        }
 
     override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
         val warnings = mutableListOf<ErrorDetail>()
@@ -135,7 +149,7 @@ abstract class OcppSoapParserImpl(
         val xmlBuilder = SoapEnvelopeOut(
             header = headers,
             body = request.payload,
-            ocpp = ns_ocpp
+            ocpp = ocppNs.toInitiatorNamespace(request.forcedInitiator ?: getOcppInitiator(request.action))
         )
         return soapMapperOutput.writeValueAsString(xmlBuilder)
     }

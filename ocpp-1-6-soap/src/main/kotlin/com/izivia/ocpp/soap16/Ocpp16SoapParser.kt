@@ -3,6 +3,7 @@ package com.izivia.ocpp.soap16
 import com.fasterxml.jackson.core.type.TypeReference
 import com.izivia.ocpp.core16.Ocpp16ForcedFieldType
 import com.izivia.ocpp.core16.Ocpp16IgnoredNullRestriction
+import com.izivia.ocpp.core16.model.common.enumeration.Actions
 import com.izivia.ocpp.soap.*
 import com.izivia.ocpp.utils.*
 import kotlin.reflect.full.memberProperties
@@ -11,7 +12,10 @@ class Ocpp16SoapParser(
     override val ignoredNullRestrictions: List<Ocpp16IgnoredNullRestriction>? = null,
     override val forcedFieldTypes: List<Ocpp16ForcedFieldType>? = null
 ) : OcppSoapParserImpl(
-    ns_ocpp = "urn://Ocpp/Cp/2015/10/",
+    ocppNs = OcppNs(
+        ocppCpNs = "urn://Ocpp/Cp/2015/10/",
+        ocppCsNs = "urn://Ocpp/Cs/2015/10/"
+    ),
     soapMapperInput = Ocpp16SoapMapperIn,
     soapMapperOutput = Ocpp16SoapMapper
 ) {
@@ -41,6 +45,9 @@ class Ocpp16SoapParser(
 
     override fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any =
         getRealBodyContent(envelope as SoapEnvelope<Ocpp16SoapBody>)
+
+    override fun getOcppInitiator(action: String): OcppInitiator =
+        Actions.valueOf(action.uppercase()).initiatedBy
 
     private fun getRealBodyContent(envelope: SoapEnvelope<Ocpp16SoapBody>): Any {
         for (prop in Ocpp16SoapBody::class.memberProperties) {
