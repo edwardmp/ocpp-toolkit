@@ -23,6 +23,8 @@ import com.izivia.ocpp.core15.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core15.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core15.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.core15.model.metervalues.MeterValuesResp
+import com.izivia.ocpp.core15.model.reset.ResetResp
+import com.izivia.ocpp.core15.model.reset.enumeration.ResetStatus
 import com.izivia.ocpp.core15.model.starttransaction.StartTransactionReq
 import com.izivia.ocpp.core15.model.starttransaction.StartTransactionResp
 import com.izivia.ocpp.core15.model.statusnotification.StatusNotificationReq
@@ -31,7 +33,10 @@ import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointEr
 import com.izivia.ocpp.core15.model.statusnotification.enumeration.ChargePointStatus
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionReq
 import com.izivia.ocpp.core15.model.stoptransaction.StopTransactionResp
-import com.izivia.ocpp.soap.*
+import com.izivia.ocpp.soap.RequestSoapMessage
+import com.izivia.ocpp.soap.ResponseSoapMessage
+import com.izivia.ocpp.soap.SoapFault
+import com.izivia.ocpp.soap.parseRequestFromSoap
 import com.izivia.ocpp.utils.ActionTypeEnum
 import com.izivia.ocpp.utils.ErrorDetailCode
 import com.izivia.ocpp.utils.MessageErrorCode
@@ -42,7 +47,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.*
-import java.util.UUID
+import java.util.*
 
 class Ocpp15SoapParserTest {
 
@@ -1681,6 +1686,34 @@ class Ocpp15SoapParserTest {
                         }
                 }
         }
+    }
+
+    @Test
+    fun `should parse ResetResp (without message id) from soap`() {
+        val response = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <SOAP-ENV:Envelope
+                    xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:cp="urn://Ocpp/Cs/2012/06/"
+                    xmlns:wsa5="http://www.w3.org/2005/08/addressing">
+                <SOAP-ENV:Header>
+                    <cp:chargeBoxIdentity>XXXXX</cp:chargeBoxIdentity>
+                    <wsa5:RelatesTo>318ab371-0e80-4bf8-8eee-f706995966f7</wsa5:RelatesTo>
+                    <wsa5:To SOAP-ENV:mustUnderstand="true">
+                        http://xxxxx
+                    </wsa5:To>
+                    <wsa5:Action SOAP-ENV:mustUnderstand="true">/ResetResponse</wsa5:Action>
+                </SOAP-ENV:Header>
+                <SOAP-ENV:Body>
+                    <cp:resetResponse>
+                        <cp:status>Accepted</cp:status>
+                    </cp:resetResponse>
+                </SOAP-ENV:Body>
+            </SOAP-ENV:Envelope>
+        """.trimIndent()
+
+        expectThat(ocpp15SoapParser.parseAnyResponseFromSoap(response))
+            .isA<ResponseSoapMessage<ResetResp>>()
+            .get { payload.status }.isEqualTo(ResetStatus.Accepted)
     }
 }
 

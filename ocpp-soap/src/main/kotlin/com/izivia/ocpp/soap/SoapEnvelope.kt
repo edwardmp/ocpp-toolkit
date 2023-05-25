@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
+import java.util.UUID
 
 object OcppConstant {
     const val HEADER = "Header"
@@ -54,7 +55,7 @@ data class SoapEnvelope<T : SoapBody>(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SoapHeader(
     @JsonProperty(OcppConstant.MESSAGE_ID)
-    val messageId: ValueText,
+    val messageId: ValueText = ValueText(UUID.randomUUID().toString()),
     @JsonProperty(OcppConstant.ACTION)
     val action: ValueText,
     @JsonProperty(OcppConstant.CHARGEBOX_IDENTITY)
