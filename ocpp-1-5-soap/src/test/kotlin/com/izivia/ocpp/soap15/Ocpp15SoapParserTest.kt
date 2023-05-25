@@ -6,6 +6,8 @@ import com.izivia.ocpp.core15.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core15.model.bootnotification.enumeration.RegistrationStatus
+import com.izivia.ocpp.core15.model.clearcache.ClearCacheResp
+import com.izivia.ocpp.core15.model.clearcache.enumeration.ClearCacheStatus
 import com.izivia.ocpp.core15.model.common.IdTagInfo
 import com.izivia.ocpp.core15.model.common.MeterValue
 import com.izivia.ocpp.core15.model.common.SampledValue
@@ -1558,6 +1560,20 @@ class Ocpp15SoapParserTest {
                     get { status }.isEqualTo(AuthorizationStatus.Accepted)
                     get { expiryDate }.isEqualTo(Instant.parse("2022-05-16T15:42:05.128Z"))
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `should parse SOAP response with missing messageId to ClearCacheResp`() {
+        val response = """<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cp="urn://Ocpp/Cp/2012/06/" xmlns:chan="http://schemas.microsoft.com/ws/2005/02/duplex" xmlns:wsa5="http://www.w3.org/2005/08/addressing" xmlns:cs="urn://Ocpp/Cs/2012/06/"><SOAP-ENV:Header><cp:chargeBoxIdentity>00:13:F6:01:91:26</cp:chargeBoxIdentity><wsa5:RelatesTo>test</wsa5:RelatesTo><wsa5:To SOAP-ENV:mustUnderstand="true">http://192.168.100.158:10001/api/ocpp-15/soap/</wsa5:To><wsa5:Action SOAP-ENV:mustUnderstand="true">/ClearCacheResponse</wsa5:Action></SOAP-ENV:Header><SOAP-ENV:Body><cp:clearCacheResponse><cp:status>Accepted</cp:status></cp:clearCacheResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
+
+        val message = ocpp15SoapParser.parseAnyResponseFromSoap(response)
+
+        expectThat(message).and {
+            get { payload }.isA<ClearCacheResp>().and {
+                get { status }.isEqualTo(ClearCacheStatus.Accepted)
             }
         }
     }
