@@ -6,6 +6,7 @@ import com.izivia.ocpp.core15.model.authorize.AuthorizeResp
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationReq
 import com.izivia.ocpp.core15.model.bootnotification.BootNotificationResp
 import com.izivia.ocpp.core15.model.bootnotification.enumeration.RegistrationStatus
+import com.izivia.ocpp.core15.model.clearcache.ClearCacheReq
 import com.izivia.ocpp.core15.model.clearcache.ClearCacheResp
 import com.izivia.ocpp.core15.model.clearcache.enumeration.ClearCacheStatus
 import com.izivia.ocpp.core15.model.common.IdTagInfo
@@ -1565,6 +1566,31 @@ class Ocpp15SoapParserTest {
     }
 
     @Test
+    fun `should map ClearCacheReq to SOAP`() {
+        val request = ClearCacheReq()
+
+        val messageSoap = ocpp15SoapParser.mapRequestToSoap(
+            RequestSoapMessage(
+                messageId = "test",
+                chargingStationId = "CS1",
+                action = "ClearCache",
+                from = "source",
+                to = "destination",
+                payload = request
+            )
+        )
+
+        val expectedEnvelope =
+            """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:o="urn://Ocpp/Cp/2012/06/"><s:Header><a:MessageID>test</a:MessageID><a:Action>/ClearCache</a:Action><o:chargeBoxIdentity>CS1</o:chargeBoxIdentity><a:From><a:Address>source</a:Address></a:From><a:To>destination</a:To></s:Header><s:Body><o:clearCacheRequest/></s:Body></s:Envelope>""".trimSoap()
+
+        expectThat(messageSoap).isEqualTo(expectedEnvelope)
+        expectThat(ocpp15SoapParser.parseAnyRequestFromSoap(messageSoap)) {
+            get { payload }.isA<ClearCacheReq>()
+
+        }
+    }
+
+    @Test
     fun `should parse SOAP response with missing messageId to ClearCacheResp`() {
         val response = """<?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cp="urn://Ocpp/Cp/2012/06/" xmlns:chan="http://schemas.microsoft.com/ws/2005/02/duplex" xmlns:wsa5="http://www.w3.org/2005/08/addressing" xmlns:cs="urn://Ocpp/Cs/2012/06/"><SOAP-ENV:Header><cp:chargeBoxIdentity>00:13:F6:01:91:26</cp:chargeBoxIdentity><wsa5:RelatesTo>test</wsa5:RelatesTo><wsa5:To SOAP-ENV:mustUnderstand="true">http://192.168.100.158:10001/api/ocpp-15/soap/</wsa5:To><wsa5:Action SOAP-ENV:mustUnderstand="true">/ClearCacheResponse</wsa5:Action></SOAP-ENV:Header><SOAP-ENV:Body><cp:clearCacheResponse><cp:status>Accepted</cp:status></cp:clearCacheResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>"""
@@ -1718,7 +1744,7 @@ class Ocpp15SoapParserTest {
         val response = """
             <?xml version="1.0" encoding="UTF-8"?>
             <SOAP-ENV:Envelope
-                    xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:cp="urn://Ocpp/Cs/2012/06/"
+                    xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:cp="urn://Ocpp/Cp/2012/06/"
                     xmlns:wsa5="http://www.w3.org/2005/08/addressing">
                 <SOAP-ENV:Header>
                     <cp:chargeBoxIdentity>XXXXX</cp:chargeBoxIdentity>
