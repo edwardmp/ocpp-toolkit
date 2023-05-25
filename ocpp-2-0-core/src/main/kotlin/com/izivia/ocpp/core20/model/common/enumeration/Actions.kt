@@ -65,75 +65,154 @@ import com.izivia.ocpp.core20.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core20.model.unpublishfirmware.UnpublishFirmwareReq
 import com.izivia.ocpp.core20.model.updatefirmware.UpdateFirmwareReq
 import com.izivia.ocpp.utils.IActions
+import com.izivia.ocpp.utils.OcppInitiator
 
-enum class Actions(override val value: String, override val classRequest: Class<*>) : IActions {
-    AUTHORIZE("authorize", AuthorizeReq::class.java),
-    BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java),
-    CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java),
-    CERTIFICATESIGNED("certificateSigned", CertificateSignedReq::class.java),
-    CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java),
-    CLEARCACHE("clearCache", ClearCacheReq::class.java),
-    CLEARCHARGINGPROFILE("clearChargingProfile", ClearChargingProfileReq::class.java),
-    CLEARDISPLAYMESSAGE("clearDisplayMessage", ClearDisplayMessageReq::class.java),
-    CLEAREDCHARGINGLIMIT("clearedChargingLimit", ClearedChargingLimitReq::class.java),
-    CLEARVARIABLEMONITORING("clearVariableMonitoring", ClearVariableMonitoringReq::class.java),
-    COSTUPDATED("costUpdated", CostUpdatedReq::class.java),
-    CUSTOMERINFORMATION("customerInformation", CustomerInformationReq::class.java),
-    DATATRANSFER("dataTransfer", DataTransferReq::class.java),
-    DELETECERTIFICATE("deleteCertificate", DeleteCertificateReq::class.java),
-    FIRMWARESTATUSNOTIFICATION("firmwareStatusNotification", FirmwareStatusNotificationReq::class.java),
-    GET15118EVCERTIFICATE("get15118EVCertificate", Get15118EVCertificateReq::class.java),
-    GETBASEREPORT("getBaseReport", GetBaseReportReq::class.java),
-    GETCERTIFICATESTATUS("getCertificateStatus", GetCertificateStatusReq::class.java),
-    GETCHARGINGPROFILES("getChargingProfiles", GetChargingProfilesReq::class.java),
-    GETCOMPOSITESCHEDULE("getCompositeSchedule", GetCompositeScheduleReq::class.java),
-    GETDISPLAYMESSAGES("getDisplayMessages", GetDisplayMessagesReq::class.java),
-    GETINSTALLEDCERTIFICATEIDS("getInstalledCertificateIds", GetInstalledCertificateIdsReq::class.java),
-    GETLOCALLISTVERSION("getLocalListVersion", GetLocalListVersionReq::class.java),
-    GETLOG("getLog", GetLogReq::class.java),
-    GETMONITORINGREPORT("getMonitoringReport", GetMonitoringReportReq::class.java),
-    GETREPORT("getReport", GetReportReq::class.java),
-    GETTRANSACTIONSTATUS("getTransactionStatus", GetTransactionStatusReq::class.java),
-    GETVARIABLES("getVariables", GetVariablesReq::class.java),
-    HEARTBEAT("heartbeat", HeartbeatReq::class.java),
-    INSTALLCERTIFICATE("installCertificate", InstallCertificateReq::class.java),
-    LOGSTATUSNOTIFICATION("logStatusNotification", LogStatusNotificationReq::class.java),
-    METERVALUES("meterValues", MeterValuesReq::class.java),
-    NOTIFYCHARGINGLIMIT("notifyChargingLimit", NotifyChargingLimitReq::class.java),
-    NOTIFYCUSTOMERINFORMATION("notifyCustomerInformation", NotifyCustomerInformationReq::class.java),
-    NOTIFYDISPLAYMESSAGES("notifyDisplayMessages", NotifyDisplayMessagesReq::class.java),
-    NOTIFYEVCHARGINGNEEDS("notifyEVChargingNeeds", NotifyEVChargingNeedsReq::class.java),
-    NOTIFYEVCHARGINGSCHEDULE("notifyEVChargingSchedule", NotifyEVChargingScheduleReq::class.java),
-    NOTIFYEVENT("notifyEvent", NotifyEventReq::class.java),
-    NOTIFYMONITORINGREPORT("notifyMonitoringReport", NotifyMonitoringReportReq::class.java),
-    NOTIFYREPORT("notifyReport", NotifyReportReq::class.java),
-    PUBLISHFIRMWARE("publishFirmware", PublishFirmwareReq::class.java),
+enum class Actions(
+    override val value: String, override val classRequest: Class<*>,
+    override val initiatedBy: OcppInitiator
+) : IActions {
+    AUTHORIZE("authorize", AuthorizeReq::class.java, OcppInitiator.CHARGING_STATION),
+    BOOTNOTIFICATION("bootNotification", BootNotificationReq::class.java, OcppInitiator.CHARGING_STATION),
+    CANCELRESERVATION("cancelReservation", CancelReservationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CERTIFICATESIGNED("certificateSigned", CertificateSignedReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CHANGEAVAILABILITY("changeAvailability", ChangeAvailabilityReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CLEARCACHE("clearCache", ClearCacheReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CLEARCHARGINGPROFILE("clearChargingProfile", ClearChargingProfileReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CLEARDISPLAYMESSAGE("clearDisplayMessage", ClearDisplayMessageReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CLEAREDCHARGINGLIMIT("clearedChargingLimit", ClearedChargingLimitReq::class.java, OcppInitiator.CHARGING_STATION),
+    CLEARVARIABLEMONITORING(
+        "clearVariableMonitoring",
+        ClearVariableMonitoringReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    COSTUPDATED("costUpdated", CostUpdatedReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    CUSTOMERINFORMATION("customerInformation", CustomerInformationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    DATATRANSFER("dataTransfer", DataTransferReq::class.java, OcppInitiator.ALL),
+    DELETECERTIFICATE("deleteCertificate", DeleteCertificateReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    FIRMWARESTATUSNOTIFICATION(
+        "firmwareStatusNotification",
+        FirmwareStatusNotificationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    GET15118EVCERTIFICATE(
+        "get15118EVCertificate",
+        Get15118EVCertificateReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    GETBASEREPORT("getBaseReport", GetBaseReportReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETCERTIFICATESTATUS(
+        "getCertificateStatus", GetCertificateStatusReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    GETCHARGINGPROFILES("getChargingProfiles", GetChargingProfilesReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETCOMPOSITESCHEDULE(
+        "getCompositeSchedule", GetCompositeScheduleReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    GETDISPLAYMESSAGES("getDisplayMessages", GetDisplayMessagesReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETINSTALLEDCERTIFICATEIDS(
+        "getInstalledCertificateIds",
+        GetInstalledCertificateIdsReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    GETLOCALLISTVERSION("getLocalListVersion", GetLocalListVersionReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETLOG("getLog", GetLogReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETMONITORINGREPORT("getMonitoringReport", GetMonitoringReportReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETREPORT("getReport", GetReportReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    GETTRANSACTIONSTATUS(
+        "getTransactionStatus", GetTransactionStatusReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    GETVARIABLES("getVariables", GetVariablesReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    HEARTBEAT("heartbeat", HeartbeatReq::class.java, OcppInitiator.CHARGING_STATION),
+    INSTALLCERTIFICATE("installCertificate", InstallCertificateReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    LOGSTATUSNOTIFICATION(
+        "logStatusNotification",
+        LogStatusNotificationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    METERVALUES("meterValues", MeterValuesReq::class.java, OcppInitiator.CHARGING_STATION),
+    NOTIFYCHARGINGLIMIT(
+        "notifyChargingLimit", NotifyChargingLimitReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYCUSTOMERINFORMATION(
+        "notifyCustomerInformation",
+        NotifyCustomerInformationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYDISPLAYMESSAGES(
+        "notifyDisplayMessages",
+        NotifyDisplayMessagesReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYEVCHARGINGNEEDS(
+        "notifyEVChargingNeeds",
+        NotifyEVChargingNeedsReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYEVCHARGINGSCHEDULE(
+        "notifyEVChargingSchedule",
+        NotifyEVChargingScheduleReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYEVENT("notifyEvent", NotifyEventReq::class.java, OcppInitiator.CHARGING_STATION),
+    NOTIFYMONITORINGREPORT(
+        "notifyMonitoringReport",
+        NotifyMonitoringReportReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    NOTIFYREPORT("notifyReport", NotifyReportReq::class.java, OcppInitiator.CHARGING_STATION),
+    PUBLISHFIRMWARE("publishFirmware", PublishFirmwareReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
     PUBLISHFIRMWARESTATUSNOTIFICATION(
         "publishFirmwareStatusNotification",
-        PublishFirmwareStatusNotificationReq::class.java
+        PublishFirmwareStatusNotificationReq::class.java, OcppInitiator.CHARGING_STATION
     ),
-    REPORTCHARGINGPROFILES("reportChargingProfiles", ReportChargingProfilesReq::class.java),
-    REQUESTSTARTTRANSACTION("requestStartTransaction", RequestStartTransactionReq::class.java),
-    REQUESTSTOPTRANSACTION("requestStopTransaction", RequestStopTransactionReq::class.java),
-    RESERVATIONSTATUSUPDATE("reservationStatusUpdate", ReservationStatusUpdateReq::class.java),
-    RESERVENOW("reserveNow", ReserveNowReq::class.java),
-    RESET("reset", ResetReq::class.java),
-    SECURITYEVENTNOTIFICATION("securityEventNotification", SecurityEventNotificationReq::class.java),
-    SENDLOCALLIST("sendLocalList", SendLocalListReq::class.java),
-    SETCHARGINGPROFILE("setChargingProfile", SetChargingProfileReq::class.java),
-    SETDISPLAYMESSAGE("setDisplayMessage", SetDisplayMessageReq::class.java),
-    SETMONITORINGBASE("setMonitoringBase", SetMonitoringBaseReq::class.java),
-    SETMONITORINGLEVEL("setMonitoringLevel", SetMonitoringLevelReq::class.java),
-    SETNETWORKPROFILE("setNetworkProfile", SetNetworkProfileReq::class.java),
-    SETVARIABLEMONITORING("setVariableMonitoring", SetVariableMonitoringReq::class.java),
-    SETVARIABLES("setVariables", SetVariablesReq::class.java),
-    SIGNCERTIFICATE("signCertificate", SignCertificateReq::class.java),
-    STATUSNOTIFICATION("statusNotification", StatusNotificationReq::class.java),
-    TRANSACTIONEVENT("transactionEvent", TransactionEventReq::class.java),
-    TRIGGERMESSAGE("triggerMessage", TriggerMessageReq::class.java),
-    UNLOCKCONNECTOR("unlockConnector", UnlockConnectorReq::class.java),
-    UNPUBLISHFIRMWARE("unpublishFirmware", UnpublishFirmwareReq::class.java),
-    UPDATEFIRMWARE("updateFirmware", UpdateFirmwareReq::class.java);
+    REPORTCHARGINGPROFILES(
+        "reportChargingProfiles",
+        ReportChargingProfilesReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    REQUESTSTARTTRANSACTION(
+        "requestStartTransaction",
+        RequestStartTransactionReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    REQUESTSTOPTRANSACTION(
+        "requestStopTransaction",
+        RequestStopTransactionReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    RESERVATIONSTATUSUPDATE(
+        "reservationStatusUpdate",
+        ReservationStatusUpdateReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    RESERVENOW("reserveNow", ReserveNowReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    RESET("reset", ResetReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SECURITYEVENTNOTIFICATION(
+        "securityEventNotification",
+        SecurityEventNotificationReq::class.java,
+        OcppInitiator.CHARGING_STATION
+    ),
+    SENDLOCALLIST("sendLocalList", SendLocalListReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETCHARGINGPROFILE("setChargingProfile", SetChargingProfileReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETDISPLAYMESSAGE("setDisplayMessage", SetDisplayMessageReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETMONITORINGBASE("setMonitoringBase", SetMonitoringBaseReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETMONITORINGLEVEL("setMonitoringLevel", SetMonitoringLevelReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETNETWORKPROFILE("setNetworkProfile", SetNetworkProfileReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SETVARIABLEMONITORING(
+        "setVariableMonitoring", SetVariableMonitoringReq::class.java,
+        OcppInitiator.CENTRAL_SYSTEM
+    ),
+    SETVARIABLES("setVariables", SetVariablesReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    SIGNCERTIFICATE("signCertificate", SignCertificateReq::class.java, OcppInitiator.CHARGING_STATION),
+    STATUSNOTIFICATION("statusNotification", StatusNotificationReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    TRANSACTIONEVENT("transactionEvent", TransactionEventReq::class.java, OcppInitiator.CHARGING_STATION),
+    TRIGGERMESSAGE("triggerMessage", TriggerMessageReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    UNLOCKCONNECTOR("unlockConnector", UnlockConnectorReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    UNPUBLISHFIRMWARE("unpublishFirmware", UnpublishFirmwareReq::class.java, OcppInitiator.CENTRAL_SYSTEM),
+    UPDATEFIRMWARE("updateFirmware", UpdateFirmwareReq::class.java, OcppInitiator.CENTRAL_SYSTEM);
 
     fun lowercase() = value.lowercase()
 

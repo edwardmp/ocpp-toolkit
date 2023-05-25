@@ -3,6 +3,7 @@ package com.izivia.ocpp.soap15
 import com.fasterxml.jackson.core.type.TypeReference
 import com.izivia.ocpp.core15.Ocpp15ForcedFieldType
 import com.izivia.ocpp.core15.Ocpp15IgnoredNullRestriction
+import com.izivia.ocpp.core15.model.common.enumeration.Actions
 import com.izivia.ocpp.soap.*
 import com.izivia.ocpp.utils.*
 import kotlin.reflect.full.memberProperties
@@ -12,7 +13,10 @@ class Ocpp15SoapParser(
     override val forcedFieldTypes: List<Ocpp15ForcedFieldType>? = null,
 ) :
     OcppSoapParserImpl(
-        ns_ocpp = "urn://Ocpp/Cp/2012/06/",
+        ocppNs = OcppNs(
+            ocppCpNs = "urn://Ocpp/Cp/2012/06/",
+            ocppCsNs = "urn://Ocpp/Cs/2012/06/"
+        ),
         soapMapperInput = Ocpp15SoapMapperIn,
         soapMapperOutput = Ocpp15SoapMapper
     ) {
@@ -25,7 +29,7 @@ class Ocpp15SoapParser(
             soapMapperInput
                 .readTree(soap)
                 .apply {
-                   applyDeserializerOptions(this, warningHandler)
+                    applyDeserializerOptions(this, warningHandler)
                 }?.let {
                     soapMapperInput
                         .readerFor(object : TypeReference<SoapEnvelope<Ocpp15SoapBody>>() {})
@@ -50,4 +54,7 @@ class Ocpp15SoapParser(
 
     override fun getResponseBodyContent(envelope: SoapEnvelope<*>): Any =
         getRealBodyContent(envelope as SoapEnvelope<Ocpp15SoapBody>)
+
+    override fun getOcppInitiator(action: String): OcppInitiator =
+        Actions.valueOf(action.uppercase()).initiatedBy
 }

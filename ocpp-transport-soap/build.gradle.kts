@@ -12,6 +12,7 @@ dependencies {
 
     implementation(project(":ocpp-soap"))
     implementation(project(":ocpp-transport"))
+    implementation(project(":utils"))
     implementation(project(":operation-information"))
 
     testImplementation(project(":ocpp-1-6-soap"))
