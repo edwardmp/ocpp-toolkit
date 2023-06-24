@@ -54,7 +54,10 @@ class UndertowOcppWampServer(
                     )
                 ).start()
             }
-        logger.info("starting ocpp wamp server on port $port")
+        logger.info(
+            "starting ocpp wamp server on port $port" +
+                " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
+        )
     }
 
     override fun shutdown() {

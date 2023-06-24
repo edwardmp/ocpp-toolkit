@@ -59,12 +59,12 @@ class OcppWampServerApp(
             val handler = handlers(chargingStationOcppId)
             onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
 
-            if (connections[chargingStationOcppId] != null) {
+            connections[chargingStationOcppId]?.also {
                 // already connected
                 logger.warn(
-                    """[$chargingStationOcppId] already connected - the new connection will replace the previous one """
+                    "[$chargingStationOcppId] already connected - the new connection will replace the previous one"
                 )
-                connections[chargingStationOcppId]?.close()
+                it.close()
             }
 
             val chargingStationConnection = ChargingStationConnection(
@@ -76,35 +76,43 @@ class OcppWampServerApp(
                 shutdown
             )
             connections[chargingStationOcppId] = chargingStationConnection
+            val logContext = "[$chargingStationOcppId] [$wsConnectionId]"
             ws.onClose {
-                logger.info("""[$chargingStationOcppId] [$wsConnectionId] disconnected """)
                 if (connections[chargingStationOcppId]?.wsConnectionId == wsConnectionId) {
                     connections[chargingStationOcppId] = null
                 } else {
-                    logger.info("warn: do not clear ws on close - not current connection in map")
+                    logger.info("$logContext warn: do not clear ws on close - not current connection in map")
                 }
+                logger.info("$logContext disconnected - number of connections : ${connections.size}")
                 onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
             }
 
-            logger.info("""[$chargingStationOcppId] [$wsConnectionId] connected """)
+            logger.info("$logContext connected - number of connections : ${connections.size}")
             ws.onMessage {
-                logger.info(
-                    "OcppWampServerApp onMessage [$chargingStationOcppId] " +
-                        "[$wsConnectionId] connected - number of connexion : ${connections.size}"
-                )
                 val msgString = it.bodyString()
-                logger.info("OcppWampServerApp onMessage $msgString")
+                if (logger.isDebugEnabled) {
+                    logger.debug("$logContext onMessage $msgString")
+                }
                 val msg = WampMessage.parse(msgString)
                 if (msg == null) {
-                    logger.error("OcppWampServerApp onMessage : Parsing Wamp message return null")
+                    logger.error("$logContext parsing Wamp message returns null - `$msgString`")
+                    ws.send(
+                        WsMessage(
+                            WampMessage.CallError(
+                                "",
+                                MessageErrorCode.INTERNAL_ERROR,
+                                "Parse error",
+                                "{}"
+                            ).toJson()
+                        )
+                    )
+                    return@onMessage
                 }
-                msg?.also { wampMessage ->
+                msg.also { wampMessage ->
                     when (wampMessage.msgType) {
                         WampMessageType.CALL -> {
                             if (shutdown.get()) {
-                                logger.info(
-                                    """[$chargingStationOcppId] [$wsConnectionId] - rejected call - shutting down - $msgString"""
-                                )
+                                logger.info("$logContext - rejected call - shutting down - $msgString")
                                 ws.send(
                                     WsMessage(
                                         WampMessage.CallError(
@@ -118,7 +126,7 @@ class OcppWampServerApp(
                                 return@onMessage
                             }
 
-                            logger.info("""[$chargingStationOcppId] [$wsConnectionId] -> ${it.bodyString()}""")
+                            logger.info("$logContext -> ${it.bodyString()}")
                             val resp = handler.asSequence()
                                 // use sequence to avoid greedy mapping, to find the first handler with non null result
                                 .map {
@@ -134,23 +142,20 @@ class OcppWampServerApp(
                                     MessageErrorCode.INTERNAL_ERROR,
                                     "No action handler found",
                                     """{"message":"$wampMessage"}"""
-                                ).also { logger.warn("no action handler found for $wampMessage") }
+                                ).also { logger.warn("$logContext no action handler found for $wampMessage") }
 
-                            logger.info("""[$chargingStationOcppId] [$wsConnectionId] <- ${resp.toJson()}""")
+                            logger.info("$logContext <- ${resp.toJson()}")
                             ws.send(WsMessage(resp.toJson()))
                         }
 
                         WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
-                            chargingStationConnection.callManager.handleResult(
-                                "[$chargingStationOcppId] [$wsConnectionId]",
-                                wampMessage
-                            )
+                            chargingStationConnection.callManager.handleResult(logContext, wampMessage)
                         }
                     }
                 }
             }
         } catch (e: Exception) {
-            logger.error("Error during new connection", e)
+            logger.error("Error during new connection with ${ws.upgradeRequest}: $e", e)
             throw e
         }
     }
