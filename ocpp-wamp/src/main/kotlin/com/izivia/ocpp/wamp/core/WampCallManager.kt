@@ -8,15 +8,15 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 class WampCallManager(
-    private val logger:Logger,
-    private val send:(str:String)->Unit,
-    val timeoutInMs:Long,
+    private val logger: Logger,
+    private val send: (str: String) -> Unit,
+    val timeoutInMs: Long,
     private val shutdown: AtomicBoolean = AtomicBoolean(false)
 ) {
 
-    private var currentCall:WampCall? = null
+    private var currentCall: WampCall? = null
 
-    fun callBlocking(logContext:String, message:WampMessage): WampMessage {
+    fun callBlocking(logContext: String, message: WampMessage): WampMessage {
         val now = Clock.System.now()
         synchronized(this) {
             while (currentCall != null && (Clock.System.now() - now).inWholeMilliseconds < timeoutInMs) {
@@ -41,7 +41,7 @@ class WampCallManager(
         }
     }
 
-    fun handleResult(logContext:String, message:WampMessage) {
+    fun handleResult(logContext: String, message: WampMessage) {
         val msgString = message.toJson()
         val pending = currentCall
         when {
@@ -49,8 +49,10 @@ class WampCallManager(
                 logger.warn("$logContext got a call result/error with no pending call - discarding $msgString")
             }
             pending.msg.msgId != message.msgId -> {
-                logger.warn("$logContext got a call result/error not corresponding to pending call" +
-                        " message id ${pending.msg.msgId} - discarding $msgString")
+                logger.warn(
+                    "$logContext got a call result/error not corresponding to pending call" +
+                        " message id ${pending.msg.msgId} - discarding $msgString"
+                )
             }
             else -> {
                 logger.info("$logContext <= $msgString")
@@ -61,8 +63,8 @@ class WampCallManager(
     }
 
     fun close() {
-        if (currentCall != null) {
-            logger.warn("closing connection while a pending call is in progress")
+        currentCall?.also {
+            logger.warn("${it.logContext} closing connection while a pending call is in progress: ${it.msg}")
         }
     }
 
@@ -80,7 +82,10 @@ class WampCallManager(
         }
     }
 
-    private data class WampCall(val logContext: String, val msg: WampMessage,
-                                val latch: CountDownLatch = CountDownLatch(1),
-                                var response: WampMessage? = null)
+    private data class WampCall(
+        val logContext: String,
+        val msg: WampMessage,
+        val latch: CountDownLatch = CountDownLatch(1),
+        var response: WampMessage? = null
+    )
 }

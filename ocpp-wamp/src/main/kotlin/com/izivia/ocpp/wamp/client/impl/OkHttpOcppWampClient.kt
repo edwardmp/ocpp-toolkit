@@ -141,6 +141,10 @@ class OkHttpOcppWampClient(
                     }
                 }
 
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    logger.info("[$ocppId] connection closed to $serverUri - code=$code; reason=$reason")
+                }
+
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                     if (connectionState == ConnectionState.CONNECTING) {
                         if (t is ConnectException) {

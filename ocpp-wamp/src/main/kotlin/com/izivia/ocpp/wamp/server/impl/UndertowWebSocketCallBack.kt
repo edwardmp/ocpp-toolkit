@@ -2,17 +2,9 @@ package com.izivia.ocpp.wamp.server.impl
 
 import io.undertow.server.HttpServerExchange
 import io.undertow.websockets.WebSocketConnectionCallback
-import io.undertow.websockets.core.WebSocketChannel
-import io.undertow.websockets.core.WebSockets
-import io.undertow.websockets.core.AbstractReceiveListener
-import io.undertow.websockets.core.BufferedTextMessage
-import io.undertow.websockets.core.BufferedBinaryMessage
+import io.undertow.websockets.core.*
 import io.undertow.websockets.spi.WebSocketHttpExchange
-import org.http4k.core.StreamBody
-import org.http4k.core.Body
-import org.http4k.core.Request
-import org.http4k.core.RequestSource
-import org.http4k.core.Method
+import org.http4k.core.*
 import org.http4k.websocket.PushPullAdaptingWebSocket
 import org.http4k.websocket.WsHandler
 import org.http4k.websocket.WsMessage
@@ -31,14 +23,15 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
 
     companion object {
         private val logger = LoggerFactory.getLogger(UndertowWebSocketCallBack::class.java)
+        private val doubleSlashRegex = Regex("""[^:]//""")
     }
 
     override fun onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel) {
         // When chargerStation connect with //
-        if (exchange.getResponseHeader(SEC_WEBSOCKET_LOCATION)?.contains(Regex("""[^:]//""")) == true) {
-            logger.info(
-                "Replace Sec-WebSocket-Location header ${exchange.getResponseHeader(SEC_WEBSOCKET_LOCATION)} " +
-                    "double slash"
+        if (exchange.getResponseHeader(SEC_WEBSOCKET_LOCATION)?.contains(doubleSlashRegex) == true) {
+            logger.debug(
+                "Replace Sec-WebSocket-Location header {} double slash",
+                exchange.getResponseHeader(SEC_WEBSOCKET_LOCATION)
             )
             exchange.setResponseHeader(
                 SEC_WEBSOCKET_LOCATION,
@@ -47,6 +40,8 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
         }
 
         val upgradeRequest = exchange.asRequest(channel)
+        val logContext = upgradeRequest.uri.toString()
+        logger.debug("{} - connection attempt: upgrade request={}", logContext, upgradeRequest)
 
         val socket = object : PushPullAdaptingWebSocket(upgradeRequest) {
             override fun send(message: WsMessage) =
@@ -61,17 +56,18 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
                 }
 
             override fun close(status: WsStatus) {
-                logger.warn(
-                    "Closing websocket : WsStatus $status, channel $channel, closeCode: ${channel.closeCode}," +
-                        " closeReason: ${channel.closeReason}"
+                logger.info(
+                    "$logContext - closing websocket: WsStatus $status, channel $channel," +
+                        " closeCode: ${channel.closeCode}, closeReason: ${channel.closeReason}"
                 )
                 WebSockets.sendClose(status.code, status.description, channel, null)
             }
         }.apply(ws(upgradeRequest))
 
         channel.addCloseTask {
-            logger.warn("Closing websocket : WsStatus $it")
-            socket.triggerClose(WsStatus(it.closeCode, it.closeReason ?: "unknown"))
+            val status = WsStatus(it.closeCode, it.closeReason ?: "unknown")
+            logger.warn("$logContext - closing websocket: WsStatus $status channel $it", Exception("capture stack"))
+            socket.triggerClose(status)
         }
 
         channel.receiveSetter.set(object : AbstractReceiveListener() {
@@ -82,10 +78,10 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
                 try {
                     socket.triggerMessage(WsMessage(Body(message.data)))
                 } catch (e: IOException) {
-                    logger.error("IOException $message", e)
+                    logger.error("$logContext - IOException on $message - $e", e)
                     throw e
                 } catch (e: Exception) {
-                    logger.error("Exception $message", e)
+                    logger.error("$logContext - Exception on $message - $e", e)
                     socket.triggerError(e)
                     throw e
                 }
@@ -98,7 +94,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
                 message.data.resource.forEach { socket.triggerMessage(WsMessage(Body(it))) }
 
             override fun onError(channel: WebSocketChannel, error: Throwable) {
-                logger.warn("Exception, requestURI: ${exchange?.requestURI}", error)
+                logger.warn("$logContext - Exception $error", error)
                 return socket.triggerError(error)
             }
         })
@@ -117,16 +113,16 @@ private fun WebSocketHttpExchange.asRequest(channel: WebSocketChannel) =
             )
         )
 
-fun requiresWebSocketUpgrade(): (HttpServerExchange) -> Boolean = {
-    (
-        it.requestHeaders["Connection"]?.any { header ->
-            header.equals("upgrade", true)
+fun requiresWebSocketUpgrade(): (HttpServerExchange) -> Boolean = { httpServerExchange ->
+    val containsValidConnectionHeader = httpServerExchange.requestHeaders["Connection"]
+        ?.any { headerValue ->
+            headerValue.split(",")
+                .map { it.trim().lowercase() }
+                .contains("upgrade")
         } ?: false
-        ) &&
-        (
-            it.requestHeaders["Upgrade"]?.any { header ->
-                header.equals("websocket", true)
-            }
-                ?: false
-            )
+
+    val containsValidUpgradeHeader = httpServerExchange.requestHeaders["Upgrade"]
+        ?.any { it.equals("websocket", true) } ?: false
+
+    containsValidConnectionHeader && containsValidUpgradeHeader
 }

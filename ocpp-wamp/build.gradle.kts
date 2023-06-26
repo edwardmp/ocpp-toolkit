@@ -7,13 +7,15 @@ coreProject()
 
 dependencies {
     api(project(":ocpp-json"))
-    
+
     implementation(project(":utils"))
 
     implementation("org.http4k:http4k-core:_")
     implementation("org.http4k:http4k-client-websocket:_")
     implementation("org.http4k:http4k-server-undertow:_")
     implementation("org.http4k:http4k-client-apache:_")
+    implementation("io.undertow:undertow-core:_")
+    implementation("io.undertow:undertow-servlet:_")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:_")
 
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
