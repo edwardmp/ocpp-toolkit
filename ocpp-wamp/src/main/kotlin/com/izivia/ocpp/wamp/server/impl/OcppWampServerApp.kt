@@ -9,6 +9,8 @@ import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.http4k.routing.bind
 import org.http4k.routing.websockets
 import org.http4k.websocket.Websocket
@@ -28,15 +30,18 @@ class OcppWampServerApp(
     private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val ocppWsEndpoint: OcppWsEndpoint,
-    val timeoutInMs: Long
+    val timeoutInMs: Long,
+    private val clock: Clock = Clock.System
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger("com.izivia.ocpp.wamp.server")
     }
 
-    private val connections = Collections.synchronizedMap(TreeMap<String, ChargingStationConnection?> { a, b ->
-        a.lowercase().compareTo(b.lowercase())
-    })
+    private val connections = Collections.synchronizedMap(
+        TreeMap<String, ChargingStationConnection?> { a, b ->
+            a.lowercase().compareTo(b.lowercase())
+        }
+    )
     private val shutdown = AtomicBoolean(false)
 
     private fun newConnection(ws: Websocket) {
@@ -56,42 +61,72 @@ class OcppWampServerApp(
                 ?: throw IllegalArgumentException(
                     "malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}"
                 )
-            val handler = handlers(chargingStationOcppId)
-            onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
 
-            connections[chargingStationOcppId]?.also {
-                // already connected
-                logger.warn(
-                    "[$chargingStationOcppId] already connected - the new connection will replace the previous one"
-                )
-                it.close()
-            }
-
+            val previousConnection = connections[chargingStationOcppId]
             val chargingStationConnection = ChargingStationConnection(
+                clock.now(),
                 wsConnectionId,
                 chargingStationOcppId,
                 ws,
                 ocppVersion,
                 timeoutInMs,
                 shutdown
-            )
-            connections[chargingStationOcppId] = chargingStationConnection
+            ).also {
+                connections[chargingStationOcppId] = it
+            }
+
+            val reconnect = previousConnection != null
+
+            if (reconnect) {
+                logger.warn(
+                    """[$chargingStationOcppId] already connected
+                        | - the new connection will replace the previous one
+                        | - no connection notification will be sent
+                        | - existing connection=$previousConnection
+                        | - new connection=$chargingStationConnection
+                        | - existing connection will be closed""".trimMargin()
+                )
+                // this close wont trigger a onClose, because we have already changed the current registered connection
+                previousConnection?.close()
+            } else {
+                // we notify connection only if it's not a reconnection (already connected)
+                onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+            }
+
             val logContext = "[$chargingStationOcppId] [$wsConnectionId]"
             ws.onClose {
-                if (connections[chargingStationOcppId]?.wsConnectionId == wsConnectionId) {
+                val currentConnection = connections[chargingStationOcppId]
+                if (currentConnection?.wsConnectionId == wsConnectionId) {
+                    // todo - use a concurrent map and a remove if to make this atomic
                     connections[chargingStationOcppId] = null
                 } else {
-                    logger.info("$logContext warn: do not clear ws on close - not current connection in map")
+                    logger.info(
+                        "$logContext warn: do not clear ws on close - not current connection in map" +
+                            " - registered connection: $currentConnection" +
+                            " - closed connection: $chargingStationConnection"
+                    )
                 }
-                logger.info("$logContext disconnected - number of connections : ${connections.size}")
-                onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                val duration = clock.now() - chargingStationConnection.timestamp
+                logger.info("$logContext disconnected - $duration - number of connections : ${connections.size}")
+
+                if (connections[chargingStationOcppId] == null) {
+                    // we notify only if we remove the connection, otherwise we are still connected
+                    onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                } else {
+                    logger.debug("$logContext not notifying disconnection - still connected")
+                }
             }
 
             logger.info("$logContext connected - number of connections : ${connections.size}")
+            val handler = handlers(chargingStationOcppId)
             ws.onMessage {
                 val msgString = it.bodyString()
                 if (logger.isDebugEnabled) {
-                    logger.debug("$logContext onMessage $msgString")
+                    logger.debug("$logContext onMessage `$msgString`")
+                }
+                if (msgString.trim().isEmpty()) {
+                    logger.info("$logContext empty message received - ignored")
+                    return@onMessage
                 }
                 val msg = WampMessage.parse(msgString)
                 if (msg == null) {
@@ -193,6 +228,7 @@ class OcppWampServerApp(
     fun newRoutingHandler() = websockets(ocppWsEndpoint.uriTemplate.toString() bind ::newConnection)
 
     private class ChargingStationConnection(
+        val timestamp: Instant,
         val wsConnectionId: String,
         val ocppId: CSOcppId,
         val ws: Websocket,
@@ -209,6 +245,11 @@ class OcppWampServerApp(
         fun close() {
             logger.info("[$ocppId] [$wsConnectionId] - closing")
             ws.close()
+        }
+
+        override fun toString(): String {
+            return "ChargingStationConnection(" +
+                "wsConnectionId='$wsConnectionId', ocppId='$ocppId', ocppVersion=$ocppVersion, timestamp='$timestamp')"
         }
     }
 }
