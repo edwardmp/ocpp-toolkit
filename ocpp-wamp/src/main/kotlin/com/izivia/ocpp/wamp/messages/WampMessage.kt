@@ -84,7 +84,7 @@ object WampMessageParser {
     private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]+),(.*)""")
 
     fun parse(msg: String): WampMessage? {
-        logger.info("Trying to parse message: $msg")
+        logger.debug("Trying to parse message: {}", msg)
         when (msg) {
             null, "{}" -> return null
             else -> {
