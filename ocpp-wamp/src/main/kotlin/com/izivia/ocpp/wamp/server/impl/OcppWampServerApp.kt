@@ -29,6 +29,7 @@ class OcppWampServerApp(
     val ocppVersions: Set<OcppVersion>,
     private val handlers: (CSOcppId) -> List<OcppWampServerHandler>,
     private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val ocppWsEndpoint: OcppWsEndpoint,
     val timeoutInMs: Long,
@@ -82,16 +83,17 @@ class OcppWampServerApp(
                 logger.warn(
                     """[$chargingStationOcppId] already connected
                         | - the new connection will replace the previous one
-                        | - no connection notification will be sent
+                        | - a connection reconnect notification will be sent
                         | - existing connection=$previousConnection
                         | - new connection=$chargingStationConnection
                         | - existing connection will be closed
                     """.trimMargin()
                 )
-                // this close wont trigger a onClose, because we have already changed the current registered connection
+                // this close wont trigger a onWsCloseHandler,
+                // because we have already changed the current registered connection
                 previousConnection?.close()
+                onWsReconnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
             } else {
-                // we notify connection only if it's not a reconnection (already connected)
                 onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
             }
 
