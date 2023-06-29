@@ -20,6 +20,7 @@ interface OcppWampClient {
             ocppId: CSOcppId,
             ocppVersion: OcppVersion,
             timeoutInMs: Long = 30_000,
+            autoReconnect: Boolean = true,
             baseAutoReconnectDelayInMs: Long = 250,
             headers: WampMessageMetaHeaders = emptyList()
         ) = OkHttpOcppWampClient(
@@ -27,6 +28,7 @@ interface OcppWampClient {
             ocppId,
             ocppVersion,
             timeoutInMs,
+            autoReconnect,
             baseAutoReconnectDelayInMs,
             headers
         )
