@@ -16,6 +16,7 @@ import org.http4k.routing.websockets
 import org.http4k.websocket.Websocket
 import org.http4k.websocket.WsMessage
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -84,7 +85,8 @@ class OcppWampServerApp(
                         | - no connection notification will be sent
                         | - existing connection=$previousConnection
                         | - new connection=$chargingStationConnection
-                        | - existing connection will be closed""".trimMargin()
+                        | - existing connection will be closed
+                    """.trimMargin()
                 )
                 // this close wont trigger a onClose, because we have already changed the current registered connection
                 previousConnection?.close()
@@ -95,25 +97,13 @@ class OcppWampServerApp(
 
             val logContext = "[$chargingStationOcppId] [$wsConnectionId]"
             ws.onClose {
-                val currentConnection = connections[chargingStationOcppId]
-                if (currentConnection?.wsConnectionId == wsConnectionId) {
-                    // todo - use a concurrent map and a remove if to make this atomic
-                    connections[chargingStationOcppId] = null
-                } else {
-                    logger.info(
-                        "$logContext warn: do not clear ws on close - not current connection in map" +
-                            " - registered connection: $currentConnection" +
-                            " - closed connection: $chargingStationConnection"
-                    )
-                }
-                val duration = clock.now() - chargingStationConnection.timestamp
-                logger.info("$logContext disconnected - $duration - number of connections : ${connections.size}")
+                handleWebSocketClosed(logContext, chargingStationConnection)
+            }
 
-                if (connections[chargingStationOcppId] == null) {
-                    // we notify only if we remove the connection, otherwise we are still connected
-                    onWsCloseHandler(chargingStationOcppId, ws.upgradeRequest.headers)
-                } else {
-                    logger.debug("$logContext not notifying disconnection - still connected")
+            ws.onError { e ->
+                // not sure yet if we should consider any error as a close, so we handle only connection resets
+                if (e.isConnectionReset()) {
+                    handleWebSocketClosed(logContext, chargingStationConnection, e)
                 }
             }
 
@@ -195,6 +185,35 @@ class OcppWampServerApp(
         }
     }
 
+    private fun handleWebSocketClosed(
+        logContext: String,
+        chargingStationConnection: ChargingStationConnection,
+        t: Throwable? = null
+    ) {
+        val chargingStationOcppId = chargingStationConnection.ocppId
+        val currentConnection = connections[chargingStationOcppId]
+        if (currentConnection?.wsConnectionId == chargingStationConnection.wsConnectionId) {
+            // todo - use a concurrent map and a remove if to make this atomic
+            connections[chargingStationOcppId] = null
+        } else {
+            logger.info(
+                "$logContext warn: do not clear ws on close - not current connection in map" +
+                    " - registered connection: $currentConnection" +
+                    " - closed connection: $chargingStationConnection"
+            )
+        }
+        val duration = clock.now() - chargingStationConnection.timestamp
+        val errorInfo = t?.let { " onError $t - " } ?: ""
+        logger.info("$logContext disconnected - $duration -$errorInfo number of connections : ${connections.size}")
+
+        if (connections[chargingStationOcppId] == null) {
+            // we notify only if we remove the connection, otherwise we are still connected
+            onWsCloseHandler(chargingStationOcppId, chargingStationConnection.ws.upgradeRequest.headers)
+        } else {
+            logger.debug("$logContext not notifying disconnection - still connected")
+        }
+    }
+
     fun shutdown() {
         shutdown.set(true)
         connections.values.toList().forEach { c ->
@@ -253,3 +272,6 @@ class OcppWampServerApp(
         }
     }
 }
+
+private fun Throwable.isConnectionReset(): Boolean =
+    this is SocketException && this.message.equals("Connection reset")
