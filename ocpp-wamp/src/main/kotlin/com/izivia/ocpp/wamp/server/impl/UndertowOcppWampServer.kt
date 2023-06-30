@@ -20,6 +20,7 @@ class UndertowOcppWampServer(
     path: String = "ws",
     val timeoutInMs: Long = 30_000,
     private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
 ) : OcppWampServer {
     private val handlers = mutableListOf<OcppWampServerHandler>()
@@ -33,6 +34,7 @@ class UndertowOcppWampServer(
             ocppVersions = ocppVersions,
             handlers = { id -> selectedHandler[id] ?: throw IllegalStateException() },
             onWsConnectHandler = onWsConnectHandler,
+            onWsReconnectHandler = onWsReconnectHandler,
             onWsCloseHandler = onWsCloseHandler,
             ocppWsEndpoint = ocppWsEndpoint,
             timeoutInMs = timeoutInMs
@@ -55,7 +57,7 @@ class UndertowOcppWampServer(
                 ).start()
             }
         logger.info(
-            "starting ocpp wamp server on port $port" +
+            "starting ocpp wamp server 1.0.2 on port $port" +
                 " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
         )
     }

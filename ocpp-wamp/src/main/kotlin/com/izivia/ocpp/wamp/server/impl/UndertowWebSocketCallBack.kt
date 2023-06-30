@@ -66,7 +66,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
 
         channel.addCloseTask {
             val status = WsStatus(it.closeCode, it.closeReason ?: "unknown")
-            logger.warn("$logContext - closing websocket: WsStatus $status channel $it", Exception("capture stack"))
+            logger.warn("$logContext - closing websocket: WsStatus $status channel $it")
             socket.triggerClose(status)
         }
 

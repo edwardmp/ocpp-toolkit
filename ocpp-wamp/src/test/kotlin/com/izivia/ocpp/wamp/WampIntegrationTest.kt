@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectCatching
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
-import strikt.assertions.isFailure
-import strikt.assertions.isLessThan
-import strikt.assertions.isSuccess
+import strikt.assertions.*
 import kotlin.system.measureTimeMillis
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class WampIntegrationTest {
     private val port = getFreePort()
@@ -63,6 +63,104 @@ class WampIntegrationTest {
             }
 
             client.close()
+        } finally {
+            server.stop()
+        }
+    }
+
+    @Test
+    fun `should send notifications on connect - disconnect - reconnect`() {
+        val heartbeatResponsePayload = """{"currentTime":"${Clock.System.now()}"}"""
+
+        val connectedEvents: MutableList<CSOcppId> = ArrayList()
+        val closeEvents: MutableList<CSOcppId> = ArrayList()
+        val reconnectedEvents: MutableList<CSOcppId> = ArrayList()
+        val server = OcppWampServer.newServer(
+            port,
+            setOf(OCPP_1_6),
+            onWsConnectHandler = { id, headers ->
+                connectedEvents.add(id)
+            },
+            onWsCloseHandler = { id, headers ->
+                closeEvents.add(id)
+            },
+            onWsReconnectHandler = { id, headers ->
+                reconnectedEvents.add(id)
+            }
+        )
+        server.register(object : OcppWampServerHandler {
+            override fun accept(ocppId: CSOcppId): Boolean = "TEST1" == ocppId
+
+            override fun onAction(meta: WampMessageMeta, msg: WampMessage): WampMessage? =
+                WampMessage.CallResult(msg.msgId, heartbeatResponsePayload)
+        })
+        server.start()
+
+        try {
+            expectThat(connectedEvents).isEmpty()
+            expectThat(closeEvents).isEmpty()
+            expectThat(reconnectedEvents).isEmpty()
+
+            val client =
+                OcppWampClient.newClient(Uri.of("ws://localhost:$port/ws"), "TEST1", OCPP_1_6, autoReconnect = false)
+            client.connect()
+
+            runWithTimeout {
+                expectThat(connectedEvents).hasSize(1).first().isEqualTo("TEST1")
+                expectThat(closeEvents).isEmpty()
+                expectThat(reconnectedEvents).isEmpty()
+                connectedEvents.clear()
+            }
+
+            client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}"))
+            // should not send events on message
+            expectThat(connectedEvents).isEmpty()
+            expectThat(closeEvents).isEmpty()
+            expectThat(reconnectedEvents).isEmpty()
+
+            client.close()
+            runWithTimeout {
+                expectThat(connectedEvents).isEmpty()
+                expectThat(closeEvents).hasSize(1).first().isEqualTo("TEST1")
+                expectThat(reconnectedEvents).isEmpty()
+                closeEvents.clear()
+            }
+
+            // reconnect after proper close will send a connect event, because we have sent a close event before
+            client.connect()
+            runWithTimeout {
+                expectThat(connectedEvents).hasSize(1).first().isEqualTo("TEST1")
+                expectThat(closeEvents).isEmpty()
+                expectThat(reconnectedEvents).isEmpty()
+                connectedEvents.clear()
+            }
+
+            // we simulate a reconnect with a second client on the asme ocpp id, it should close the first client
+            // connection and trigger a reconnect event
+            val client2 =
+                OcppWampClient.newClient(Uri.of("ws://localhost:$port/ws"), "TEST1", OCPP_1_6, autoReconnect = false)
+            client2.connect()
+            runWithTimeout {
+                expectThat(connectedEvents).isEmpty()
+                expectThat(closeEvents).isEmpty()
+                expectThat(reconnectedEvents).hasSize(1).first().isEqualTo("TEST1")
+                reconnectedEvents.clear()
+            }
+
+            client.close()
+            runWithTimeout {
+                // no event, already disconnected
+                expectThat(connectedEvents).isEmpty()
+                expectThat(closeEvents).isEmpty()
+                expectThat(reconnectedEvents).isEmpty()
+            }
+
+            client2.close()
+            runWithTimeout {
+                expectThat(connectedEvents).isEmpty()
+                expectThat(closeEvents).hasSize(1).first().isEqualTo("TEST1")
+                expectThat(reconnectedEvents).isEmpty()
+            }
         } finally {
             server.stop()
         }
@@ -321,5 +419,30 @@ class WampIntegrationTest {
             expectCatching { client.connect() }.isFailure()
         }
         expectThat(time).isLessThan(100) // 50ms timeout + 50ms tolerance
+    }
+}
+
+fun runWithTimeout(
+    timeout: Duration = 10.seconds,
+    step: Duration = 100L.milliseconds,
+    block: () -> Unit
+) {
+    val timeoutTimestamp = System.currentTimeMillis() + timeout.inWholeMilliseconds
+    var attemptCount = 0
+    while (true) {
+        val startAttemptTimestamp = System.currentTimeMillis()
+        try {
+            attemptCount++
+            block()
+            break
+        } catch (e: Throwable) {
+            if (System.currentTimeMillis() > timeoutTimestamp) {
+                throw e
+            } else {
+                val elapsed = System.currentTimeMillis() - startAttemptTimestamp
+                println("failed attempt $attemptCount - took $elapsed ms - error: ${e.message}")
+            }
+        }
+        Thread.sleep(step.inWholeMilliseconds)
     }
 }

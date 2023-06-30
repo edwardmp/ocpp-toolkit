@@ -27,6 +27,7 @@ class OkHttpOcppWampClient(
     val ocppId: CSOcppId,
     val ocppVersion: OcppVersion,
     val timeoutInMs: Long = 30_000,
+    autoReconnect: Boolean = true,
     baseAutoReconnectDelayInMs: Long = 250,
     private val headers: WampMessageMetaHeaders = emptyList(),
     hostnameVerifier: HostnameVerifier = HostnameVerifier { _, _ -> true }
@@ -41,6 +42,7 @@ class OkHttpOcppWampClient(
         .hostnameVerifier(hostnameVerifier)
         .build()
     private val autoReconnectHandler = AutoReconnectHandler(this, baseAutoReconnectDelayInMs)
+        .takeIf { autoReconnect }
 
     private var wampConnection: WampConnection? = null
 
@@ -78,7 +80,7 @@ class OkHttpOcppWampClient(
 
     private fun cleanupStateOnClose() {
         wampConnection = null
-        autoReconnectHandler.stopReconnecting()
+        autoReconnectHandler?.stopReconnecting()
         connectionState = ConnectionState.DISCONNECTED
     }
 
@@ -232,7 +234,7 @@ class OkHttpOcppWampClient(
         // we don't call close on the connection, we are already in the ws closing hook
         wampConnection = null
 
-        autoReconnectHandler.startReconnecting()
+        autoReconnectHandler?.startReconnecting()
     }
 
     private fun onConnectedTo(connectedWebsocket: WebSocket) {
@@ -285,12 +287,16 @@ class OkHttpOcppWampClient(
     private fun waitForReconnectionOrTimeout() {
         if (connectionState == ConnectionState.CONNECTED) return
 
-        autoReconnectHandler.maybeForceReconnectAttemptAndWaitForReconnection()
-        if (connectionState == ConnectionState.CONNECTED) {
-            logger.debug("[$ocppId] reconnection successful to $serverUri")
-        } else {
-            logger.debug("[$ocppId] reconnection failed to $serverUri")
-        }
+        autoReconnectHandler
+            ?.maybeForceReconnectAttemptAndWaitForReconnection()
+            ?.also {
+                if (connectionState == ConnectionState.CONNECTED) {
+                    logger.debug("[$ocppId] reconnection successful to $serverUri")
+                } else {
+                    logger.debug("[$ocppId] reconnection failed to $serverUri")
+                }
+            } ?: logger.debug("[$ocppId] no reconnection configured - disconnected from $serverUri")
+
     }
 
     enum class ConnectionState {
