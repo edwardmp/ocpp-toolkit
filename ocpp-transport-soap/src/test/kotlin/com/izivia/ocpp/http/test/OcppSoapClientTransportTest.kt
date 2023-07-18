@@ -197,6 +197,6 @@ class OcppSoapClientTransportTest {
     }
 
     private fun createMockServerAndAlwaysRespond(handlerBody: String) =
-        ("api/{ocppId}" bind Method.POST to { Response(Status.OK).body(handlerBody) })
+        ("api" bind Method.POST to { Response(Status.OK).body(handlerBody) })
             .asServer(Undertow(5002))
 }
