@@ -45,7 +45,7 @@ class OcppSoapClientTransport(
         server = app.asServer(Undertow(port = clientSettings.port))
     }
 
-    private val targetRoute = target.removeSuffix("/") + "/" + ocppId
+    private val targetRoute = target.removeSuffix("/") + "/"
     private fun routeHandler(): HttpHandler = { request: Request ->
         val payload = request.bodyString()
         val action = extractAction(payload)
@@ -80,7 +80,7 @@ class OcppSoapClientTransport(
                         messageId = newMessageId(),
                         chargingStationId = ocppId,
                         action = action,
-                        from = clientSettings.path,
+                        from = clientSettings.path + ":" + clientSettings.port,
                         to = targetRoute,
                         payload = message
                     )

@@ -88,7 +88,7 @@ class ApiFactory {
             newMessageId: () -> String
         ): ClientTransport =
             OcppSoapClientTransport(
-                SoapClientSettings(path, port),
+                SoapClientSettings(path.removeSuffix("/"), port),
                 ocppId,
                 target,
                 getSoapParser(ocppVersion),
