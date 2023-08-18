@@ -9,6 +9,7 @@ import io.undertow.websockets.WebSocketProtocolHandshakeHandler
 import io.undertow.websockets.core.protocol.version07.Hybi07Handshake
 import io.undertow.websockets.core.protocol.version08.Hybi08Handshake
 import io.undertow.websockets.core.protocol.version13.Hybi13Handshake
+import io.undertow.websockets.extensions.PerMessageDeflateHandshake
 import org.http4k.core.HttpHandler
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.BAD_REQUEST
@@ -35,9 +36,9 @@ class Undertow(val port: Int = 8000, val enableHttp2: Boolean,
             } else {
                 WebSocketProtocolHandshakeHandler(
                     listOf(
-                        Hybi13Handshake(wsSubprotocols, false),
-                        Hybi08Handshake(wsSubprotocols, false),
-                        Hybi07Handshake(wsSubprotocols, false),
+                        Hybi13Handshake(wsSubprotocols, true),
+                        Hybi08Handshake(wsSubprotocols, true),
+                        Hybi07Handshake(wsSubprotocols, true),
                     ),
                     UndertowWebSocketCallBack(it)
                 )
