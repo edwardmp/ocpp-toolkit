@@ -57,7 +57,7 @@ class UndertowOcppWampServer(
                 ).start()
             }
         logger.info(
-            "starting ocpp wamp server 1.0.2 on port $port" +
+            "starting ocpp wamp server on port $port" +
                 " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
         )
     }
