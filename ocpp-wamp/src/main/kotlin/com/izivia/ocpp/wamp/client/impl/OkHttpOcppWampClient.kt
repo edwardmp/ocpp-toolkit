@@ -44,7 +44,7 @@ class OkHttpOcppWampClient(
     private val autoReconnectHandler = AutoReconnectHandler(this, baseAutoReconnectDelayInMs)
         .takeIf { autoReconnect }
 
-    private var wampConnection: WampConnection? = null
+    var wampConnection: WampConnection? = null
 
     private var desiredConnectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
