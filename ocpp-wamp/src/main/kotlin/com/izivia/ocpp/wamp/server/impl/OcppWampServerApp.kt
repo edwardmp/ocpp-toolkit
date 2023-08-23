@@ -48,6 +48,7 @@ class OcppWampServerApp(
 
     private fun newConnection(ws: Websocket) {
         try {
+            logger.debug("websocket connection: upgrade request={}", ws.upgradeRequest)
             if (shutdown.get()) {
                 logger.warn("shutting down - rejecting connection")
                 ws.close()

@@ -1,4 +1,4 @@
-package com.izivia.ocpp.wamp.server.impl
+package com.izivia.ocpp.wamp.server.impl.undertow
 
 import io.undertow.server.HttpServerExchange
 import io.undertow.websockets.WebSocketConnectionCallback
@@ -20,6 +20,8 @@ import java.io.IOException
 class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnectionCallback {
 
     private val SEC_WEBSOCKET_LOCATION = "Sec-WebSocket-Location"
+    private val SEC_WEBSOCKET_EXT = "Sec-WebSocket-Extensions"
+    private val PERMESSAGE_DEFLATE = "permessage-deflate"
 
     companion object {
         private val logger = LoggerFactory.getLogger(UndertowWebSocketCallBack::class.java)
@@ -104,7 +106,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
 
 private fun WebSocketHttpExchange.asRequest(channel: WebSocketChannel) =
     Request(Method.GET, requestURI.replace("//", "/"))
-        .headers(requestHeaders.toList().flatMap { h -> h.second.map { h.first to it } })
+        .headers(requestHeaders.toList().flatMap { h -> h.second.map { h.first.lowercase() to it } })
         .source(
             RequestSource(
                 channel.sourceAddress.hostString,
@@ -112,6 +114,13 @@ private fun WebSocketHttpExchange.asRequest(channel: WebSocketChannel) =
                 channel.requestScheme
             )
         )
+        .let {
+            if (it.header("user-agent") == "Ze-Watt") {
+                it.removeHeader("sec-websocket-extensions")
+            } else {
+                it
+            }
+        }
 
 fun requiresWebSocketUpgrade(): (HttpServerExchange) -> Boolean = { httpServerExchange ->
     val containsValidConnectionHeader = httpServerExchange.requestHeaders["Connection"]

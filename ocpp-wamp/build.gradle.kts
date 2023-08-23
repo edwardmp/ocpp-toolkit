@@ -13,6 +13,9 @@ dependencies {
     implementation("org.http4k:http4k-core:_")
     implementation("org.http4k:http4k-client-websocket:_")
     implementation("org.http4k:http4k-server-undertow:_")
+    implementation("org.http4k:http4k-server-jetty:_")
+    implementation("org.http4k:http4k-server-websocket:_")
+
     implementation("org.http4k:http4k-client-apache:_")
     implementation("io.undertow:undertow-core:_")
     implementation("io.undertow:undertow-servlet:_")

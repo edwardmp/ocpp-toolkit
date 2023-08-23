@@ -5,7 +5,9 @@ import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
-import com.izivia.ocpp.wamp.server.impl.UndertowOcppWampServer
+import com.izivia.ocpp.wamp.server.impl.jetty.JettyOcppWampServer
+import com.izivia.ocpp.wamp.server.impl.undertow.UndertowOcppWampServer
+import com.izivia.ocpp.wamp.server.impl.websocket.JdkOcppWampServer
 
 interface OcppWampServer {
     /**
@@ -64,7 +66,7 @@ interface OcppWampServer {
             onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
             onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
             onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
-        ) = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsReconnectHandler, onWsCloseHandler)
+        ) = JdkOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsReconnectHandler, onWsCloseHandler)
     }
 }
 
