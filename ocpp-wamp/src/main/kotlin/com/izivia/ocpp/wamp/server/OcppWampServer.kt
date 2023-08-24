@@ -63,8 +63,18 @@ interface OcppWampServer {
             timeoutInMs: Long = 60_000,
             onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
             onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-            onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
-        ) = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsReconnectHandler, onWsCloseHandler)
+            onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+            ignoreCorruptMessageByHeaders: List<Pair<String, String>>? = null
+        ) = UndertowOcppWampServer(
+            port,
+            ocppVersions,
+            path,
+            timeoutInMs,
+            onWsConnectHandler,
+            onWsReconnectHandler,
+            onWsCloseHandler,
+            ignoreCorruptMessageByHeaders
+        )
     }
 }
 

@@ -12,6 +12,7 @@ import org.http4k.websocket.WsStatus
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
+
 /**
  * Taken from Http4kUndertowWebSocketCallBack
  * With improvement on upgradeRequest to add source field
@@ -27,6 +28,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
     }
 
     override fun onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel) {
+
         // When chargerStation connect with //
         if (exchange.getResponseHeader(SEC_WEBSOCKET_LOCATION)?.contains(doubleSlashRegex) == true) {
             logger.debug(
@@ -58,7 +60,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
             override fun close(status: WsStatus) {
                 logger.info(
                     "$logContext - closing websocket: WsStatus $status, channel $channel," +
-                        " closeCode: ${channel.closeCode}, closeReason: ${channel.closeReason}"
+                            " closeCode: ${channel.closeCode}, closeReason: ${channel.closeReason}"
                 )
                 WebSockets.sendClose(status.code, status.description, channel, null)
             }

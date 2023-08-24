@@ -21,7 +21,8 @@ class UndertowOcppWampServer(
     val timeoutInMs: Long = 30_000,
     private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
     private val onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-    private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
+    private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val ignoreCorruptMessageByHeaders: WampMessageMetaHeaders? = null
 ) : OcppWampServer {
     private val handlers = mutableListOf<OcppWampServerHandler>()
     private val selectedHandler = ConcurrentHashMap<CSOcppId, List<OcppWampServerHandler>>()
@@ -52,13 +53,25 @@ class UndertowOcppWampServer(
                                     .also { selectedHandler[ocppId] = it }
                             } != null
                         },
-                        wsSubprotocols = ocppVersions.map { it.subprotocol }.toSet()
+                        wsSubprotocols = ocppVersions.map { it.subprotocol }.toSet(),
+                        wsConnectionCallbackSelectorByHeaders = { exch ->
+                            ignoreCorruptMessageByHeaders?.any { expectedHeader ->
+                                exch
+                                    .requestHeaders[expectedHeader.first]
+                                    ?.any { hv ->
+                                        expectedHeader.second?.lowercase()?.let { hValue ->
+                                            hv.lowercase().contains(hValue)
+                                        } ?: false
+                                    }
+                                    ?: false
+                            } ?: false
+                        }
                     )
                 ).start()
             }
         logger.info(
             "starting ocpp wamp server 1.0.2 on port $port" +
-                " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
+                    " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
         )
     }
 
