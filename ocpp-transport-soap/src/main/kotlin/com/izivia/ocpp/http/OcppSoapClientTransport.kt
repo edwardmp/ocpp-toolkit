@@ -12,6 +12,7 @@ import org.http4k.server.Http4kServer
 import org.http4k.server.Undertow
 import org.http4k.server.asServer
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -59,7 +60,7 @@ class OcppSoapClientTransport(
     }
 
     private fun extractAction(payload: String): String =
-        ocppSoapParser.readToEnvelop(payload).header.action.value.removePrefix("/")
+        ocppSoapParser.readToEnvelop(payload).header.action?.value?.removePrefix("/") ?: ""
 
     override fun connect() {
         server?.start()
