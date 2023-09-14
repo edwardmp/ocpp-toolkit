@@ -47,7 +47,7 @@ object OcppConstant {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SoapEnvelope<T : SoapBody>(
     @JsonProperty(OcppConstant.HEADER)
-    val header: SoapHeader,
+    val header: SoapHeader = SoapHeader(),
     @JsonProperty(OcppConstant.BODY)
     val body: T
 )
@@ -57,15 +57,15 @@ data class SoapHeader(
     @JsonProperty(OcppConstant.MESSAGE_ID)
     val messageId: ValueText = ValueText(UUID.randomUUID().toString()),
     @JsonProperty(OcppConstant.ACTION)
-    val action: ValueText,
+    val action: ValueText? = null,
     @JsonProperty(OcppConstant.CHARGEBOX_IDENTITY)
-    val chargeBoxIdentity: ValueText?,
+    val chargeBoxIdentity: ValueText? = null,
     @JsonProperty(OcppConstant.FROM)
     val from: SoapHeaderFrom = SoapHeaderFrom(OcppConstant.SOAP_ANONYMOUS_VT),
     @JsonProperty(OcppConstant.TO)
     val to: ValueText = OcppConstant.SOAP_ANONYMOUS_VT,
     @JsonProperty(OcppConstant.RELATES_TO)
-    val relatesTo: ValueText?
+    val relatesTo: ValueText? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

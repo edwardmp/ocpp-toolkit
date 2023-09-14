@@ -86,11 +86,12 @@ abstract class OcppSoapParserImpl(
     override fun parseAnyRequestFromSoap(messageStr: String): RequestSoapMessage<Any> {
         val warnings = mutableListOf<ErrorDetail>()
         val envelope = readToEnvelop(messageStr) { warnings.addAll(it) }
+        val action = envelope.header.action?.value ?: ""
         try {
             return RequestSoapMessage(
                 messageId = envelope.header.messageId.value,
                 chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
-                action = envelope.header.action.value.removePrefix("/"),
+                action = action.removePrefix("/"),
                 from = envelope.header.from.address.value,
                 to = envelope.header.to.value,
                 payload = getRequestBodyContent(envelope),
@@ -100,8 +101,8 @@ abstract class OcppSoapParserImpl(
             return RequestSoapMessage(
                 messageId = envelope.header.messageId.value,
                 chargingStationId = envelope.header.chargeBoxIdentity?.value ?: "Undefined",
-                action = envelope.header.action.value.removePrefix("/"),
-                payload = buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e),
+                action = action.removePrefix("/"),
+                payload = buildSoapFault(action = action, soap = messageStr, e = e),
                 from = envelope.header.from.address.value,
                 to = envelope.header.to.toString(),
                 warnings = warnings.takeIf { it.size > 0 }
@@ -124,11 +125,11 @@ abstract class OcppSoapParserImpl(
                     )
                 )
             },
-            action = envelope.header.action.value.removePrefix("/").removeSuffix("Response"),
+            action = envelope.header.action?.value?.removePrefix("/")?.removeSuffix("Response") ?: "",
             payload = try {
                 getResponseBodyContent(envelope)
             } catch (e: Exception) {
-                buildSoapFault(action = envelope.header.action.value, soap = messageStr, e = e)
+                buildSoapFault(action = envelope.header.action?.value, soap = messageStr, e = e)
             },
             from = envelope.header.from.address.value,
             to = envelope.header.to.toString(),
