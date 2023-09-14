@@ -26,6 +26,7 @@ import com.izivia.ocpp.core15.model.heartbeat.HeartbeatReq
 import com.izivia.ocpp.core15.model.heartbeat.HeartbeatResp
 import com.izivia.ocpp.core15.model.metervalues.MeterValuesReq
 import com.izivia.ocpp.core15.model.metervalues.MeterValuesResp
+import com.izivia.ocpp.core15.model.remotestart.RemoteStartTransactionResp
 import com.izivia.ocpp.core15.model.reset.ResetResp
 import com.izivia.ocpp.core15.model.reset.enumeration.ResetStatus
 import com.izivia.ocpp.core15.model.starttransaction.StartTransactionReq
@@ -1022,7 +1023,7 @@ class Ocpp15SoapParserTest {
                     get { data }
                         .isEqualTo(
                             "{\"connectorId\":10,\"name\":\"Vehicle\",\"state\":\"1\"," +
-                                    "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
+                                "\"timestamp\":\"2022-05-17T15:42:03Z:\"}"
                         )
                 }
             get { messageId }.isEqualTo(msgId)
@@ -1586,7 +1587,28 @@ class Ocpp15SoapParserTest {
         expectThat(messageSoap).isEqualTo(expectedEnvelope)
         expectThat(ocpp15SoapParser.parseAnyRequestFromSoap(messageSoap)) {
             get { payload }.isA<ClearCacheReq>()
+        }
+    }
 
+    @Test
+    fun `should parse remote start SOAP response without header`() {
+        val response = """<s:Envelope
+                                xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"
+                                xmlns:tns="urn://Ocpp/Cp/2012/06/"
+                                xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                            <s:Body>
+                                <remoteStartTransactionResponse xmlns="urn://Ocpp/Cp/2012/06/">
+                                    <status>Accepted</status>
+                                </remoteStartTransactionResponse>
+                            </s:Body>
+                        </s:Envelope>"""
+
+        val message = ocpp15SoapParser.parseAnyResponseFromSoap(response)
+
+        expectThat(message).and {
+            get { payload }.isA<RemoteStartTransactionResp>().and {
+                get { status }.isEqualTo(RemoteStartStopStatus.Accepted)
+            }
         }
     }
 
