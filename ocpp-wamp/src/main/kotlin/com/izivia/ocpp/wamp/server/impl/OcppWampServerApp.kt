@@ -6,7 +6,6 @@ import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.core.WampCallManager
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
-import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import kotlinx.datetime.Clock
@@ -28,11 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 class OcppWampServerApp(
     val ocppVersions: Set<OcppVersion>,
     private val handlers: (CSOcppId) -> List<OcppWampServerHandler>,
-    private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-    private val onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-    private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
+    private val listeners: EventsListeners = EventsListeners(),
     private val ocppWsEndpoint: OcppWsEndpoint,
-    val timeoutInMs: Long,
+    val settings: OcppWampServerSettings,
     private val clock: Clock = Clock.System
 ) {
     companion object {
@@ -71,7 +68,7 @@ class OcppWampServerApp(
                 chargingStationOcppId,
                 ws,
                 ocppVersion,
-                timeoutInMs,
+                settings.timeoutInMs,
                 shutdown
             ).also {
                 connections[chargingStationOcppId] = it
@@ -92,9 +89,9 @@ class OcppWampServerApp(
                 // this close wont trigger a onWsCloseHandler,
                 // because we have already changed the current registered connection
                 previousConnection?.close()
-                onWsReconnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                listeners.onWsReconnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
             } else {
-                onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                listeners.onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
             }
 
             val logContext = "[$chargingStationOcppId] [$wsConnectionId]"
@@ -210,7 +207,7 @@ class OcppWampServerApp(
 
         if (connections[chargingStationOcppId] == null) {
             // we notify only if we remove the connection, otherwise we are still connected
-            onWsCloseHandler(chargingStationOcppId, chargingStationConnection.ws.upgradeRequest.headers)
+            listeners.onWsCloseHandler(chargingStationOcppId, chargingStationConnection.ws.upgradeRequest.headers)
         } else {
             logger.debug("$logContext not notifying disconnection - still connected")
         }

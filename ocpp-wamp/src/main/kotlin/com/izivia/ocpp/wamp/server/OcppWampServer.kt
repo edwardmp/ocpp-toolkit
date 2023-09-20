@@ -4,7 +4,8 @@ import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
-import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
+import com.izivia.ocpp.wamp.server.impl.EventsListeners
+import com.izivia.ocpp.wamp.server.impl.OcppWampServerSettings
 import com.izivia.ocpp.wamp.server.impl.UndertowOcppWampServer
 
 interface OcppWampServer {
@@ -60,11 +61,9 @@ interface OcppWampServer {
             port: Int,
             ocppVersions: Set<OcppVersion> = OcppVersion.values().toSet(),
             path: String = "ws",
-            timeoutInMs: Long = 60_000,
-            onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-            onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-            onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
-        ) = UndertowOcppWampServer(port, ocppVersions, path, timeoutInMs, onWsConnectHandler, onWsReconnectHandler, onWsCloseHandler)
+            settings: OcppWampServerSettings = OcppWampServerSettings(),
+            listeners: EventsListeners = EventsListeners()
+        ) = UndertowOcppWampServer(port, ocppVersions, path, settings, listeners)
     }
 }
 
