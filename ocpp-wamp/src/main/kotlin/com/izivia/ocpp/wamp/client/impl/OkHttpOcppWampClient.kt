@@ -260,7 +260,7 @@ class OkHttpOcppWampClient(
     }
 
     override fun sendBlocking(message: WampMessage): WampMessage {
-        return getCallManager().callBlocking("[$ocppId]", message)
+        return getCallManager().callBlocking("[$ocppId]", Clock.System.now(), message)
     }
 
     override fun onAction(handler: WampOnActionHandler) {

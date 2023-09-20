@@ -17,6 +17,7 @@ import org.http4k.websocket.WsMessage
 import org.slf4j.LoggerFactory
 import java.net.SocketException
 import java.util.*
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -42,6 +43,7 @@ class OcppWampServerApp(
         }
     )
     private val shutdown = AtomicBoolean(false)
+    private val callsExecutor: Executor = settings.buildCallsExecutor()
 
     private fun newConnection(ws: Websocket) {
         try {
@@ -150,26 +152,42 @@ class OcppWampServerApp(
                                 return@onMessage
                             }
 
-                            logger.info("$logContext -> ${it.bodyString()}")
-                            val resp = handler.asSequence()
-                                // use sequence to avoid greedy mapping, to find the first handler with non null result
-                                .map {
-                                    it.onAction(
-                                        WampMessageMeta(ocppVersion, chargingStationOcppId, ws.upgradeRequest.headers),
-                                        wampMessage
-                                    )
-                                }
-                                .filterNotNull()
-                                .firstOrNull()
-                                ?: WampMessage.CallError(
-                                    wampMessage.msgId,
-                                    MessageErrorCode.INTERNAL_ERROR,
-                                    "No action handler found",
-                                    """{"message":"$wampMessage"}"""
-                                ).also { logger.warn("$logContext no action handler found for $wampMessage") }
+                            val startCall = clock.now()
+                            callsExecutor.execute {
+                                val callQueueLatency = clock.now() - startCall
+                                logger.info(
+                                    "$logContext [IN][CALL][REQ] -> ${it.bodyString()} -- " +
+                                        "[latency=${callQueueLatency.inWholeMilliseconds}ms]"
+                                )
+                                val resp = handler.asSequence()
+                                    // use sequence to avoid greedy mapping, to find the first handler with non null result
+                                    .map {
+                                        it.onAction(
+                                            WampMessageMeta(
+                                                ocppVersion,
+                                                chargingStationOcppId,
+                                                ws.upgradeRequest.headers
+                                            ),
+                                            wampMessage
+                                        )
+                                    }
+                                    .filterNotNull()
+                                    .firstOrNull()
+                                    ?: WampMessage.CallError(
+                                        wampMessage.msgId,
+                                        MessageErrorCode.INTERNAL_ERROR,
+                                        "No action handler found",
+                                        """{"message":"$wampMessage"}"""
+                                    ).also { logger.warn("$logContext no action handler found for $wampMessage") }
 
-                            logger.info("$logContext <- ${resp.toJson()}")
-                            ws.send(WsMessage(resp.toJson()))
+                                val duration = clock.now() - startCall
+                                logger.info(
+                                    "$logContext [IN][CALL][RESP] <- ${resp.toJson()} -- " +
+                                        "[duration=${duration.inWholeMilliseconds}]" +
+                                        "[latency=${callQueueLatency.inWholeMilliseconds}]"
+                                )
+                                ws.send(WsMessage(resp.toJson()))
+                            }
                         }
 
                         WampMessageType.CALL_RESULT, WampMessageType.CALL_ERROR -> {
@@ -224,8 +242,8 @@ class OcppWampServerApp(
         }
     }
 
-    fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage =
-        getChargingStationConnection(ocppId).sendBlocking(message)
+    fun sendBlocking(ocppId: CSOcppId, message: WampMessage, startedCallAt: Instant = Clock.System.now()): WampMessage =
+        getChargingStationConnection(ocppId).sendBlocking(message, startedCallAt)
 
     private fun getChargingStationConnection(ocppId: CSOcppId): ChargingStationConnection {
         var backOffRetryMs = 10L
@@ -257,8 +275,8 @@ class OcppWampServerApp(
         val callManager: WampCallManager =
             WampCallManager(logger, { m: String -> ws.send(WsMessage(m)) }, timeoutInMs, shutdown)
 
-        fun sendBlocking(message: WampMessage): WampMessage =
-            callManager.callBlocking("[$ocppId] [$wsConnectionId]", message)
+        fun sendBlocking(message: WampMessage, startCall: Instant): WampMessage =
+            callManager.callBlocking("[$ocppId] [$wsConnectionId]", startCall, message)
 
         fun close() {
             logger.info("[$ocppId] [$wsConnectionId] - closing")
