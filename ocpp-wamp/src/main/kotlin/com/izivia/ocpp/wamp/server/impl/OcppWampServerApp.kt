@@ -183,8 +183,8 @@ class OcppWampServerApp(
                                 val duration = clock.now() - startCall
                                 logger.info(
                                     "$logContext [IN][CALL][RESP] <- ${resp.toJson()} -- " +
-                                        "[duration=${duration.inWholeMilliseconds}]" +
-                                        "[latency=${callQueueLatency.inWholeMilliseconds}]"
+                                        "[duration=${duration.inWholeMilliseconds}ms]" +
+                                        "[latency=${callQueueLatency.inWholeMilliseconds}ms]"
                                 )
                                 ws.send(WsMessage(resp.toJson()))
                             }
