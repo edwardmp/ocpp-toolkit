@@ -10,6 +10,8 @@ import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
+import com.izivia.ocpp.wamp.server.impl.EventsListeners
+import com.izivia.ocpp.wamp.server.impl.OcppWampServerSettings
 import kotlinx.datetime.Clock
 import org.http4k.core.Uri
 import org.junit.jupiter.api.Disabled
@@ -78,15 +80,17 @@ class WampIntegrationTest {
         val server = OcppWampServer.newServer(
             port,
             setOf(OCPP_1_6),
-            onWsConnectHandler = { id, headers ->
-                connectedEvents.add(id)
-            },
-            onWsCloseHandler = { id, headers ->
-                closeEvents.add(id)
-            },
-            onWsReconnectHandler = { id, headers ->
-                reconnectedEvents.add(id)
-            }
+            listeners = EventsListeners(
+                onWsConnectHandler = { id, headers ->
+                    connectedEvents.add(id)
+                },
+                onWsCloseHandler = { id, headers ->
+                    closeEvents.add(id)
+                },
+                onWsReconnectHandler = { id, headers ->
+                    reconnectedEvents.add(id)
+                }
+            )
         )
         server.register(object : OcppWampServerHandler {
             override fun accept(ocppId: CSOcppId): Boolean = "TEST1" == ocppId
@@ -245,7 +249,8 @@ class WampIntegrationTest {
 
     @Test
     fun `should call from server to charging station timeout`() {
-        val server = OcppWampServer.newServer(port, setOf(OCPP_1_6, OcppVersion.OCPP_2_0), "ws", 200)
+        val server =
+            OcppWampServer.newServer(port, setOf(OCPP_1_6, OcppVersion.OCPP_2_0), "ws", OcppWampServerSettings(200))
         server.register(object : OcppWampServerHandler {
             override fun accept(ocppId: CSOcppId): Boolean = "TEST1" == ocppId
             override fun onAction(meta: WampMessageMeta, msg: WampMessage): WampMessage? = null

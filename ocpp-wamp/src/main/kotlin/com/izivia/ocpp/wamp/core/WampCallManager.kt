@@ -2,10 +2,12 @@ package com.izivia.ocpp.wamp.core
 
 import com.izivia.ocpp.wamp.messages.WampMessage
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.slf4j.Logger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.milliseconds
 
 class WampCallManager(
     private val logger: Logger,
@@ -13,13 +15,13 @@ class WampCallManager(
     val timeoutInMs: Long,
     private val shutdown: AtomicBoolean = AtomicBoolean(false)
 ) {
-
+    private val clock = Clock.System
     private var currentCall: WampCall? = null
 
-    fun callBlocking(logContext: String, message: WampMessage): WampMessage {
-        val now = Clock.System.now()
+    fun callBlocking(logContext: String, startCall: Instant, message: WampMessage): WampMessage {
+        val now = clock.now()
         synchronized(this) {
-            while (currentCall != null && (Clock.System.now() - now).inWholeMilliseconds < timeoutInMs) {
+            while (currentCall != null && (clock.now() - startCall).inWholeMilliseconds < timeoutInMs) {
                 Thread.sleep(10)
             }
             if (currentCall != null) {
@@ -27,13 +29,24 @@ class WampCallManager(
             }
             currentCall = WampCall(logContext, message)
         }
+        val pendingCallLatency = clock.now() - now
+        if (pendingCallLatency > 400.milliseconds) {
+            logger.warn("$logContext [OUT][CALL] queued request during $pendingCallLatency")
+        }
         val msgString = message.toJson()
-        logger.info("$logContext => $msgString")
+        val latency = clock.now() - startCall
+        logger.info("$logContext [OUT][CALL][REQ] => $msgString -- [latency=${latency.inWholeMilliseconds}ms]")
         send(msgString)
-        currentCall?.latch?.await(timeoutInMs - ((Clock.System.now() - now).inWholeMilliseconds), TimeUnit.MILLISECONDS)
+        currentCall?.latch?.await(timeoutInMs - ((clock.now() - startCall).inWholeMilliseconds), TimeUnit.MILLISECONDS)
         val response = currentCall?.response
         if (response != null) {
             currentCall = null
+            val duration = clock.now() - startCall
+            logger.info(
+                "$logContext [OUT][CALL][RESP] <= ${response.toJson()} -- " +
+                    "[duration=${duration.inWholeMilliseconds}ms]" +
+                    "[latency=${latency.inWholeMilliseconds}ms]"
+            )
             return response
         } else {
             currentCall = null
@@ -48,12 +61,14 @@ class WampCallManager(
             pending == null -> {
                 logger.warn("$logContext got a call result/error with no pending call - discarding $msgString")
             }
+
             pending.msg.msgId != message.msgId -> {
                 logger.warn(
                     "$logContext got a call result/error not corresponding to pending call" +
                         " message id ${pending.msg.msgId} - discarding $msgString"
                 )
             }
+
             else -> {
                 logger.info("$logContext <= $msgString")
                 pending.response = message

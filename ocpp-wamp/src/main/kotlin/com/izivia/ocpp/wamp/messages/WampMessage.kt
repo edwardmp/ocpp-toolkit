@@ -81,7 +81,7 @@ object WampMessageParser {
 
     private val ocppMsgRegexTypeCall = Regex("""(\d+),([^,]+),([^,]+),(.*)""")
     private val ocppMsgRegexTypeCallResult = Regex("""(\d+),([^,]+),(.*)""")
-    private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]+),(.*)""")
+    private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]*),(.*)""")
 
     fun parse(msg: String): WampMessage? {
         logger.debug("Trying to parse message: {}", msg)
@@ -91,7 +91,7 @@ object WampMessageParser {
                 try {
                     val formattedMsg = msg.formatWampMessage()
                     when (WampMessageType.fromId(formattedMsg.split(",")[0].toInt())) {
-                        WampMessageType.CALL -> {
+                        CALL -> {
                             ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, action, payload) ->
@@ -99,7 +99,10 @@ object WampMessageParser {
                                     }
                                 }
                             }
-                            logger.error("WampMessage CALL doesn't match to the expected format $msg")
+                            logger.error(
+                                "WampMessage CALL doesn't match to the expected format" +
+                                    " msg=$msg (formatted msg=`$formattedMsg`)"
+                            )
                         }
 
                         CALL_RESULT -> {
@@ -110,7 +113,10 @@ object WampMessageParser {
                                     }
                                 }
                             }
-                            logger.error("WampMessage CALL_RESULT doesn't match to the expected format $msg")
+                            logger.error(
+                                "WampMessage CALL_RESULT doesn't match to the expected format" +
+                                    " msg=$msg (formatted msg=`$formattedMsg`)"
+                            )
                         }
 
                         CALL_ERROR -> {
@@ -126,7 +132,10 @@ object WampMessageParser {
                                     }
                                 }
                             }
-                            logger.error("WampMessage CALL_ERROR doesn't match to the expected format $msg")
+                            logger.error(
+                                "WampMessage CALL_ERROR doesn't match to the expected format" +
+                                    " msg=$msg (formatted msg=`$formattedMsg`)"
+                            )
                         }
                     }
                 } catch (e: Exception) {

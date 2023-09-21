@@ -5,7 +5,6 @@ import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageMeta
-import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import kotlinx.datetime.Clock
@@ -18,10 +17,8 @@ class UndertowOcppWampServer(
     val port: Int,
     val ocppVersions: Set<OcppVersion>,
     path: String = "ws",
-    val timeoutInMs: Long = 30_000,
-    private val onWsConnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-    private val onWsReconnectHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> },
-    private val onWsCloseHandler: (CSOcppId, WampMessageMetaHeaders) -> Unit = { _, _ -> }
+    val settings: OcppWampServerSettings = OcppWampServerSettings(),
+    private val listeners: EventsListeners = EventsListeners()
 ) : OcppWampServer {
     private val handlers = mutableListOf<OcppWampServerHandler>()
     private val selectedHandler = ConcurrentHashMap<CSOcppId, List<OcppWampServerHandler>>()
@@ -33,11 +30,9 @@ class UndertowOcppWampServer(
         wsApp = OcppWampServerApp(
             ocppVersions = ocppVersions,
             handlers = { id -> selectedHandler[id] ?: throw IllegalStateException() },
-            onWsConnectHandler = onWsConnectHandler,
-            onWsReconnectHandler = onWsReconnectHandler,
-            onWsCloseHandler = onWsCloseHandler,
+            listeners = listeners,
             ocppWsEndpoint = ocppWsEndpoint,
-            timeoutInMs = timeoutInMs
+            settings = settings
         )
             .also {
                 server = it.newRoutingHandler().asServer(
@@ -58,7 +53,7 @@ class UndertowOcppWampServer(
             }
         logger.info(
             "starting ocpp wamp server 1.0.2 on port $port" +
-                " -- ocpp versions=$ocppVersions - timeout=$timeoutInMs ms"
+                " -- ocpp versions=$ocppVersions - timeout=${settings.timeoutInMs} ms"
         )
     }
 

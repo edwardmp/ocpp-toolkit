@@ -178,6 +178,22 @@ class WampParserTest {
     }
 
     @Test
+    fun `should parse call error without status`() {
+        val callErrorTypeMsg =
+            """[4,"52370","NotImplemented","",{}]"""
+
+        var wampMessage = WampMessageParser.parse(callErrorTypeMsg)
+        expectThat(wampMessage).isNotNull()
+        expectThat(wampMessage!!) {
+            get { msgId }.isEqualTo("52370")
+            get { msgType }.isEqualTo(WampMessageType.CALL_ERROR)
+            get { errorCode }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED)
+            get { errorDescription }.isEqualTo("")
+            get { payload }.isEqualTo("""{}""")
+        }
+    }
+
+    @Test
     fun `should parse all without error`() {
         val path = "src/test/resources/listeWampMsgTest.txt"
         val file = File(path)
