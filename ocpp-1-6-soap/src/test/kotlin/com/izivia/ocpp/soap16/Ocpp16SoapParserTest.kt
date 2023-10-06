@@ -1158,7 +1158,7 @@ class Ocpp16SoapParserTest {
     fun `should map BootNotificationResp to soap`() {
         val response = BootNotificationResp(
             status = RegistrationStatus.Rejected,
-            currentTime = Instant.parse("2022-05-17T15:43:08.025Z"),
+            currentTime = Instant.parse("2022-05-17T15:43:08.123456Z"),
             interval = 1800
         )
 
@@ -1174,16 +1174,34 @@ class Ocpp16SoapParserTest {
                 )
             )
 
-        expectThat(messageSoap) {
-            get { this }.contains("xmlns:o=\"urn://Ocpp/Cs/2015/10/\"")
-            get { this }.contains("<a:Action>/BootNotificationResponse</a:Action>")
-            get { this }.contains("<a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>")
-            get { this }.contains("<a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>")
-        }
+        val expectedEnvelope =
+            """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+                                xmlns:a="http://www.w3.org/2005/08/addressing"
+                            xmlns:o="urn://Ocpp/Cs/2015/10/">
+                    <s:Header>
+                        <a:MessageID>urn:uuid:739faeb1-da7c-4a50-8b61-2f631057fc2b</a:MessageID>
+                        <a:Action>/BootNotificationResponse</a:Action>
+                        <a:From>
+                            <a:Address>source</a:Address>
+                        </a:From>
+                        <a:To>destination</a:To>
+                        <a:RelatesTo>urn:uuid:a7ef37c1-2ac6-4247-a3ad-8ed5905a5b49</a:RelatesTo>
+                    </s:Header>
+                    <s:Body>
+                        <o:bootNotificationResponse>
+                            <o:currentTime>2022-05-17T15:43:08.123Z</o:currentTime>
+                            <o:interval>1800</o:interval>
+                            <o:status>Rejected</o:status>
+                        </o:bootNotificationResponse>
+                    </s:Body>
+               </s:Envelope>""".trimSoap()
+
+        expectThat(messageSoap).isEqualTo(expectedEnvelope)
+
         expectThat(ocpp16SoapParser.parseAnyResponseFromSoap(messageSoap)) {
             get { payload }.isA<BootNotificationResp>().and {
                 get { status }.isEqualTo(RegistrationStatus.Rejected)
-                get { currentTime }.isEqualTo(Instant.parse("2022-05-17T15:43:08.025Z"))
+                get { currentTime }.isEqualTo(Instant.parse("2022-05-17T15:43:08.123Z"))
                 get { interval }.isEqualTo(1800)
             }
         }
@@ -2396,3 +2414,4 @@ private fun String.trimSoap(): String =
     this.trimIndent()
         .replace("\n", "")
         .replace("\\s+".toRegex(), " ")
+        .replace("> <", "><")
