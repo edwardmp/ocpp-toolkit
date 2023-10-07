@@ -214,7 +214,12 @@ class WampIntegrationTest {
         server.start()
 
         try {
-            val client = OcppWampClient.newClient(Uri.of("ws://localhost:$port/ws"), "TEST1", OCPP_1_6)
+            val client = OcppWampClient.newClient(
+                Uri.of("ws://localhost:$port/ws"),
+                "TEST1",
+                OCPP_1_6,
+                autoReconnect = false
+            )
             client.onAction { meta: WampMessageMeta, msg: WampMessage ->
                 when (msg.action?.lowercase()) {
                     "remotebeat" ->
@@ -333,7 +338,13 @@ class WampIntegrationTest {
 
     @Test
     fun `should cleanly fail on connection when no server`() {
-        val client = OcppWampClient.newClient(Uri.of("ws://localhost:$port/ws"), "TEST1", OCPP_1_6, timeoutInMs = 500)
+        val client = OcppWampClient.newClient(
+            Uri.of("ws://localhost:$port/ws"),
+            "TEST1",
+            OCPP_1_6,
+            timeoutInMs = 500,
+            autoReconnect = false
+        )
         expectCatching { client.connect() }.isFailure()
         expectCatching { client.sendBlocking(WampMessage.Call("1", "Heartbeat", "{}")) }.isFailure()
 
@@ -418,7 +429,8 @@ class WampIntegrationTest {
             Uri.of("ws://localhost:$port/ws"),
             "TEST1",
             OCPP_1_6,
-            timeoutInMs = 50
+            timeoutInMs = 50,
+            autoReconnect = false
         )
         val time = measureTimeMillis {
             expectCatching { client.connect() }.isFailure()
