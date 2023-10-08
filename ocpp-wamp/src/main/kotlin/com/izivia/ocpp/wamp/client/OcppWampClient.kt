@@ -2,6 +2,7 @@ package com.izivia.ocpp.wamp.client
 
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
+import com.izivia.ocpp.wamp.client.autoreconnect.AutoReconnectConfig
 import com.izivia.ocpp.wamp.client.autoreconnect.AutoReconnectOcppWampClient
 import com.izivia.ocpp.wamp.client.impl.OkHttpOcppWampClient
 import com.izivia.ocpp.wamp.messages.WampMessage
@@ -32,8 +33,10 @@ interface OcppWampClient {
                 AutoReconnectOcppWampClient(
                     it,
                     it.debugContext,
-                    timeoutInMs.milliseconds,
-                    baseAutoReconnectDelayInMs.milliseconds
+                    AutoReconnectConfig(
+                        timeoutInMs.milliseconds,
+                        baseAutoReconnectDelayInMs.milliseconds
+                    )
                 )
             } else {
                 it
