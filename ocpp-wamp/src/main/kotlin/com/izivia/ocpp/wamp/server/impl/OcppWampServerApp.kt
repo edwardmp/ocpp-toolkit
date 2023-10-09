@@ -17,6 +17,8 @@ import org.http4k.websocket.WsMessage
 import org.slf4j.LoggerFactory
 import java.net.SocketException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -37,11 +39,7 @@ class OcppWampServerApp(
         private val logger = LoggerFactory.getLogger("com.izivia.ocpp.wamp.server")
     }
 
-    private val connections = Collections.synchronizedMap(
-        TreeMap<String, ChargingStationConnection?> { a, b ->
-            a.lowercase().compareTo(b.lowercase())
-        }
-    )
+    private val connections = ConnectionsMap()
     private val shutdown = AtomicBoolean(false)
     private val callsExecutor: Executor = settings.buildCallsExecutor()
 
@@ -209,10 +207,7 @@ class OcppWampServerApp(
     ) {
         val chargingStationOcppId = chargingStationConnection.ocppId
         val currentConnection = connections[chargingStationOcppId]
-        if (currentConnection?.wsConnectionId == chargingStationConnection.wsConnectionId) {
-            // todo - use a concurrent map and a remove if to make this atomic
-            connections[chargingStationOcppId] = null
-        } else {
+        if (!connections.remove(chargingStationConnection)) {
             logger.info(
                 "$logContext warn: do not clear ws on close - not current connection in map" +
                     " - registered connection: $currentConnection" +
@@ -237,7 +232,7 @@ class OcppWampServerApp(
             c?.let {
                 it.callManager.await()
                 it.close()
-                connections[it.ocppId] = null
+                connections.remove(it)
             }
         }
     }
@@ -287,6 +282,22 @@ class OcppWampServerApp(
             return "ChargingStationConnection(" +
                 "wsConnectionId='$wsConnectionId', ocppId='$ocppId', ocppVersion=$ocppVersion, timestamp='$timestamp')"
         }
+    }
+
+    private class ConnectionsMap {
+        private val connections: ConcurrentMap<String, ChargingStationConnection?> =
+            ConcurrentHashMap<String, ChargingStationConnection?>()
+        val values get() = connections.values
+
+        operator fun get(ocppId: String) = connections[ocppId.lowercase()]
+        operator fun set(ocppId: String, connection: ChargingStationConnection) {
+            connections[ocppId.lowercase()] = connection
+        }
+
+        fun remove(connection: ChargingStationConnection) =
+            connections.remove(connection.ocppId.lowercase(), connection)
+
+        val size: Int get() = connections.size
     }
 }
 

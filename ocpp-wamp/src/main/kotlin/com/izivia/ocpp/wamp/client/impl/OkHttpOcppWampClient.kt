@@ -3,6 +3,8 @@ package com.izivia.ocpp.wamp.client.impl
 import com.izivia.ocpp.CSOcppId
 import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.utils.MessageErrorCode
+import com.izivia.ocpp.wamp.client.ConnectionListener
+import com.izivia.ocpp.wamp.client.ConnectionState
 import com.izivia.ocpp.wamp.client.OcppWampClient
 import com.izivia.ocpp.wamp.client.WampOnActionHandler
 import com.izivia.ocpp.wamp.core.WampCallManager
@@ -12,7 +14,6 @@ import com.izivia.ocpp.wamp.messages.WampMessageMetaHeaders
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import okhttp3.*
 import org.http4k.core.Uri
 import org.slf4j.LoggerFactory
@@ -20,59 +21,54 @@ import java.io.IOException
 import java.net.ConnectException
 import java.util.concurrent.*
 import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLSession
 
 class OkHttpOcppWampClient(
     target: Uri,
     val ocppId: CSOcppId,
     val ocppVersion: OcppVersion,
     val timeoutInMs: Long = 30_000,
-    autoReconnect: Boolean = true,
-    baseAutoReconnectDelayInMs: Long = 250,
     private val headers: WampMessageMetaHeaders = emptyList(),
     hostnameVerifier: HostnameVerifier = HostnameVerifier { _, _ -> true }
 ) : OcppWampClient {
     val serverUri = target.path("${target.path.removeSuffix("/")}/$ocppId")
+    val debugContext = "$ocppId -> $serverUri"
+    override val state: ConnectionState
+        get() = connectionState
 
     private val handlers = mutableListOf<WampOnActionHandler>()
+    private var connectionListener: ConnectionListener? = null
 
     private val socketOkHttpClient = OkHttpClient.Builder()
         .readTimeout(timeoutInMs, TimeUnit.MILLISECONDS)
         .connectTimeout(timeoutInMs, TimeUnit.MILLISECONDS)
         .hostnameVerifier(hostnameVerifier)
         .build()
-    private val autoReconnectHandler = AutoReconnectHandler(this, baseAutoReconnectDelayInMs)
-        .takeIf { autoReconnect }
 
     private var wampConnection: WampConnection? = null
 
-    private var desiredConnectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
         set(value) {
             if (value != field) {
-                logger.info("[$ocppId] connection state $field -> $value")
+                logger.info("[$debugContext] connection state $field -> $value")
                 field = value
             }
         }
 
-    override fun connect() {
-        logger.info("connecting to $serverUri with ocpp version $ocppVersion")
-        desiredConnectionState = ConnectionState.CONNECTED
+    override fun connect(listener: ConnectionListener?) {
+        connectionListener = listener
         tryToConnect().also { t ->
             if (t == null) {
-                logger.info("[$ocppId] connected to $serverUri")
+                logger.info("[$debugContext] connected")
             } else {
-                logger.error("[$ocppId] error when connecting to $serverUri - $t")
-                desiredConnectionState = ConnectionState.DISCONNECTED
+                logger.error("[$debugContext] error when connecting - $t")
                 cleanupStateOnClose()
-                throw IOException("[$ocppId] connection to $serverUri failed", t)
+                throw IOException("[$debugContext] connection failed: $t", t)
             }
         }
     }
 
     override fun close() {
-        logger.info("disconnecting from $serverUri")
-        desiredConnectionState = ConnectionState.DISCONNECTED
+        logger.info("[$debugContext] disconnecting")
         connectionState = ConnectionState.DISCONNECTING
         wampConnection?.close(NORMAL_CLOSURE_STATUS, "close")
         cleanupStateOnClose()
@@ -80,31 +76,46 @@ class OkHttpOcppWampClient(
 
     private fun cleanupStateOnClose() {
         wampConnection = null
-        autoReconnectHandler?.stopReconnecting()
         connectionState = ConnectionState.DISCONNECTED
+        connectionListener = null
     }
 
-    fun tryToConnect(): Throwable? {
+    private fun tryToConnect(): Throwable? {
         val latch = CountDownLatch(1)
         var error: Throwable? = TimeoutException("connection timed out to $serverUri")
-        asyncConnect(object : ConnectListener {
-            override fun onConnect() {
+        asyncConnect(object : ConnectionListener {
+            override fun onConnected() {
                 error = null
                 latch.countDown()
             }
 
-            override fun onFailure(t: Throwable) {
+            override fun onConnectionFailure(t: Throwable) {
                 error = t
                 latch.countDown()
+            }
+
+            override fun onConnectionLost(t: Throwable?) {
+                if (latch.count > 0) {
+                    // shouldn't be possible, but just in case
+                    error = t
+                    latch.countDown()
+                }
+                connectionListener?.onConnectionLost(t)
             }
         })
         latch.await(timeoutInMs, TimeUnit.MILLISECONDS)
         return error
     }
 
-    private fun asyncConnect(listener: ConnectListener) {
+    private fun asyncConnect(listener: ConnectionListener) {
+        if (connectionState != ConnectionState.DISCONNECTED) {
+            throw IllegalStateException(
+                "can't async connect to $serverUri when connection state is $connectionState"
+            )
+        }
         logger.debug("[$ocppId] connecting to $serverUri - current connection state = $connectionState")
         connectionState = ConnectionState.CONNECTING
+
         socketOkHttpClient.newWebSocket(
             Request.Builder().url(serverUri.toString())
                 .header("Sec-WebSocket-Protocol", ocppVersion.subprotocol)
@@ -119,7 +130,7 @@ class OkHttpOcppWampClient(
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                     onConnectedTo(webSocket)
-                    listener.onConnect()
+                    listener.onConnected()
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
@@ -127,38 +138,54 @@ class OkHttpOcppWampClient(
                 }
 
                 override fun onClosing(closingWebSocket: WebSocket, code: Int, reason: String) {
-                    when {
-                        code == CLEANUP_CLOSURE_STATUS ->
-                            logger.info("[$ocppId] connection closed to $serverUri due to reconnection")
+                    logger.warn("[$ocppId] web socket closing $code $reason - state = $connectionState")
+                    if (code == CLEANUP_CLOSURE_STATUS) {
+                        logger.info("[$ocppId] connection closed to $serverUri due to reconnection")
+                        return
+                    }
 
-                        desiredConnectionState == ConnectionState.CONNECTED -> {
-                            logger.info("[$ocppId] connection lost to $serverUri - code=$code; reason=$reason")
-
-                            handleUnexpectedDisconnection(closingWebSocket)
+                    connectionState = ConnectionState.DISCONNECTED
+                    wampConnection = null
+                    when (connectionState) {
+                        ConnectionState.CONNECTING -> {
+                            listener.onConnectionFailure(
+                                IOException(
+                                    "[$debugContext] websocket closed:" +
+                                        " ws=$closingWebSocket; code=$code; reason=$reason"
+                                )
+                            )
                         }
 
                         else -> {
-                            connectionState = ConnectionState.DISCONNECTED
+                            listener.onConnectionLost(
+                                IOException(
+                                    "[$debugContext] websocket closed:" +
+                                        " ws=$closingWebSocket; code=$code; reason=$reason"
+                                )
+                            )
                         }
                     }
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     logger.info("[$ocppId] connection closed to $serverUri - code=$code; reason=$reason")
+                    connectionState = ConnectionState.DISCONNECTED
+                    wampConnection = null
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    connectionState = ConnectionState.DISCONNECTED
+                    wampConnection = null
                     if (connectionState == ConnectionState.CONNECTING) {
                         if (t is ConnectException) {
                             logger.warn("[$ocppId] web socket failed to connect to $serverUri: $t")
                         } else {
                             logger.warn("[$ocppId] web socket connection failure to $serverUri: $t", t)
                         }
-                        connectionState = ConnectionState.DISCONNECTED
-                        listener.onFailure(t)
+                        listener.onConnectionFailure(t)
                     } else {
                         logger.warn("[$ocppId] web socket failure with connection to $serverUri: $t", t)
-                        handleUnexpectedDisconnection(webSocket)
+                        listener.onConnectionLost(t)
                     }
                 }
             }
@@ -229,34 +256,24 @@ class OkHttpOcppWampClient(
         }
     }
 
-    private fun handleUnexpectedDisconnection(closingWebSocket: WebSocket) {
-        connectionState = ConnectionState.DISCONNECTED
-        // we don't call close on the connection, we are already in the ws closing hook
-        wampConnection = null
-
-        autoReconnectHandler?.startReconnecting()
-    }
-
     private fun onConnectedTo(connectedWebsocket: WebSocket) {
-        synchronized(this) {
-            if (wampConnection?.websocket == connectedWebsocket) {
-                logger.info("[$ocppId] already connected to $serverUri - ignored")
-                return
-            }
-
-            if (wampConnection != null) {
-                logger.warn("connected to new websocket while another one was already open - closing previous one")
-                // cleanup call manager and websocket
-                wampConnection?.close(CLEANUP_CLOSURE_STATUS, "reconnection")
-                wampConnection = null
-            }
-
-            wampConnection = WampConnection(
-                connectedWebsocket,
-                WampCallManager(logger, { m: String -> connectedWebsocket.send(m) }, timeoutInMs)
-            )
-            connectionState = ConnectionState.CONNECTED
+        if (wampConnection?.websocket == connectedWebsocket) {
+            logger.info("[$ocppId] already connected to $serverUri - ignored")
+            return
         }
+
+        if (wampConnection != null) {
+            logger.warn("connected to new websocket while another one was already open - closing previous one")
+            // cleanup call manager and websocket
+            wampConnection?.close(CLEANUP_CLOSURE_STATUS, "reconnection")
+            wampConnection = null
+        }
+
+        wampConnection = WampConnection(
+            connectedWebsocket,
+            WampCallManager(logger, { m: String -> connectedWebsocket.send(m) }, timeoutInMs)
+        )
+        connectionState = ConnectionState.CONNECTED
     }
 
     override fun sendBlocking(message: WampMessage): WampMessage {
@@ -268,39 +285,8 @@ class OkHttpOcppWampClient(
     }
 
     private fun getCallManager(): WampCallManager {
-        if (wampConnection == null && desiredConnectionState == ConnectionState.CONNECTED) {
-            waitForReconnectionOrTimeout()
-        }
         return wampConnection?.callManager
-            ?: throw when (desiredConnectionState) {
-                ConnectionState.DISCONNECTED ->
-                    IllegalStateException("not connected to $serverUri")
-
-                ConnectionState.CONNECTED ->
-                    IOException("currently not connected to $serverUri - retry later")
-
-                else ->
-                    IllegalStateException("unsupported desired state $desiredConnectionState")
-            }
-    }
-
-    private fun waitForReconnectionOrTimeout() {
-        if (connectionState == ConnectionState.CONNECTED) return
-
-        autoReconnectHandler
-            ?.maybeForceReconnectAttemptAndWaitForReconnection()
-            ?.also {
-                if (connectionState == ConnectionState.CONNECTED) {
-                    logger.debug("[$ocppId] reconnection successful to $serverUri")
-                } else {
-                    logger.debug("[$ocppId] reconnection failed to $serverUri")
-                }
-            } ?: logger.debug("[$ocppId] no reconnection configured - disconnected from $serverUri")
-
-    }
-
-    enum class ConnectionState {
-        CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED
+            ?: throw IllegalStateException("not connected to $serverUri")
     }
 
     companion object {
@@ -314,100 +300,6 @@ class OkHttpOcppWampClient(
         fun close(code: Int, reason: String) {
             callManager.close()
             websocket.close(code, reason)
-        }
-    }
-
-    interface ConnectListener {
-        fun onConnect()
-        fun onFailure(t: Throwable)
-    }
-
-    class AutoReconnectHandler(val client: OkHttpOcppWampClient, val baseAutoReconnectDelay: Long) {
-        private var reconnecting: Boolean = false
-        private var autoReconnectDelay: Long = baseAutoReconnectDelay
-        private var autoReconnectAttemptCount = 0
-        private var next: ScheduledFuture<*>? = null
-        private var connectionLatch: CountDownLatch? = null
-        private var lastForcedReconnectionAttempt: Instant? = null
-
-        fun maybeForceReconnectAttemptAndWaitForReconnection() {
-            val lastAttempt = lastForcedReconnectionAttempt
-            if (lastAttempt == null ||
-                // make sure we don't force the immediate reconnect attempt too often
-                Clock.System.now().minus(lastAttempt).inWholeMilliseconds > baseAutoReconnectDelay
-            ) {
-                logger.info("[${client.ocppId}] triggering immediate reconnect attempt to ${client.serverUri}")
-                next?.cancel(false)
-                autoReconnectDelay = baseAutoReconnectDelay
-                lastForcedReconnectionAttempt = Clock.System.now()
-                reconnectAttempt()
-            }
-            logger.info(
-                "[${client.ocppId}] waiting for reconnection to ${client.serverUri}" +
-                    " with connection latch $connectionLatch"
-            )
-            connectionLatch?.await(client.timeoutInMs, TimeUnit.MILLISECONDS)
-        }
-
-        fun startReconnecting() {
-            synchronized(this) {
-                if (reconnecting) {
-                    logger.debug("[${client.ocppId}] auto reconnect requested, but already going on - ignored")
-                    return
-                }
-                logger.info("[${client.ocppId}] starting auto reconnect process to ${client.serverUri}")
-                reconnecting = true
-                autoReconnectAttemptCount = 0
-                autoReconnectDelay = baseAutoReconnectDelay
-                setupConnectionLatch()
-                reconnectAttempt()
-            }
-        }
-
-        private fun setupConnectionLatch() {
-            if (connectionLatch == null) {
-                connectionLatch = CountDownLatch(1)
-                logger.info("[${client.ocppId}] set up connection latch $connectionLatch")
-            }
-        }
-
-        private fun reconnectAttempt() {
-            autoReconnectAttemptCount++
-            logger.info(
-                "[${client.ocppId}] attempting to reconnect to ${client.serverUri} (attempt $autoReconnectAttemptCount)"
-            )
-            client.tryToConnect().also { t ->
-                if (t == null) {
-                    logger.info(
-                        "[${client.ocppId}] reconnected to ${client.serverUri}" +
-                            " (after $autoReconnectAttemptCount attempts)"
-                    )
-
-                    logger.info("[${client.ocppId}] notifying connection on latch $connectionLatch")
-                    connectionLatch?.countDown()
-                    connectionLatch = null
-
-                    stopReconnecting()
-                } else {
-                    logger.info(
-                        "[${client.ocppId}] failed to reconnect to ${client.serverUri}"
-                    )
-                    autoReconnectDelay *= 2
-                    next = executor.schedule({ reconnectAttempt() }, autoReconnectDelay, TimeUnit.MILLISECONDS)
-                }
-            }
-        }
-
-        fun stopReconnecting() {
-            synchronized(this) {
-                if (!reconnecting) return
-                reconnecting = false
-                next?.cancel(false)
-            }
-        }
-
-        companion object {
-            private val executor = Executors.newScheduledThreadPool(1)
         }
     }
 }
