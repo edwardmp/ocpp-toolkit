@@ -76,6 +76,7 @@ class AutoReconnectOcppWampClient(
         }
         lock.withLock {
             connectionListener = null
+            client.close()
         }
     }
 
