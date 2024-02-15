@@ -263,7 +263,13 @@ class Ocpp16CSApiAdapter(
         req: SetChargingProfileReq
     ): OperationExecution<SetChargingProfileReq, SetChargingProfileResp> {
         val mapper: SetChargingProfileMapper = Mappers.getMapper(SetChargingProfileMapper::class.java)
-        val response = csApi.setChargingProfile(meta, mapper.coreToGenReq(req))
+        val transactionId = req.csChargingProfiles.transactionId
+            ?.let { transactionIds.getLocalIdByTransactionId(it) }
+            ?.localId
+        val response = csApi.setChargingProfile(
+            meta,
+            mapper.coreToGenReq(req)
+                .let { it.copy(chargingProfile = it.chargingProfile.copy(transactionId = transactionId)) })
         return OperationExecution(
             ExecutionMetadata(meta, RequestStatus.SUCCESS),
             req,

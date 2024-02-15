@@ -513,10 +513,11 @@ class MapperTest {
                     stackLevel = 2,
                     chargingProfilePurpose = ChargingProfilePurposeType.ChargePointMaxProfile,
                     chargingProfileKind = ChargingProfileKindType.Absolute,
-                    chargingSchedule = ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1)))
+                    chargingSchedule = ChargingSchedule(ChargingRateUnitType.A, listOf(ChargingSchedulePeriod(1, 1))),
+                    transactionId = 1
                 )
             )
-        )
+        ).let { it.copy(chargingProfile = it.chargingProfile.copy(transactionId = "4")) }
         expectThat(req)
             .and { get { evseId }.isEqualTo(1) }
             .and { get { chargingProfile.id }.isEqualTo(1) }
@@ -538,6 +539,7 @@ class MapperTest {
                     )
                 )
             }
+            .and { get { chargingProfile.transactionId }.isEqualTo("4") }
     }
 
     @Test
