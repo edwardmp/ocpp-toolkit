@@ -15,7 +15,6 @@ import org.http4k.core.Status.Companion.BAD_REQUEST
 import org.http4k.server.*
 import org.http4k.sse.SseHandler
 import org.http4k.websocket.WsHandler
-import org.xnio.Options
 import java.net.InetSocketAddress
 
 /*
@@ -43,22 +42,17 @@ class Undertow(val port: Int = 8000, val enableHttp2: Boolean,
                 )
             }
         }
-        val sseCallback = sse?.let { serverSentEvents(Http4kSseCallback(sse)) }
 
         val handlerWithWs = predicate(
             { exch -> requiresWebSocketUpgrade()(exch) && acceptWebSocketPredicate(exch)},
             wsCallback, httpHandler)
-
-        val handlerWithSse = sseCallback
-            ?.let { predicate(hasEventStreamContentType(), sseCallback, handlerWithWs) }
-            ?: handlerWithWs
 
         return object : Http4kServer {
             val server = Undertow.builder()
                 .addHttpListener(port, "0.0.0.0")
                 .setServerOption(ENABLE_HTTP2, enableHttp2)
                 .setWorkerThreads(32 * Runtime.getRuntime().availableProcessors())
-                .setHandler(handlerWithSse).build()
+                .setHandler(handlerWithWs).build()
 
             override fun start() = apply { server.start() }
 
