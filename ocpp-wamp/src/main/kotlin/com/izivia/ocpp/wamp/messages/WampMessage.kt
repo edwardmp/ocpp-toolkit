@@ -5,6 +5,7 @@ import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessageType.*
 import org.slf4j.LoggerFactory
+import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 data class WampMessage(
     val msgType: WampMessageType,
@@ -55,9 +56,7 @@ object WampMessageParser {
     private val logger = LoggerFactory.getLogger(WampMessageParser::class.java)
 
     private fun String.formatWampMessage(): String =
-        this.replace("\n", "")
-            .replace("\\n", "")
-            .removeBracketsAndTrim()
+        this.removeBracketsAndTrim()
             .removeQuotesBeforePayloadAndTrim()
 
     private fun String.removeBracketsAndTrim(): String = this.trim().removePrefix("[").removeSuffix("]")
@@ -79,9 +78,18 @@ object WampMessageParser {
         }
     }
 
-    private val ocppMsgRegexTypeCall = Regex("""(\d+),([^,]+),([^,]+),(.*)""")
-    private val ocppMsgRegexTypeCallResult = Regex("""(\d+),([^,]+),(.*)""")
-    private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]*),(.*)""")
+    private val ocppMsgRegexTypeCall = Regex(
+        """(\d+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*(.*)""",
+        DOT_MATCHES_ALL
+    )
+    private val ocppMsgRegexTypeCallResult = Regex(
+        """(\d+)\s*,\s*([^,]+)\s*,\s*(.*)""",
+        DOT_MATCHES_ALL
+    )
+    private val ocppMsgRegexTypeCallError = Regex(
+        """(\d+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]*)\s*,(.*)""",
+        DOT_MATCHES_ALL
+    )
 
     fun parse(msg: String): WampMessage? {
         logger.debug("Trying to parse message: {}", msg)
@@ -95,7 +103,11 @@ object WampMessageParser {
                             ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, action, payload) ->
-                                        WampMessage.Call(msgId, action, payload)
+                                        WampMessage.Call(
+                                            msgId.trimNewLines(),
+                                            action.trimNewLines(),
+                                            payload.trimNewLines()
+                                        )
                                     }
                                 }
                             }
@@ -109,7 +121,10 @@ object WampMessageParser {
                             ocppMsgRegexTypeCallResult.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, payload) ->
-                                        WampMessage.CallResult(msgId, payload)
+                                        WampMessage.CallResult(
+                                            msgId.trimNewLines(),
+                                            payload.trimNewLines()
+                                        )
                                     }
                                 }
                             }
@@ -124,10 +139,10 @@ object WampMessageParser {
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, errorCode, errorDescription, payload) ->
                                         WampMessage.CallError(
-                                            msgId,
-                                            MessageErrorCode.fromValue(errorCode),
-                                            errorDescription,
-                                            payload
+                                            msgId.trimNewLines(),
+                                            MessageErrorCode.fromValue(errorCode.trimNewLines()),
+                                            errorDescription.trimNewLines(),
+                                            payload.trimNewLines()
                                         )
                                     }
                                 }
@@ -145,6 +160,8 @@ object WampMessageParser {
         }
         return null
     }
+
+    private fun String.trimNewLines() = trim(' ', '\n', '\r')
 }
 
 enum class WampMessageType(val id: Int) {
