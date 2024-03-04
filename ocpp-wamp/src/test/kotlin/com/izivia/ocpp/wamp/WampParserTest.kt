@@ -3,49 +3,15 @@ package fr.izivia.websocketproxy.wamp
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessage
 import com.izivia.ocpp.wamp.messages.WampMessageParser
-import com.izivia.ocpp.wamp.messages.WampMessageParser.removeQuotesBeforePayloadAndTrim
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isContainedIn
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import java.io.File
-import java.util.*
 
 class WampParserTest {
-
-    @Test
-    fun `TreeMap should make connections insensitive`() {
-        // GIVEN
-        val connections = TreeMap<String, String> { a, b ->
-            a.lowercase().compareTo(b.lowercase())
-        }
-
-        // WHEN
-        connections["key"] = "val"
-        connections["keY"] = "val"
-
-        // THEN
-        expectThat(connections.size).isEqualTo(1)
-        expectThat(connections["key"]).isNotNull()
-        expectThat(connections["key"]).isEqualTo("val")
-        expectThat(connections["keY"]).isEqualTo("val")
-        expectThat(connections["Key"]).isEqualTo("val")
-        expectThat(connections["notExistingKey"]).isNull()
-    }
-
-    @Test
-    fun `should RemoveQuotesBeforePayloadAndTrim`() {
-        var s = """[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254",{"status":"Accepted"}]"""
-        s = s.removeQuotesBeforePayloadAndTrim()
-        expectThat(s).isEqualTo("""[3,ffd94ceeA8c5bA4b9dA9a1bA21c64276d254,{"status":"Accepted"}]""")
-
-        s = """[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254","status":"Accepted"]"""
-        s = s.removeQuotesBeforePayloadAndTrim()
-        expectThat(s).isEqualTo("""[3,"ffd94ceeA8c5bA4b9dA9a1bA21c64276d254","status":"Accepted"]""")
-    }
 
     @Test
     fun `should parse wrong typed Msg and return null`() {
@@ -233,6 +199,17 @@ class WampParserTest {
             get { msgType }.isEqualTo(WampMessageType.CALL_ERROR)
             get { errorCode }.isEqualTo(MessageErrorCode.GENERIC_ERROR)
             get { errorDescription }.isEqualTo("Generic description")
+            get { payload }.isEqualTo("""{"status", "ERROR"}""")
+        }
+
+        wampMessage = WampMessageParser.parse(
+            """[4,"11d95d88-5228-4a95-832a-b9e9ff6841c5","InternalError","a problem, with a comma",{"status", "ERROR"}]"""
+        )
+        expectThat(wampMessage).isNotNull().and {
+            get { msgId }.isEqualTo("11d95d88-5228-4a95-832a-b9e9ff6841c5")
+            get { msgType }.isEqualTo(WampMessageType.CALL_ERROR)
+            get { errorCode }.isEqualTo(MessageErrorCode.INTERNAL_ERROR)
+            get { errorDescription }.isEqualTo("a problem, with a comma")
             get { payload }.isEqualTo("""{"status", "ERROR"}""")
         }
     }

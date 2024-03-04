@@ -57,15 +57,14 @@ object WampMessageParser {
 
     private fun String.formatWampMessage(): String =
         this.removeBracketsAndTrim()
-            .removeQuotesBeforePayloadAndTrim()
+            .removeSingleDoubleQuoteInPayload()
 
     private fun String.removeBracketsAndTrim(): String = this.trim().removePrefix("[").removeSuffix("]")
 
-    fun String.removeQuotesBeforePayloadAndTrim(): String {
+    fun String.removeSingleDoubleQuoteInPayload(): String {
         this.indexOf("{", 0).let { indexOfFirstBrace ->
             if (indexOfFirstBrace != -1) {
                 return this.substring(0, indexOfFirstBrace)
-                    .replace("\"", "").replace(", ", ",")
                     .plus(
                         this.substring(indexOfFirstBrace).let { str ->
                             str.takeIf { it.count { it == '"' } == 1 }?.replace("\"", "") ?: str
@@ -78,16 +77,29 @@ object WampMessageParser {
         }
     }
 
+    object Patterns {
+        const val CALL_TYPE = """(\d)\s*""" // call type is a single digit
+        const val MSG_ID = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val ACTION = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val ERROR_CODE = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val PAYLOAD = """\s*(.*)""" // anything
+
+        const val ERROR_DESCRIPTION = """\s*(?:"([^"]*)"|([^"][^,]*))\s*"""
+            // either anything but quote surrounded by quotes,
+            // or anything but a comma
+    }
+
     private val ocppMsgRegexTypeCall = Regex(
-        """(\d+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*(.*)""",
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.ACTION, Patterns.PAYLOAD).joinToString(","),
         DOT_MATCHES_ALL
     )
     private val ocppMsgRegexTypeCallResult = Regex(
-        """(\d+)\s*,\s*([^,]+)\s*,\s*(.*)""",
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.PAYLOAD).joinToString(","),
         DOT_MATCHES_ALL
     )
     private val ocppMsgRegexTypeCallError = Regex(
-        """(\d+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]*)\s*,(.*)""",
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.ERROR_CODE, Patterns.ERROR_DESCRIPTION, Patterns.PAYLOAD)
+            .joinToString(","),
         DOT_MATCHES_ALL
     )
 
@@ -137,11 +149,12 @@ object WampMessageParser {
                         CALL_ERROR -> {
                             ocppMsgRegexTypeCallError.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
-                                    it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                                    it.let { (_, msgId, errorCode, errorDescription1, errorDescription2, payload) ->
                                         WampMessage.CallError(
                                             msgId.trimNewLines(),
                                             MessageErrorCode.fromValue(errorCode.trimNewLines()),
-                                            errorDescription.trimNewLines(),
+                                            // either description 1 or 2 will be filled, it's an OR between the two
+                                            errorDescription1.trimNewLines() + errorDescription2.trimNewLines(),
                                             payload.trimNewLines()
                                         )
                                     }
