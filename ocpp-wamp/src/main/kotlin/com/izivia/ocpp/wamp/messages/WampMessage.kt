@@ -5,6 +5,7 @@ import com.izivia.ocpp.OcppVersion
 import com.izivia.ocpp.utils.MessageErrorCode
 import com.izivia.ocpp.wamp.messages.WampMessageType.*
 import org.slf4j.LoggerFactory
+import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 data class WampMessage(
     val msgType: WampMessageType,
@@ -55,18 +56,15 @@ object WampMessageParser {
     private val logger = LoggerFactory.getLogger(WampMessageParser::class.java)
 
     private fun String.formatWampMessage(): String =
-        this.replace("\n", "")
-            .replace("\\n", "")
-            .removeBracketsAndTrim()
-            .removeQuotesBeforePayloadAndTrim()
+        this.removeBracketsAndTrim()
+            .removeSingleDoubleQuoteInPayload()
 
     private fun String.removeBracketsAndTrim(): String = this.trim().removePrefix("[").removeSuffix("]")
 
-    fun String.removeQuotesBeforePayloadAndTrim(): String {
+    fun String.removeSingleDoubleQuoteInPayload(): String {
         this.indexOf("{", 0).let { indexOfFirstBrace ->
             if (indexOfFirstBrace != -1) {
                 return this.substring(0, indexOfFirstBrace)
-                    .replace("\"", "").replace(", ", ",")
                     .plus(
                         this.substring(indexOfFirstBrace).let { str ->
                             str.takeIf { it.count { it == '"' } == 1 }?.replace("\"", "") ?: str
@@ -79,9 +77,31 @@ object WampMessageParser {
         }
     }
 
-    private val ocppMsgRegexTypeCall = Regex("""(\d+),([^,]+),([^,]+),(.*)""")
-    private val ocppMsgRegexTypeCallResult = Regex("""(\d+),([^,]+),(.*)""")
-    private val ocppMsgRegexTypeCallError = Regex("""(\d+),([^,]+),([^,]+),([^,]*),(.*)""")
+    object Patterns {
+        const val CALL_TYPE = """(\d)\s*""" // call type is a single digit
+        const val MSG_ID = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val ACTION = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val ERROR_CODE = """\s*"?([^,"]+)"?\s*""" // anything except comma or quote, maybe surrounded by quotes
+        const val PAYLOAD = """\s*(.*)""" // anything
+
+        const val ERROR_DESCRIPTION = """\s*(?:"([^"]*)"|([^"][^,]*))\s*"""
+            // either anything but quote surrounded by quotes,
+            // or anything but a comma
+    }
+
+    private val ocppMsgRegexTypeCall = Regex(
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.ACTION, Patterns.PAYLOAD).joinToString(","),
+        DOT_MATCHES_ALL
+    )
+    private val ocppMsgRegexTypeCallResult = Regex(
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.PAYLOAD).joinToString(","),
+        DOT_MATCHES_ALL
+    )
+    private val ocppMsgRegexTypeCallError = Regex(
+        listOf(Patterns.CALL_TYPE, Patterns.MSG_ID, Patterns.ERROR_CODE, Patterns.ERROR_DESCRIPTION, Patterns.PAYLOAD)
+            .joinToString(","),
+        DOT_MATCHES_ALL
+    )
 
     fun parse(msg: String): WampMessage? {
         logger.debug("Trying to parse message: {}", msg)
@@ -95,7 +115,11 @@ object WampMessageParser {
                             ocppMsgRegexTypeCall.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, action, payload) ->
-                                        WampMessage.Call(msgId, action, payload)
+                                        WampMessage.Call(
+                                            msgId.trimNewLines(),
+                                            action.trimNewLines(),
+                                            payload.trimNewLines()
+                                        )
                                     }
                                 }
                             }
@@ -109,7 +133,10 @@ object WampMessageParser {
                             ocppMsgRegexTypeCallResult.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
                                     it.let { (_, msgId, payload) ->
-                                        WampMessage.CallResult(msgId, payload)
+                                        WampMessage.CallResult(
+                                            msgId.trimNewLines(),
+                                            payload.trimNewLines()
+                                        )
                                     }
                                 }
                             }
@@ -122,12 +149,13 @@ object WampMessageParser {
                         CALL_ERROR -> {
                             ocppMsgRegexTypeCallError.matchEntire(formattedMsg)?.let { matchResult ->
                                 return matchResult.destructured.let {
-                                    it.let { (_, msgId, errorCode, errorDescription, payload) ->
+                                    it.let { (_, msgId, errorCode, errorDescription1, errorDescription2, payload) ->
                                         WampMessage.CallError(
-                                            msgId,
-                                            MessageErrorCode.fromValue(errorCode),
-                                            errorDescription,
-                                            payload
+                                            msgId.trimNewLines(),
+                                            MessageErrorCode.fromValue(errorCode.trimNewLines()),
+                                            // either description 1 or 2 will be filled, it's an OR between the two
+                                            errorDescription1.trimNewLines() + errorDescription2.trimNewLines(),
+                                            payload.trimNewLines()
                                         )
                                     }
                                 }
@@ -145,6 +173,8 @@ object WampMessageParser {
         }
         return null
     }
+
+    private fun String.trimNewLines() = trim(' ', '\n', '\r')
 }
 
 enum class WampMessageType(val id: Int) {
