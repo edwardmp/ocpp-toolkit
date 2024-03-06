@@ -43,7 +43,7 @@ class UndertowWebSocketCallBack(private val ws: WsHandler) : WebSocketConnection
         val logContext = upgradeRequest.uri.toString()
         logger.debug("{} - connection attempt: upgrade request={}", logContext, upgradeRequest)
 
-        val socket = object : PushPullAdaptingWebSocket(upgradeRequest) {
+        val socket = object : PushPullAdaptingWebSocket() {
             override fun send(message: WsMessage) =
                 if (message.body is StreamBody) {
                     WebSockets.sendBinary(

@@ -10,10 +10,12 @@ import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.http4k.routing.bind
+import org.http4k.core.Request
 import org.http4k.routing.websockets
+import org.http4k.routing.ws.bind
 import org.http4k.websocket.Websocket
 import org.http4k.websocket.WsMessage
+import org.http4k.websocket.WsResponse
 import org.slf4j.LoggerFactory
 import java.net.SocketException
 import java.util.*
@@ -43,22 +45,22 @@ class OcppWampServerApp(
     private val shutdown = AtomicBoolean(false)
     private val callsExecutor: Executor = settings.buildCallsExecutor()
 
-    private fun newConnection(ws: Websocket) {
+    private fun newConnection(request: Request) = WsResponse { ws: Websocket ->
         try {
             if (shutdown.get()) {
                 logger.warn("shutting down - rejecting connection")
                 ws.close()
-                return
+                return@WsResponse
             }
             val wsConnectionId = UUID.randomUUID().toString()
-            val chargingStationOcppId = ocppWsEndpoint.extractChargingStationOcppId(ws.upgradeRequest.uri.path)
+            val chargingStationOcppId = ocppWsEndpoint.extractChargingStationOcppId(request.uri.path)
                 ?.takeUnless { it.isEmpty() }
-                ?: throw IllegalArgumentException("malformed request - no chargingStationOcppId - ${ws.upgradeRequest}")
-            val ocppVersion = ws.upgradeRequest.header("Sec-WebSocket-Protocol")
+                ?: throw IllegalArgumentException("malformed request - no chargingStationOcppId - $request")
+            val ocppVersion = request.header("Sec-WebSocket-Protocol")
                 ?.split(",")?.firstOrNull()?.trim()
                 ?.let { ocppVersions.filter { v -> v.subprotocol == it.lowercase() }.firstOrNull() }
                 ?: throw IllegalArgumentException(
-                    "malformed request - unsupported or invalid ocpp version - ${ws.upgradeRequest}"
+                    "malformed request - unsupported or invalid ocpp version - $request"
                 )
 
             val previousConnection = connections[chargingStationOcppId]
@@ -67,6 +69,7 @@ class OcppWampServerApp(
                 wsConnectionId,
                 chargingStationOcppId,
                 ws,
+                request,
                 ocppVersion,
                 settings.timeoutInMs,
                 shutdown
@@ -89,9 +92,9 @@ class OcppWampServerApp(
                 // this close wont trigger a onWsCloseHandler,
                 // because we have already changed the current registered connection
                 previousConnection?.close()
-                listeners.onWsReconnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                listeners.onWsReconnectHandler(chargingStationOcppId, request.headers)
             } else {
-                listeners.onWsConnectHandler(chargingStationOcppId, ws.upgradeRequest.headers)
+                listeners.onWsConnectHandler(chargingStationOcppId, request.headers)
             }
 
             val logContext = "[$chargingStationOcppId] [$wsConnectionId]"
@@ -164,7 +167,7 @@ class OcppWampServerApp(
                                             WampMessageMeta(
                                                 ocppVersion,
                                                 chargingStationOcppId,
-                                                ws.upgradeRequest.headers
+                                                request.headers
                                             ),
                                             wampMessage
                                         )
@@ -195,7 +198,7 @@ class OcppWampServerApp(
                 }
             }
         } catch (e: Exception) {
-            logger.error("Error during new connection with ${ws.upgradeRequest}: $e", e)
+            logger.error("Error during new connection with $request: $e", e)
             throw e
         }
     }
@@ -220,7 +223,7 @@ class OcppWampServerApp(
 
         if (connections[chargingStationOcppId] == null) {
             // we notify only if we remove the connection, otherwise we are still connected
-            listeners.onWsCloseHandler(chargingStationOcppId, chargingStationConnection.ws.upgradeRequest.headers)
+            listeners.onWsCloseHandler(chargingStationOcppId, chargingStationConnection.request.headers)
         } else {
             logger.debug("$logContext not notifying disconnection - still connected")
         }
@@ -263,6 +266,7 @@ class OcppWampServerApp(
         val wsConnectionId: String,
         val ocppId: CSOcppId,
         val ws: Websocket,
+        val request: Request,
         val ocppVersion: OcppVersion,
         timeoutInMs: Long,
         shutdown: AtomicBoolean

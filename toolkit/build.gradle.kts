@@ -11,6 +11,7 @@ dependencies {
     implementation("org.http4k:http4k-client-websocket:_")
     implementation("org.http4k:http4k-server-undertow:_")
     implementation("org.http4k:http4k-client-apache:_")
+    implementation("com.fasterxml.jackson.core:jackson-databind:_")
 
     implementation(project(":generic-api"))
     implementation(project(":ocpp-wamp"))
