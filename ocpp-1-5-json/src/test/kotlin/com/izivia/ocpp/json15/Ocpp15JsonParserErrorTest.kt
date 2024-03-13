@@ -310,6 +310,36 @@ class Ocpp15JsonParserErrorTest {
         // expectThat(percent).isGreaterThan(0.0)
     }
 
+    @Test
+    fun `should parse to Fault missing usedClazz`() {
+        val response = """[3,"messageId",{}]"""
+
+        val res = parser.parseAnyFromString(response)
+        expectThat(res)
+            .and {
+                get { action }.isEqualTo("Fault")
+                get { errorCode }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED)
+                get { payload }.isA<Fault>()
+                    .and {
+                        get { errorCode }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED.errorCode)
+                        get { errorDescription }.isEqualTo(MessageErrorCode.NOT_IMPLEMENTED.description)
+                        get { errorDetails }.hasSize(2)
+                            .and {
+                                get { get(0) }
+                                    .and {
+                                        get { code }.isEqualTo(ErrorDetailCode.ACTION.value)
+                                        get { detail }.contains("Cannot parse message, class used to retrieve the response action is not defined")
+                                    }
+                                get { get(1) }
+                                    .and {
+                                        get { code }.isEqualTo(ErrorDetailCode.PAYLOAD.value)
+                                        get { detail }.isEqualTo(response)
+                                    }
+                            }
+                    }
+            }
+    }
+
     @OptIn(ExperimentalTime::class)
     fun timeit(requestList: List<String>, parser: Ocpp15JsonParser): Duration {
         return measureTime {

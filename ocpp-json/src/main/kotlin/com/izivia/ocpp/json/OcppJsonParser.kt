@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.izivia.ocpp.json.JsonMessageType.*
 import com.izivia.ocpp.utils.*
-import com.izivia.ocpp.utils.fault.*
+import com.izivia.ocpp.utils.fault.FAULT
+import com.izivia.ocpp.utils.fault.Fault
 import com.networknt.schema.ValidationMessage
 import com.networknt.schema.ValidatorTypeCode
 import kotlin.reflect.KClass
@@ -38,6 +39,15 @@ abstract class OcppJsonParser(
         errorsHandler: (errors: List<ValidationMessage>) -> Unit
     )
 
+    /**
+     * Parses a JSON message from a string.
+     *
+     * @param messageStr The string representation of the message.
+     * @param useClazz In the case of a CALL_RESULT type message, useClazz is the class used to parse the message
+     *                 (as it cannot always be deduced from the message itself)
+     *
+     * @return A JsonMessage object containing the parsed data.
+     */
     fun parseAnyFromString(messageStr: String, useClazz: Class<out Any>? = null): JsonMessage<Any> {
         try {
             val warnings = mutableListOf<ErrorDetail>()
@@ -66,7 +76,20 @@ abstract class OcppJsonParser(
                 CALL_RESULT -> useClazz?.let {
                     parsed = parsed.copy(action = getActionFromClass(it.simpleName))
                     clazz = useClazz
-                }
+                } ?: throw ActionResponseNotSpecifiedException(
+                    message = "Action class not defined",
+                    messageId = parsed.msgId,
+                    errorDetails = listOf(
+                        ErrorDetail(
+                            code = ErrorDetailCode.ACTION.value,
+                            detail = "Cannot parse message, class used to retrieve the response action is not defined"
+                        ),
+                        ErrorDetail(
+                            code = ErrorDetailCode.PAYLOAD.value,
+                            detail = messageStr
+                        )
+                    )
+                )
 
                 else -> {
                     parsed = parsed.copy(

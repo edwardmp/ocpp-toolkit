@@ -124,3 +124,20 @@ class MissingRelatesToHeaderException(
             )
         ).plus(errorDetails)
     )
+
+class ActionResponseNotSpecifiedException(
+    override val message: String,
+    override val messageId: String?,
+    override val errorDetails: List<ErrorDetail> = emptyList()
+) :
+    OcppParserException(
+        message = message,
+        messageId = messageId,
+        errorCode = MessageErrorCode.NOT_IMPLEMENTED,
+        errorDetails = listOf(
+            ErrorDetail(
+                code = MessageErrorCode.NOT_IMPLEMENTED.errorCode,
+                detail = MessageErrorCode.NOT_IMPLEMENTED.description
+            )
+        ).plus(errorDetails)
+    )
