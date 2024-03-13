@@ -34,6 +34,13 @@ class Ocpp15JsonParser(
             throw errorHandler(e)
         }
 
+    override fun getResponsePayloadClass(action: String, errorHandler: (e: Exception) -> Throwable): Class<out Any> =
+        try {
+            Actions.valueOf(action.uppercase()).classResponse
+        } catch (e: Exception) {
+            throw errorHandler(e)
+        }
+
     override fun getActionFromClass(className: String): String =
         Actions.valueOf(getActionFromClassName(className)).value
 

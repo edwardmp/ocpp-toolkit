@@ -26,6 +26,11 @@ abstract class OcppJsonParser(
         errorHandler: (e: Exception) -> Throwable
     ): Class<out Any>
 
+    protected abstract fun getResponsePayloadClass(
+        action: String,
+        errorHandler: (e: Exception) -> Throwable
+    ): Class<out Any>
+
     protected abstract fun getActionFromClass(className: String): String
 
     protected abstract fun validateJson(
