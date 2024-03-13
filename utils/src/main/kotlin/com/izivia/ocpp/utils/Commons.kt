@@ -9,6 +9,7 @@ inline fun <reified T : Any> Any.isA(function: (T) -> Any = { it -> it }): Any =
 interface IActions {
     val value: String
     val classRequest: Class<*>
+    val classResponse: Class<*>
     val initiatedBy: OcppInitiator
 }
 
