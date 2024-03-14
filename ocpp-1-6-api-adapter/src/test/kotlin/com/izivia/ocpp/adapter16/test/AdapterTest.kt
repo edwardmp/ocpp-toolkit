@@ -731,7 +731,7 @@ class AdapterTest {
                 triggerReason = TriggerReasonEnumType.EVDetected,
                 seqNo = 100,
                 transactionInfo = TransactionType("T1"),
-                evse = EVSEType(1),
+                evse = EVSEType(1, 11),
                 meterValue = listOf(
                     MeterValueType(
                         listOf(SampledValueType(10.0, ReadingContextEnumType.TransactionBegin)),
@@ -824,7 +824,7 @@ class AdapterTest {
             timestamp = Instant.parse("2022-02-15T00:00:00.000Z"),
             triggerReason = TriggerReasonEnumType.Deauthorized,
             seqNo = 100,
-            evse = EVSEType(10),
+            evse = EVSEType(10, 11),
             transactionInfo = TransactionType(
                 "T1",
                 ChargingStateEnumType.Charging,
