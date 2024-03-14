@@ -22,12 +22,12 @@ abstract class OcppJsonParser(
     protected fun getActionFromClassName(className: String) =
         className.replace(classActionRegex, "").uppercase()
 
-    protected abstract fun getRequestPayloadClass(
+    abstract fun getRequestPayloadClass(
         action: String,
         errorHandler: (e: Exception) -> Throwable
     ): Class<out Any>
 
-    protected abstract fun getResponsePayloadClass(
+    abstract fun getResponsePayloadClass(
         action: String,
         errorHandler: (e: Exception) -> Throwable
     ): Class<out Any>
