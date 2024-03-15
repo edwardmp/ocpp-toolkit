@@ -128,7 +128,7 @@ abstract class CommonMapper {
     @Named("convertEVSEType")
     fun convertEVSEType(evse: EVSEType?): Int =
         if (evse != null) {
-            evse.connectorId!!
+            evse.connectorId ?: evse.id
         } else {
             throw IllegalArgumentException("Argument evse is required in OCPP 1.6 to start a transaction")
         }
