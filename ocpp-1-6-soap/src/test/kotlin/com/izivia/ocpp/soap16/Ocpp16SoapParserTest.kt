@@ -413,6 +413,7 @@ class Ocpp16SoapParserTest {
                                     <ocpp:measurand>Energy.Active.Import.Register</ocpp:measurand>
                                     <ocpp:unit>Wh</ocpp:unit>
                                     <ocpp:value>15213716</ocpp:value>
+                                    <ocpp:phase>L1-N</ocpp:phase>
                                 </ocpp:sampledValue>
                             </ocpp:meterValue>
                         </ocpp:meterValuesRequest>
@@ -434,7 +435,7 @@ class Ocpp16SoapParserTest {
                     get { format }.isEqualTo(ValueFormat.Raw)
                     get { location }.isEqualTo(Location.Inlet)
                     get { measurand }.isEqualTo(Measurand.EnergyActiveImportRegister)
-                    get { phase }.isNull()
+                    get { phase }.isEqualTo(Phase.L1N)
                     get { unit }.isEqualTo(UnitOfMeasure.Wh)
                 }
             }
