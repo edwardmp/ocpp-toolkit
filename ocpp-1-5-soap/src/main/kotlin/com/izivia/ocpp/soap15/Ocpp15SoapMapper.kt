@@ -1,5 +1,6 @@
 package com.izivia.ocpp.soap15
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRootName
 import com.fasterxml.jackson.databind.MapperFeature
@@ -242,6 +243,7 @@ private abstract class ChangeConfigurationReqMixin(
     @JacksonXmlProperty(localName = "o:key")
     val key: String,
     @JacksonXmlProperty(localName = "o:value")
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     val value: String
 )
 

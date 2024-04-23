@@ -1,6 +1,7 @@
 package com.izivia.ocpp.json20
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.izivia.ocpp.core20.model.common.enumeration.MeasurandEnumType
@@ -10,6 +11,8 @@ import com.izivia.ocpp.core20.model.notifyevent.NotifyEventReq
 import com.izivia.ocpp.core20.model.notifymonitoringreport.NotifyMonitoringReportReq
 import com.izivia.ocpp.core20.model.notifyreport.NotifyReportReq
 import com.izivia.ocpp.core20.model.notifyreport.enumeration.DataEnumType
+import com.izivia.ocpp.core20.model.setvariables.SetVariableDataType
+import com.izivia.ocpp.core20.model.setvariables.SetVariablesReq
 import com.izivia.ocpp.json.OcppJsonMapper
 
 internal object Ocpp20JsonObjectMapper : ObjectMapper(
@@ -21,6 +24,7 @@ internal object Ocpp20JsonObjectMapper : ObjectMapper(
         .addMixIn(NotifyEventReq::class.java, HasActionTimestampMixin::class.java)
         .addMixIn(NotifyReportReq::class.java, HasActionTimestampMixin::class.java)
         .addMixIn(NotifyMonitoringReportReq::class.java, HasActionTimestampMixin::class.java)
+        .addMixIn(SetVariableDataType::class.java, SetVariableDataTypeMixin::class.java)
 )
 
 private abstract class EnumMixin(
@@ -29,3 +33,8 @@ private abstract class EnumMixin(
 
 @JsonIgnoreProperties(value = ["timestamp"])
 private abstract class HasActionTimestampMixin
+
+private abstract class SetVariableDataTypeMixin {
+    @get:JsonInclude(JsonInclude.Include.ALWAYS)
+    abstract val attributeValue: String
+}
