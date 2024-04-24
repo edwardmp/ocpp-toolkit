@@ -379,6 +379,7 @@ private abstract class ChangeConfigurationReqMixin(
     @JacksonXmlProperty(localName = "o:key")
     val key: String,
     @JacksonXmlProperty(localName = "o:value")
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     val value: String
 )
 
