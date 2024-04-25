@@ -71,7 +71,10 @@ class WebsocketServer(
                     val parser = getJsonMapper(OcppVersionWamp.valueOf(ocppVersion.name))
                     try {
                         val response =
-                            onAction(RequestMetadata(meta.ocppId), parser.parsePayloadFromJson(msg.payload, clazz))
+                            onAction(
+                                RequestMetadata(meta.ocppId, msg.msgId),
+                                parser.parsePayloadFromJson(msg.payload, clazz)
+                            )
                         val payload = parser.mapPayloadToString(response)
                         WampMessage.CallResult(msg.msgId, payload)
                     } catch (e: Exception) { // TODO Better mapping of exceptions https://izivia.atlassian.net/browse/IDEV-497
