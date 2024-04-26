@@ -105,7 +105,7 @@ class OcppSoapServerTransport private constructor(
                         msg.action?.lowercase() == action.lowercase()
                     ) {
                         val message = ocppSoapParser.parseRequestFromSoap(msg.payload, clazz)
-                        val response = onAction(RequestMetadata(message.messageId), message.payload)
+                        val response = onAction(RequestMetadata(message.chargingStationId, message.messageId), message.payload)
                         val payload = ocppSoapParser.mapResponseToSoap(
                             ResponseSoapMessage(
                                 messageId = "urn:uuid:${newMessageId()}",
