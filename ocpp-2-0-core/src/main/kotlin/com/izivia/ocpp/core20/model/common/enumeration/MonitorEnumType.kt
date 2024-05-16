@@ -9,5 +9,5 @@ enum class MonitorEnumType(val value: String) {
 
     Periodic("Periodic"),
 
-    PeriodicClockAligne("PeriodicClockAligne")
+    PeriodicClockAligned("PeriodicClockAligned")
 }
