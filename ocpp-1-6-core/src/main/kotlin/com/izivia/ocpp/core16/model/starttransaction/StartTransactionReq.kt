@@ -1,5 +1,6 @@
 package com.izivia.ocpp.core16.model.starttransaction
 
+import com.izivia.ocpp.core16.model.Request
 import com.izivia.ocpp.utils.HasActionTimestamp
 import kotlinx.datetime.Instant
 
@@ -9,4 +10,4 @@ data class StartTransactionReq(
     val meterStart: Int,
     override val timestamp: Instant,
     val reservationId: Int? = null
-) : HasActionTimestamp
+) : HasActionTimestamp, Request

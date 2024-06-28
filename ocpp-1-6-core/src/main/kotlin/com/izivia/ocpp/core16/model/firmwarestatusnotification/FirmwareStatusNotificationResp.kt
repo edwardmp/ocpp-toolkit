@@ -1,3 +1,5 @@
 package com.izivia.ocpp.core16.model.firmwarestatusnotification
 
-class FirmwareStatusNotificationResp
+import com.izivia.ocpp.core16.model.Response
+
+class FirmwareStatusNotificationResp : Response

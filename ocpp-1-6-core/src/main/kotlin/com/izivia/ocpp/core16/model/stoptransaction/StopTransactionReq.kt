@@ -1,5 +1,6 @@
 package com.izivia.ocpp.core16.model.stoptransaction
 
+import com.izivia.ocpp.core16.model.Request
 import com.izivia.ocpp.core16.model.common.MeterValue
 import com.izivia.ocpp.core16.model.stoptransaction.enumeration.Reason
 import com.izivia.ocpp.utils.HasActionTimestamp
@@ -12,4 +13,4 @@ data class StopTransactionReq(
     val idTag: String? = null,
     val reason: Reason? = null,
     val transactionData: List<MeterValue>? = null
-) : HasActionTimestamp
+) : HasActionTimestamp, Request

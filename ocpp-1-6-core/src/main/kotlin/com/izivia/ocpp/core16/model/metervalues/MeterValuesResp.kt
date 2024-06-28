@@ -1,3 +1,5 @@
 package com.izivia.ocpp.core16.model.metervalues
 
-class MeterValuesResp
+import com.izivia.ocpp.core16.model.Response
+
+class MeterValuesResp : Response

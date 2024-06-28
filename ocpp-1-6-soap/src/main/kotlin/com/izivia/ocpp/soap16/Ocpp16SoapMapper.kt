@@ -87,7 +87,7 @@ import com.izivia.ocpp.core16.model.triggermessage.enumeration.TriggerMessageSta
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
 import com.izivia.ocpp.core16.model.unlockconnector.enumeration.UnlockStatus
-import com.izivia.ocpp.core16.model.updatefirmware.SignedUpdateFirmwareReq
+import com.izivia.ocpp.core16.model.signedupdatefirmware.SignedUpdateFirmwareReq
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.*
 import kotlinx.datetime.Instant

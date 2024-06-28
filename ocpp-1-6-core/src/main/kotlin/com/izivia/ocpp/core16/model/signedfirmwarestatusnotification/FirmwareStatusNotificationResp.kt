@@ -1,3 +1,5 @@
-package com.izivia.ocpp.core16.model.firmwarestatusnotification
+package com.izivia.ocpp.core16.model.signedfirmwarestatusnotification
 
-class SignedFirmwareStatusNotificationResp
+import com.izivia.ocpp.core16.model.Response
+
+class SignedFirmwareStatusNotificationResp : Response
