@@ -57,7 +57,7 @@ import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageReq
 import com.izivia.ocpp.core16.model.triggermessage.TriggerMessageResp
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorReq
 import com.izivia.ocpp.core16.model.unlockconnector.UnlockConnectorResp
-import com.izivia.ocpp.core16.model.updatefirmware.SignedUpdateFirmwareReq
+import com.izivia.ocpp.core16.model.signedupdatefirmware.SignedUpdateFirmwareReq
 import com.izivia.ocpp.core16.model.updatefirmware.UpdateFirmwareResp
 import com.izivia.ocpp.soap.SoapBody
 import com.izivia.ocpp.soap.SoapFault

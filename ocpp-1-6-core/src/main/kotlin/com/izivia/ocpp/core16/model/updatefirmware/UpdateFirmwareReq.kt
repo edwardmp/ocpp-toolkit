@@ -1,5 +1,6 @@
 package com.izivia.ocpp.core16.model.updatefirmware
 
+import com.izivia.ocpp.core16.model.Request
 import kotlinx.datetime.Instant
 
 data class UpdateFirmwareReq(
@@ -7,4 +8,4 @@ data class UpdateFirmwareReq(
     val retries: Int? = null,
     val retrieveDate: Instant,
     val retryInterval: Int? = null
-)
+) : Request

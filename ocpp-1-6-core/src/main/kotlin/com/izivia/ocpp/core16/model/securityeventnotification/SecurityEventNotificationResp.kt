@@ -1,3 +1,5 @@
 package com.izivia.ocpp.core16.model.securityeventnotification
 
-class SecurityEventNotificationResp
+import com.izivia.ocpp.core16.model.Response
+
+class SecurityEventNotificationResp : Response

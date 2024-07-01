@@ -1,3 +1,5 @@
 package com.izivia.ocpp.core16.model.getlocallistversion
 
-class GetLocalListVersionReq
+import com.izivia.ocpp.core16.model.Request
+
+class GetLocalListVersionReq : Request

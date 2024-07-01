@@ -1,4 +1,4 @@
-package com.izivia.ocpp.core.test
+package com.izivia.ocpp.core16.test
 
 import com.izivia.ocpp.core16.CSMSOperations
 import com.izivia.ocpp.core16.ChargePointOperations

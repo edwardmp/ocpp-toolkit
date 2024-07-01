@@ -1,5 +1,6 @@
 package com.izivia.ocpp.core16.model.clearchargingprofile
 
+import com.izivia.ocpp.core16.model.Request
 import com.izivia.ocpp.core16.model.common.enumeration.ChargingProfilePurposeType
 
 data class ClearChargingProfileReq(
@@ -7,4 +8,4 @@ data class ClearChargingProfileReq(
     val connectorId: Int? = null,
     val chargingProfilePurpose: ChargingProfilePurposeType? = null,
     val stackLevel: Int? = null
-)
+) : Request
