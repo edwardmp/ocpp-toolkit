@@ -13,6 +13,7 @@ import com.izivia.ocpp.wamp.messages.WampMessageMeta
 import com.izivia.ocpp.wamp.messages.WampMessageType
 import com.izivia.ocpp.wamp.server.OcppWampServer
 import com.izivia.ocpp.wamp.server.OcppWampServerHandler
+import com.izivia.ocpp.wamp.server.impl.EventsListeners
 import mu.KotlinLogging
 import java.util.*
 import kotlin.reflect.KClass
@@ -24,11 +25,12 @@ class WebsocketServer(
     port: Int,
     ocppVersions: Set<OcppVersion>,
     path: String,
-    val newMessageId: () -> String = { UUID.randomUUID().toString() }
+    val newMessageId: () -> String = { UUID.randomUUID().toString() },
+    listeners: EventsListeners = EventsListeners(),
 ) : ServerTransport {
 
     private val server: OcppWampServer =
-        OcppWampServer.newServer(port, ocppVersions.map { OcppVersionWamp.valueOf(it.name) }.toSet(), path)
+        OcppWampServer.newServer(port = port, ocppVersions = ocppVersions.map { OcppVersionWamp.valueOf(it.name) }.toSet(), path = path, listeners = listeners)
 
     override fun start(): Unit = server.start()
 
