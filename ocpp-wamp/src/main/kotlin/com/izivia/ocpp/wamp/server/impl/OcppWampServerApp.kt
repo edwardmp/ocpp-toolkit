@@ -243,6 +243,7 @@ class OcppWampServerApp(
     fun sendBlocking(ocppId: CSOcppId, message: WampMessage, startedCallAt: Instant = Clock.System.now()): WampMessage =
         getChargingStationConnection(ocppId).sendBlocking(message, startedCallAt)
 
+    // Throws NoConnectionException when no connection is found for the specified ocpp id
     private fun getChargingStationConnection(ocppId: CSOcppId): ChargingStationConnection {
         var backOffRetryMs = 10L
         var backOffRetryAttempts = 5
@@ -253,9 +254,8 @@ class OcppWampServerApp(
             backOffRetryMs *= 2
             connection = connections[ocppId]
         }
-        return connection ?: throw IllegalStateException("no connection to $ocppId")
+        return connection ?: throw NoConnectionException("no connection to $ocppId")
     }
-
     fun getChargingStationOcppVersion(ocppId: CSOcppId): OcppVersion =
         getChargingStationConnection(ocppId).ocppVersion
 
@@ -304,6 +304,8 @@ class OcppWampServerApp(
         val size: Int get() = connections.size
     }
 }
+
+class NoConnectionException(e: String) : IllegalStateException(e)
 
 private fun Throwable.isConnectionReset(): Boolean =
     this is SocketException && this.message.equals("Connection reset")
