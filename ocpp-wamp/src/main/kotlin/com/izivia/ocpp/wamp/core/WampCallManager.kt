@@ -12,14 +12,15 @@ import kotlin.time.Duration.Companion.milliseconds
 class WampCallManager(
     private val logger: Logger,
     private val send: (str: String) -> Unit,
-    val timeoutInMs: Long,
+    val defaultTimeoutInMs: Long,
     private val shutdown: AtomicBoolean = AtomicBoolean(false)
 ) {
     private val clock = Clock.System
     private var currentCall: WampCall? = null
 
-    fun callBlocking(logContext: String, startCall: Instant, message: WampMessage): WampMessage {
+    fun callBlocking(logContext: String, startCall: Instant, message: WampMessage, specificTimeoutInMs: Long? = null): WampMessage {
         val now = clock.now()
+        val timeoutInMs = specificTimeoutInMs ?: defaultTimeoutInMs
         synchronized(this) {
             while (currentCall != null && (clock.now() - startCall).inWholeMilliseconds < timeoutInMs) {
                 Thread.sleep(10)
@@ -27,7 +28,7 @@ class WampCallManager(
             if (currentCall != null) {
                 throw IllegalStateException("$logContext can't send a call when another one is pending")
             }
-            currentCall = WampCall(logContext, message)
+            currentCall = WampCall(logContext, message, timeoutInMs)
         }
         val pendingCallLatency = clock.now() - now
         if (pendingCallLatency > 400.milliseconds) {
@@ -86,7 +87,11 @@ class WampCallManager(
     fun await() {
         val now = Clock.System.now()
         synchronized(this) {
-            while (currentCall != null && (Clock.System.now() - now).inWholeMilliseconds < timeoutInMs) {
+            val capturedCurentCall = currentCall
+            while (
+                capturedCurentCall != null &&
+                (Clock.System.now() - now).inWholeMilliseconds < capturedCurentCall.timeoutInMs
+            ) {
                 Thread.sleep(10)
             }
             val call = currentCall
@@ -100,6 +105,7 @@ class WampCallManager(
     private data class WampCall(
         val logContext: String,
         val msg: WampMessage,
+        var timeoutInMs: Long,
         val latch: CountDownLatch = CountDownLatch(1),
         var response: WampMessage? = null
     )

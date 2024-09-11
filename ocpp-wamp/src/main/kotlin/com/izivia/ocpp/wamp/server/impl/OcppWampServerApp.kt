@@ -240,8 +240,12 @@ class OcppWampServerApp(
         }
     }
 
-    fun sendBlocking(ocppId: CSOcppId, message: WampMessage, startedCallAt: Instant = Clock.System.now()): WampMessage =
-        getChargingStationConnection(ocppId).sendBlocking(message, startedCallAt)
+    fun sendBlocking(
+        ocppId: CSOcppId,
+        message: WampMessage,
+        startedCallAt: Instant = Clock.System.now(),
+        timeoutInMs: Long? = null
+    ): WampMessage = getChargingStationConnection(ocppId).sendBlocking(message, startedCallAt, timeoutInMs)
 
     // Throws NoConnectionException when no connection is found for the specified ocpp id
     private fun getChargingStationConnection(ocppId: CSOcppId): ChargingStationConnection {
@@ -274,8 +278,8 @@ class OcppWampServerApp(
         val callManager: WampCallManager =
             WampCallManager(logger, { m: String -> ws.send(WsMessage(m)) }, timeoutInMs, shutdown)
 
-        fun sendBlocking(message: WampMessage, startCall: Instant): WampMessage =
-            callManager.callBlocking("[$ocppId] [$wsConnectionId]", startCall, message)
+        fun sendBlocking(message: WampMessage, startCall: Instant, timeoutInMs: Long? = null): WampMessage =
+            callManager.callBlocking("[$ocppId] [$wsConnectionId]", startCall, message, timeoutInMs)
 
         fun close() {
             logger.info("[$ocppId] [$wsConnectionId] - closing")

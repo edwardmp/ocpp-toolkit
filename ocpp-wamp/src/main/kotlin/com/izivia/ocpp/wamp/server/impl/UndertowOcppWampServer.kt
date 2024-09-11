@@ -70,9 +70,9 @@ class UndertowOcppWampServer(
         wsApp = null
     }
 
-    override fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage =
+    override fun sendBlocking(ocppId: CSOcppId, message: WampMessage, timeoutInMs: Long?): WampMessage =
         getWsApp()
-            .sendBlocking(ocppId, message)
+            .sendBlocking(ocppId, message, timeoutInMs = timeoutInMs)
 
     override fun register(handler: OcppWampServerHandler) {
         handlers.add(handler)
