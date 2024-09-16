@@ -87,10 +87,9 @@ class WampCallManager(
     fun await() {
         val now = Clock.System.now()
         synchronized(this) {
-            val capturedCurentCall = currentCall
             while (
-                capturedCurentCall != null &&
-                (Clock.System.now() - now).inWholeMilliseconds < capturedCurentCall.timeoutInMs
+                currentCall != null &&
+                (Clock.System.now() - now).inWholeMilliseconds < (currentCall?.timeoutInMs ?: Long.MAX_VALUE)
             ) {
                 Thread.sleep(10)
             }
