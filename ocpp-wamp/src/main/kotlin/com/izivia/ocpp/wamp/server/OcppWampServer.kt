@@ -32,9 +32,10 @@ interface OcppWampServer {
     /**
      * Sends a WampMessage call to a ChargingStation, identified by its ocpp id.
      *
+     * @param timeoutInMs if not specified, the timeout from settings will be used
      * @throws IllegalStateException if no such ChargingStation is currently connected to this server
      */
-    fun sendBlocking(ocppId: CSOcppId, message: WampMessage): WampMessage
+    fun sendBlocking(ocppId: CSOcppId, message: WampMessage, timeoutInMs: Long? = null): WampMessage
 
     /**
      * registers a wamp server handler on this server.
